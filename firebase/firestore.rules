@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // DEVELOPMENT RULES - MORE PERMISSIVE FOR TESTING
+    // TODO: Replace with secure rules in production
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserRole() {
+      return request.auth.token.role;
+    }
+    
+    function hasRole(role) {
+      return isAuthenticated() && getUserRole() == role;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Users collection - allow authenticated users to read/write their own data
+    match /user/{userId} {
+      allow read, write: if isAuthenticated() && (isOwner(userId) || getUserRole() == 'admin');
+    }
+
+    // App settings - allow all authenticated users to read, allow unauthenticated read for basic settings
+    match /app_settings/{document} {
+      allow read: if true; // Allow unauthenticated read for development
+      allow write: if isAuthenticated() && getUserRole() == 'admin';
+    }
+
+    // Daily menu - allow all users to read (including unauthenticated for menu display)
+    match /daily_menu/{document} {
+      allow read: if true; // Allow unauthenticated read for development
+      allow write: if isAuthenticated() && getUserRole() == 'admin';
+    }
+
+    // Time slots - allow all users to read
+    match /time_slots/{document} {
+      allow read: if true; // Allow unauthenticated read for development
+      allow write: if isAuthenticated() && getUserRole() == 'admin';
+    }
+
+    // Plats (menu items) - allow all users to read
+    match /plat/{document} {
+      allow read: if true; // Allow unauthenticated read for development
+      allow write: if isAuthenticated() && getUserRole() == 'admin';
+    }
+
+    // Reservations - require authentication
+    match /reservation/{document} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (isOwner(resource.data.userId) || getUserRole() in ['admin', 'staff']);
+      allow delete: if isAuthenticated() && getUserRole() == 'admin';
+    }
+
+    // Analytics - allow staff and admin to read
+    match /analytics/{document} {
+      allow read: if isAuthenticated() && getUserRole() in ['admin', 'staff'];
+      allow write: if false; // Only cloud functions
+    }
+
+    // Audit logs - allow admin to read
+    match /audit_logs/{document} {
+      allow read: if isAuthenticated() && getUserRole() == 'admin';
+      allow write: if false; // Only cloud functions
+    }
+  }
+}

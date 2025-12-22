@@ -1,0 +1,17 @@
+{
+  "app_name": "ISET Com Restaurant",
+  "welcome_message": "Bienvenue au restaurant universitaire ISET Com",
+  "contact_email": "restaurant@isetcom.tn",
+  "contact_phone": "+216 71 XXX XXX",
+  "restaurant_address": "Institut Supérieur des Études Technologiques de Communications, Tunis",
+  "default_meal_price": 0.2,
+  "currency": "TND",
+  "subsidy_rate": 0.95,
+  "lunch_start_time": "12:00",
+  "lunch_end_time": "14:00",
+  "dinner_start_time": "19:00",
+  "dinner_end_time": "21:00",
+  "max_reservations_per_user": 2,
+  "reservation_deadline_hours": 1,
+  "notification_enabled": true
+}

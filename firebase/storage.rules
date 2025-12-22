@@ -1,0 +1,74 @@
+rules_version = '2';
+
+// Firebase Storage Security Rules for ISET Com Restaurant System
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserRole() {
+      return request.auth.token.role;
+    }
+    
+    function hasRole(role) {
+      return isAuthenticated() && getUserRole() == role;
+    }
+    
+    function hasAnyRole(roles) {
+      return isAuthenticated() && getUserRole() in roles;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidImageFile() {
+      return request.resource.contentType.matches('image/.*') &&
+             request.resource.size < 5 * 1024 * 1024; // 5MB limit
+    }
+
+    // Menu images - read for all authenticated, write for admins only
+    match /menu_images/{imageId} {
+      allow read: if isAuthenticated();
+      allow write: if hasRole('admin') && isValidImageFile();
+      allow delete: if hasRole('admin');
+    }
+
+    // User profile images - read for all authenticated, write for owner or admin
+    match /profile_images/{userId}/{imageId} {
+      allow read: if isAuthenticated();
+      allow write: if (isOwner(userId) || hasRole('admin')) && isValidImageFile();
+      allow delete: if isOwner(userId) || hasRole('admin');
+    }
+
+    // System assets - read for all authenticated, write for admins only
+    match /system_assets/{assetId} {
+      allow read: if isAuthenticated();
+      allow write: if hasRole('admin');
+      allow delete: if hasRole('admin');
+    }
+
+    // Temporary uploads - write for authenticated users, auto-cleanup
+    match /temp_uploads/{userId}/{uploadId} {
+      allow read, write: if isOwner(userId) && isValidImageFile();
+      allow delete: if isOwner(userId) || hasRole('admin');
+    }
+
+    // Analytics exports - read/write for admins only
+    match /analytics_exports/{exportId} {
+      allow read, write: if hasRole('admin');
+    }
+
+    // Backup files - read/write for admins only
+    match /backups/{backupId} {
+      allow read, write: if hasRole('admin');
+    }
+
+    // Default deny all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

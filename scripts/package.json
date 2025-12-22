@@ -1,0 +1,15 @@
+{
+    "name": "firebase-setup-scripts",
+    "version": "1.0.0",
+    "description": "Firebase setup scripts for ISET Restaurant",
+    "main": "setup_firebase_data.js",
+    "scripts": {
+        "setup": "node setup_firebase_data.js"
+    },
+    "dependencies": {
+        "firebase-admin": "^12.0.0"
+    },
+    "engines": {
+        "node": ">=16.0.0"
+    }
+}

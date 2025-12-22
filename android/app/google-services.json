@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "330643013308",
+    "project_id": "mafirstclienta",
+    "storage_bucket": "mafirstclienta.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:330643013308:android:1e834f670a81b15a13dab9",
+        "android_client_info": {
+          "package_name": "tn.edu.isetcom.restaurant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "330643013308-9u9m55v3l30d6sruqlrt9e0h1gdr078n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9evo6hNO5IIpbOepTgDfsVjmZ_NtIh58"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "330643013308-9u9m55v3l30d6sruqlrt9e0h1gdr078n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
