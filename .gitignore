@@ -4,6 +4,8 @@ scripts/serviceAccountKey.json
 # Node modules
 scripts/node_modules/
 scripts/package-lock.json
+firebase/functions/node_modules/
+firebase/functions/package-lock.json
 
 # Miscellaneous
 *.class
