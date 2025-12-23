@@ -69,13 +69,13 @@ class _LoginWidgetState extends State<LoginWidget> {
         backgroundColor: Colors.white,
         body: SafeArea(
           top: true,
-          child: Padding(
-            padding: EdgeInsets.all(14.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.all(14.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
                 Column(
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -764,6 +764,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                 ),
               ],
             ),
+          ),
           ),
         ),
       ),

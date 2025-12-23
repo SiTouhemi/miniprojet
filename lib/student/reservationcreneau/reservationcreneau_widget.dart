@@ -9,6 +9,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import 'reservationcreneau_model.dart';
 export 'reservationcreneau_model.dart';
 
@@ -252,177 +253,203 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                           ),
                         ),
                         
-                        // Time slot cards (keeping the existing static ones for now)
-                        Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            // Selected time slot
-                            Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                              child: Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      blurRadius: 4.0,
-                                      color: Color(0x1A00A4E4),
-                                      offset: Offset(0.0, 1.0),
-                                    )
-                                  ],
-                                  borderRadius: BorderRadius.circular(12.0),
-                                  border: Border.all(
-                                    color: Color(0xFF00A4E4),
-                                    width: 2.0,
+                        // Time slot cards - Dynamic from database
+                        StreamBuilder<List<TimeSlotRecord>>(
+                          stream: queryTimeSlotRecord(
+                            queryBuilder: (timeSlotRecord) => timeSlotRecord
+                                .where('date', isGreaterThanOrEqualTo: DateTime.now().subtract(Duration(days: 1)))
+                                .where('is_active', isEqualTo: true)
+                                .orderBy('date')
+                                .orderBy('start_time')
+                                .limit(10),
+                          ),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError) {
+                              return Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                                child: Container(
+                                  padding: EdgeInsets.all(16.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.shade50,
+                                    borderRadius: BorderRadius.circular(12.0),
+                                  ),
+                                  child: Text(
+                                    'Erreur lors du chargement des créneaux',
+                                    style: TextStyle(color: Colors.red.shade700),
                                   ),
                                 ),
-                                child: Padding(
-                                  padding: EdgeInsets.all(12.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: [
-                                          Container(
-                                            width: 36.0,
-                                            height: 36.0,
-                                            decoration: BoxDecoration(
-                                              color: Color(0xFF00A4E4),
-                                              shape: BoxShape.circle,
+                              );
+                            }
+                            
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                                child: Container(
+                                  height: 100.0,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12.0),
+                                  ),
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      color: Color(0xFF005BAA),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                            
+                            final timeSlots = snapshot.data ?? [];
+                            
+                            if (timeSlots.isEmpty) {
+                              return Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                                child: Container(
+                                  padding: EdgeInsets.all(16.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange.shade50,
+                                    borderRadius: BorderRadius.circular(12.0),
+                                  ),
+                                  child: Text(
+                                    'Aucun créneau disponible pour le moment',
+                                    style: TextStyle(color: Colors.orange.shade700),
+                                  ),
+                                ),
+                              );
+                            }
+                            
+                            return Column(
+                              mainAxisSize: MainAxisSize.max,
+                              children: timeSlots.map((timeSlot) {
+                                final startTime = timeSlot.startTime!;
+                                final endTime = timeSlot.endTime!;
+                                final availableSpots = timeSlot.maxCapacity - timeSlot.currentReservations;
+                                final isSelected = _model.selectedTimeSlot?.reference == timeSlot.reference;
+                                
+                                return Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 8.0),
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        _model.selectedTimeSlot = timeSlot;
+                                      });
+                                    },
+                                    child: Container(
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            blurRadius: 4.0,
+                                            color: isSelected ? Color(0x1A00A4E4) : Color(0x1A000000),
+                                            offset: Offset(0.0, 1.0),
+                                          )
+                                        ],
+                                        borderRadius: BorderRadius.circular(12.0),
+                                        border: Border.all(
+                                          color: isSelected ? Color(0xFF00A4E4) : Color(0xFFE0E0E0),
+                                          width: isSelected ? 2.0 : 1.0,
+                                        ),
+                                      ),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(12.0),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              children: [
+                                                Container(
+                                                  width: 36.0,
+                                                  height: 36.0,
+                                                  decoration: BoxDecoration(
+                                                    color: isSelected ? Color(0xFF00A4E4) : Color(0xFF005BAA),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Align(
+                                                    alignment: AlignmentDirectional(0.0, 0.0),
+                                                    child: Icon(
+                                                      Icons.schedule,
+                                                      color: Colors.white,
+                                                      size: 18.0,
+                                                    ),
+                                                  ),
+                                                ),
+                                                Column(
+                                                  mainAxisSize: MainAxisSize.max,
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      '${DateFormat('HH:mm').format(startTime)} - ${DateFormat('HH:mm').format(endTime)}',
+                                                      style: FlutterFlowTheme.of(context).bodyLarge.override(
+                                                            font: GoogleFonts.inter(
+                                                              fontWeight: FontWeight.w600,
+                                                            ),
+                                                            color: Color(0xFF005BAA),
+                                                            fontSize: 16.0,
+                                                            letterSpacing: 0.0,
+                                                            fontWeight: FontWeight.w600,
+                                                          ),
+                                                    ),
+                                                    Text(
+                                                      '${availableSpots} places disponibles',
+                                                      style: FlutterFlowTheme.of(context).bodySmall.override(
+                                                            font: GoogleFonts.inter(),
+                                                            color: availableSpots > 5 ? Color(0xFF00A855) : Color(0xFFFF6B35),
+                                                            fontSize: 12.0,
+                                                            letterSpacing: 0.0,
+                                                          ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ].divide(SizedBox(width: 12.0)),
                                             ),
-                                            child: Align(
-                                              alignment: AlignmentDirectional(0.0, 0.0),
-                                              child: Icon(
-                                                Icons.schedule,
-                                                color: Colors.white,
-                                                size: 18.0,
-                                              ),
-                                            ),
-                                          ),
-                                          Column(
-                                            mainAxisSize: MainAxisSize.max,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                '12:00 - 13:30',
-                                                style: FlutterFlowTheme.of(context)
-                                                    .titleMedium
-                                                    .override(
-                                                      font: GoogleFonts.interTight(
+                                            Column(
+                                              mainAxisSize: MainAxisSize.max,
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              children: [
+                                                Text(
+                                                  '${timeSlot.price.toStringAsFixed(2)} TND',
+                                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                        font: GoogleFonts.inter(
+                                                          fontWeight: FontWeight.w600,
+                                                        ),
+                                                        color: Color(0xFF005BAA),
+                                                        fontSize: 14.0,
+                                                        letterSpacing: 0.0,
                                                         fontWeight: FontWeight.w600,
                                                       ),
-                                                      color: Color(0xFF005BAA),
-                                                      letterSpacing: 0.0,
-                                                      fontWeight: FontWeight.w600,
-                                                    ),
-                                              ),
-                                              Text(
-                                                '15 places restantes',
-                                                style: FlutterFlowTheme.of(context)
-                                                    .bodySmall
-                                                    .override(
-                                                      color: Color(0xFF666666),
-                                                      letterSpacing: 0.0,
-                                                    ),
-                                              ),
-                                            ],
-                                          ),
-                                        ].divide(SizedBox(width: 12.0)),
-                                      ),
-                                      Container(
-                                        width: 20.0,
-                                        height: 20.0,
-                                        decoration: BoxDecoration(
-                                          color: Color(0xFF00A4E4),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Align(
-                                          alignment: AlignmentDirectional(0.0, 0.0),
-                                          child: Icon(
-                                            Icons.check,
-                                            color: Colors.white,
-                                            size: 12.0,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            
-                            // Other time slots
-                            Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                              child: Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      blurRadius: 2.0,
-                                      color: Color(0x0D000000),
-                                      offset: Offset(0.0, 1.0),
-                                    )
-                                  ],
-                                  borderRadius: BorderRadius.circular(12.0),
-                                  border: Border.all(
-                                    color: Color(0xFFE0E0E0),
-                                    width: 1.0,
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.all(12.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      Container(
-                                        width: 36.0,
-                                        height: 36.0,
-                                        decoration: BoxDecoration(
-                                          color: Color(0xFFF5F5F5),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Icon(
-                                          Icons.schedule,
-                                          color: Color(0xFF666666),
-                                          size: 18.0,
-                                        ),
-                                      ),
-                                      SizedBox(width: 12.0),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            '13:30 - 15:00',
-                                            style: FlutterFlowTheme.of(context)
-                                                .titleMedium
-                                                .override(
-                                                  color: Color(0xFF333333),
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.w500,
                                                 ),
-                                          ),
-                                          Text(
-                                            '8 places restantes',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodySmall
-                                                .override(
-                                                  color: Color(0xFF666666),
-                                                  letterSpacing: 0.0,
-                                                ),
-                                          ),
-                                        ],
+                                                if (isSelected)
+                                                  Container(
+                                                    padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                                                    decoration: BoxDecoration(
+                                                      color: Color(0xFF00A4E4),
+                                                      borderRadius: BorderRadius.circular(8.0),
+                                                    ),
+                                                    child: Text(
+                                                      'Sélectionné',
+                                                      style: FlutterFlowTheme.of(context).bodySmall.override(
+                                                            font: GoogleFonts.inter(),
+                                                            color: Colors.white,
+                                                            fontSize: 10.0,
+                                                            letterSpacing: 0.0,
+                                                          ),
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ],
+                                    ),
                                   ),
-                                ),
-                              ),
-                            ),
-                          ].divide(SizedBox(height: 12.0)),
+                                );
+                              }).toList(),
+                            );
+                          },
                         ),
                       ].divide(SizedBox(height: 16.0)),
                     ),
