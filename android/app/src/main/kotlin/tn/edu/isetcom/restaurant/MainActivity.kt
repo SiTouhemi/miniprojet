@@ -1,4 +1,4 @@
-package com.mycompany.miniprojet
+package tn.edu.isetcom.restaurant
 
 import io.flutter.embedding.android.FlutterActivity
 
