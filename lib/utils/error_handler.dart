@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '/config/app_config.dart';
+import '/utils/app_logger.dart';
 
 /// Enhanced error handler with French error messages and retry mechanisms
 /// Implements requirements 2.6, 6.1, 6.2, 6.3, 6.4, 6.5 for error handling and user feedback
@@ -220,15 +221,7 @@ class ErrorHandler {
 
   // Legacy methods for backward compatibility
   static void logError(dynamic error, StackTrace? stackTrace, {String? context}) {
-    if (AppConfig.enableDebugLogging) {
-      debugPrint('ERROR: $error');
-      if (stackTrace != null) {
-        debugPrint('STACK TRACE: $stackTrace');
-      }
-      if (context != null) {
-        debugPrint('CONTEXT: $context');
-      }
-    }
+    AppLogger.e('Error occurred', error: error, stackTrace: stackTrace, tag: context ?? 'ErrorHandler');
     
     // Use new error handling
     instance.handleError(error, context: context);
@@ -430,7 +423,7 @@ class ErrorHandler {
 
     // Log to console for debugging
     if (AppConfig.enableDebugLogging) {
-      debugPrint('Error [${context ?? 'Unknown'}]: $originalMessage -> $frenchMessage');
+      AppLogger.d('Error [$context]: $originalMessage -> $frenchMessage', tag: 'ErrorHandler');
     }
   }
 

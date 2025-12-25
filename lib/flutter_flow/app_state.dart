@@ -7,6 +7,7 @@ import '/backend/services/sync_performance_monitor.dart';
 import '/config/app_config.dart';
 import '/utils/error_handler.dart';
 import '/utils/performance_monitor.dart';
+import '/utils/app_logger.dart';
 import '/auth/firebase_auth/auth_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
@@ -100,7 +101,7 @@ class FFAppState extends ChangeNotifier {
       // Setup menu listener for real-time updates
       _setupMenuListener();
     } catch (e) {
-      print('Error initializing app: $e');
+      AppLogger.e('Error initializing app', error: e, tag: 'FFAppState');
       _setLastError('Failed to initialize app');
     }
   }
@@ -156,13 +157,13 @@ class FFAppState extends ChangeNotifier {
                   
                   // Log significant changes for debugging
                   if (balanceChanged) {
-                    print('User balance updated: ${updatedUser.pocket} DT');
+                    AppLogger.sync('User balance updated: ${updatedUser.pocket} DT', success: true);
                   }
                   if (ticketsChanged) {
-                    print('User tickets updated: ${updatedUser.tickets}');
+                    AppLogger.sync('User tickets updated: ${updatedUser.tickets}', success: true);
                   }
                   if (roleChanged) {
-                    print('User role changed to: ${updatedUser.role}');
+                    AppLogger.i('User role changed to: ${updatedUser.role}', tag: 'FFAppState');
                   }
                   
                   // Validate data consistency
@@ -273,7 +274,7 @@ class FFAppState extends ChangeNotifier {
 
   // Enhanced sync error handling with retry mechanism
   void _handleSyncError(String syncType, String error, String? operationId) {
-    print('FFAppState Sync Error ($syncType): $error');
+    AppLogger.e('FFAppState Sync Error ($syncType): $error', tag: 'FFAppState');
     
     // Complete performance monitoring
     if (operationId != null) {
@@ -320,7 +321,7 @@ class FFAppState extends ChangeNotifier {
   void _retrySyncOperation(String syncType) {
     if (_currentUser == null) return;
     
-    print('Retrying sync operation: $syncType');
+    AppLogger.d('Retrying sync operation: $syncType', tag: 'FFAppState');
     
     switch (syncType) {
       case 'user_data_sync':
@@ -343,7 +344,7 @@ class FFAppState extends ChangeNotifier {
     try {
       final validation = await _validationService.validateUserData(user, user.uid);
       if (!validation.isValid) {
-        print('User data validation failed: ${validation.errors}');
+        AppLogger.w('User data validation failed: ${validation.errors}', tag: 'FFAppState');
         // Log validation errors but don't show to user unless critical
         if (validation.errors.any((error) => error.contains('Balance') || error.contains('Role'))) {
           _setLastError('Incohérence détectée dans les données. Actualisation en cours...');
@@ -352,7 +353,7 @@ class FFAppState extends ChangeNotifier {
         }
       }
     } catch (e) {
-      print('Data validation error: $e');
+      AppLogger.e('Data validation error', error: e, tag: 'FFAppState');
     }
   }
 
@@ -381,9 +382,9 @@ class FFAppState extends ChangeNotifier {
       _lastDataValidation = DateTime.now();
       
       if (!validation.isValid) {
-        print('Comprehensive data validation failed:');
+        AppLogger.w('Comprehensive data validation failed:', tag: 'FFAppState');
         for (final error in validation.allErrors) {
-          print('  - $error');
+          AppLogger.d('  - $error', tag: 'FFAppState');
         }
         
         // If critical data is inconsistent, force refresh
@@ -392,7 +393,7 @@ class FFAppState extends ChangeNotifier {
         }
       }
     } catch (e) {
-      print('Comprehensive data validation error: $e');
+      AppLogger.e('Comprehensive data validation error', error: e, tag: 'FFAppState');
     }
   }
 
@@ -409,7 +410,7 @@ class FFAppState extends ChangeNotifier {
   // Error handling
   void _handleError(String error) {
     _lastError = error;
-    print('FFAppState Error: $error');
+    AppLogger.e('FFAppState Error: $error', tag: 'FFAppState');
     notifyListeners();
   }
 
@@ -434,7 +435,7 @@ class FFAppState extends ChangeNotifier {
   void _setOfflineMode() {
     if (_isOnline) {
       _isOnline = false;
-      print('App switched to offline mode');
+      AppLogger.i('App switched to offline mode', tag: 'FFAppState');
       notifyListeners();
     }
   }
@@ -443,7 +444,7 @@ class FFAppState extends ChangeNotifier {
     if (!_isOnline) {
       _isOnline = true;
       _clearError();
-      print('App switched to online mode');
+      AppLogger.i('App switched to online mode', tag: 'FFAppState');
       notifyListeners();
     }
   }
@@ -476,7 +477,7 @@ class FFAppState extends ChangeNotifier {
       }
       _setupMenuListener();
       
-      print('Connection restored and listeners re-established');
+      AppLogger.i('Connection restored and listeners re-established', tag: 'FFAppState');
     } catch (e) {
       _handleError('Connection retry failed: $e');
     }
@@ -499,7 +500,7 @@ class FFAppState extends ChangeNotifier {
         _setupUserDataListener(uid);
         _setupReservationsListener(uid);
         
-        print('User data synchronization initialized for: ${user.nom}');
+        AppLogger.i('User data synchronization initialized for: ${user.nom}', tag: 'FFAppState');
       } else {
         _handleError('User document not found. Creating new document...');
         // The auth service should handle creating the user document
@@ -527,7 +528,7 @@ class FFAppState extends ChangeNotifier {
         // Validate the refreshed data
         final validation = _validationService.validateNoHardcodedData(updatedUser);
         if (!validation.isValid) {
-          print('Warning: Potentially hardcoded data detected: ${validation.errors}');
+          AppLogger.w('Potentially hardcoded data detected: ${validation.errors}', tag: 'FFAppState');
         }
         
         _currentUser = updatedUser;
@@ -536,7 +537,7 @@ class FFAppState extends ChangeNotifier {
         _performanceMonitor.completeSyncOperation(operationId, success: true, recordsProcessed: 1);
         
         notifyListeners();
-        print('User data refreshed successfully');
+        AppLogger.i('User data refreshed successfully', tag: 'FFAppState');
       } else {
         _performanceMonitor.completeSyncOperation(operationId, success: false, errorMessage: 'User document not found');
         _handleError('Document utilisateur introuvable');
@@ -557,7 +558,7 @@ class FFAppState extends ChangeNotifier {
     try {
       _appSettings = await AppService.instance.getAppSettings();
     } catch (e) {
-      print('Error loading app settings: $e');
+      AppLogger.e('Error loading app settings', error: e, tag: 'FFAppState');
     } finally {
       _isLoadingSettings = false;
       notifyListeners();
@@ -611,7 +612,7 @@ class FFAppState extends ChangeNotifier {
               notifyListeners();
               
               // Requirement 4.6: Admin modifications immediately reflect to all connected clients
-              print('Time slots updated: ${timeSlots.length} slots available');
+              AppLogger.sync('Time slots updated: ${timeSlots.length} slots available', success: true, recordCount: timeSlots.length);
             },
             onError: (error) {
               _handleSyncError('time_slots_sync', 'Time slots sync error: $error', operationId);

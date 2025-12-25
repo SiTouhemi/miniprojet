@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '/backend/backend.dart';
 import '/backend/cloud_functions/cloud_functions.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/utils/app_logger.dart';
 
 class ReservationService {
   static ReservationService? _instance;
@@ -26,7 +27,7 @@ class ReservationService {
 
       return result;
     } catch (e) {
-      print('Error creating reservation: $e');
+      AppLogger.e('Error creating reservation', error: e, tag: 'ReservationService');
       return {
         'success': false,
         'error': 'Failed to create reservation: ${e.toString()}'
@@ -47,7 +48,7 @@ class ReservationService {
 
       return result;
     } catch (e) {
-      print('Error validating QR code: $e');
+      AppLogger.e('Error validating QR code', error: e, tag: 'ReservationService');
       return {
         'success': false,
         'error': 'Failed to validate QR code: ${e.toString()}'
@@ -65,7 +66,7 @@ class ReservationService {
 
       return reservations.isNotEmpty ? reservations.first : null;
     } catch (e) {
-      print('Error fetching reservation by QR: $e');
+      AppLogger.e('Error fetching reservation by QR', error: e, tag: 'ReservationService');
       return null;
     }
   }
@@ -85,7 +86,7 @@ class ReservationService {
             .where('status', whereIn: ['confirmed', 'used']),
       );
     } catch (e) {
-      print('Error fetching time slot reservations: $e');
+      AppLogger.e('Error fetching time slot reservations', error: e, tag: 'ReservationService');
       return [];
     }
   }
@@ -103,7 +104,7 @@ class ReservationService {
             .orderBy('creneaux'),
       );
     } catch (e) {
-      print('Error fetching upcoming reservations: $e');
+      AppLogger.e('Error fetching upcoming reservations', error: e, tag: 'ReservationService');
       return [];
     }
   }
@@ -121,7 +122,7 @@ class ReservationService {
         limit: 20, // Limit to last 20 reservations
       );
     } catch (e) {
-      print('Error fetching past reservations: $e');
+      AppLogger.e('Error fetching past reservations', error: e, tag: 'ReservationService');
       return [];
     }
   }
@@ -235,7 +236,7 @@ class ReservationService {
         };
       });
     } catch (e) {
-      print('Error cancelling reservation: $e');
+      AppLogger.e('Error cancelling reservation', error: e, tag: 'ReservationService');
       return {
         'success': false,
         'error': 'Failed to cancel reservation: ${e.toString()}',
@@ -387,7 +388,7 @@ class ReservationService {
         };
       });
     } catch (e) {
-      print('Error modifying reservation: $e');
+      AppLogger.e('Error modifying reservation', error: e, tag: 'ReservationService');
       return {
         'success': false,
         'error': 'Failed to modify reservation: ${e.toString()}',
@@ -465,7 +466,7 @@ class ReservationService {
         'hoursUntilMeal': reservation.creneaux?.difference(now).inHours ?? 0,
       };
     } catch (e) {
-      print('Error checking cancellation eligibility: $e');
+      AppLogger.e('Error checking cancellation eligibility', error: e, tag: 'ReservationService');
       return {
         'canCancel': false,
         'reason': 'Error checking eligibility: ${e.toString()}',
@@ -535,7 +536,7 @@ class ReservationService {
         'hoursUntilMeal': reservation.creneaux?.difference(now).inHours ?? 0,
       };
     } catch (e) {
-      print('Error checking modification eligibility: $e');
+      AppLogger.e('Error checking modification eligibility', error: e, tag: 'ReservationService');
       return {
         'canModify': false,
         'reason': 'Error checking eligibility: ${e.toString()}',
@@ -559,7 +560,7 @@ class ReservationService {
 
       return result;
     } catch (e) {
-      print('Error cancelling reservation via Cloud Function: $e');
+      AppLogger.e('Error cancelling reservation via Cloud Function', error: e, tag: 'ReservationService');
       return {
         'success': false,
         'error': 'Failed to cancel reservation: ${e.toString()}',
@@ -582,7 +583,7 @@ class ReservationService {
 
       return result;
     } catch (e) {
-      print('Error modifying reservation via Cloud Function: $e');
+      AppLogger.e('Error modifying reservation via Cloud Function', error: e, tag: 'ReservationService');
       return {
         'success': false,
         'error': 'Failed to modify reservation: ${e.toString()}',
@@ -620,7 +621,7 @@ class ReservationService {
             'userClass': user?.classe ?? '',
           });
         } catch (e) {
-          print('Error fetching user data for reservation: $e');
+          AppLogger.w('Error fetching user data for reservation', error: e, tag: 'ReservationService');
           enrichedReservations.add({
             'reservation': reservation,
             'user': null,
@@ -632,7 +633,7 @@ class ReservationService {
       
       return enrichedReservations;
     } catch (e) {
-      print('Error fetching today\'s reservations: $e');
+      AppLogger.e('Error fetching today\'s reservations', error: e, tag: 'ReservationService');
       return [];
     }
   }
@@ -670,7 +671,7 @@ class ReservationService {
         'timeSlots': timeSlots.length,
       };
     } catch (e) {
-      print('Error calculating occupancy stats: $e');
+      AppLogger.e('Error calculating occupancy stats', error: e, tag: 'ReservationService');
       return {
         'totalCapacity': 0,
         'totalReservations': 0,

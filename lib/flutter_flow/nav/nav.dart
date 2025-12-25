@@ -133,6 +133,20 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           allowedRoles: [UserRole.staff, UserRole.admin],
           builder: (context, params) => MonjeyaScanWidget(),
         ),
+        FFRoute(
+          name: MealManagementWidget.routeName,
+          path: MealManagementWidget.routePath,
+          requireAuth: true,
+          allowedRoles: [UserRole.staff, UserRole.admin],
+          builder: (context, params) => MealManagementWidget(),
+        ),
+        FFRoute(
+          name: DailyMenuManagementWidget.routeName,
+          path: DailyMenuManagementWidget.routePath,
+          requireAuth: true,
+          allowedRoles: [UserRole.staff, UserRole.admin],
+          builder: (context, params) => DailyMenuManagementWidget(),
+        ),
         // Admin routes
         FFRoute(
           name: AdminDashboardWidget.routeName,
@@ -147,6 +161,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           requireAuth: true,
           allowedRoles: [UserRole.admin],
           builder: (context, params) => CreateUserWidget(),
+        ),
+        FFRoute(
+          name: UserManagementWidget.routeName,
+          path: UserManagementWidget.routePath,
+          requireAuth: true,
+          allowedRoles: [UserRole.admin],
+          builder: (context, params) => UserManagementWidget(),
         ),
         FFRoute(
           name: AjoutPlatWidget.routeName,

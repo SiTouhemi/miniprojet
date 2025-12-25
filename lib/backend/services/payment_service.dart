@@ -1,5 +1,6 @@
 import '/backend/cloud_functions/cloud_functions.dart';
 import '/backend/services/app_service.dart';
+import '/utils/app_logger.dart';
 
 class PaymentService {
   static PaymentService? _instance;
@@ -39,7 +40,7 @@ class PaymentService {
         };
       }
     } catch (e) {
-      print('Error processing D17 payment: $e');
+      AppLogger.e('Error processing D17 payment', error: e, tag: 'PaymentService');
       return {
         'success': false,
         'error': 'Payment processing failed: ${e.toString()}',
@@ -54,7 +55,7 @@ class PaymentService {
       // For now, we'll simulate checking D17 balance
       return await _simulateD17BalanceCheck(userId);
     } catch (e) {
-      print('Error checking user balance: $e');
+      AppLogger.e('Error checking user balance', error: e, tag: 'PaymentService');
       return 0.0;
     }
   }
@@ -93,7 +94,7 @@ class PaymentService {
         };
       }
     } catch (e) {
-      print('Error validating payment: $e');
+      AppLogger.e('Error validating payment', error: e, tag: 'PaymentService');
       return {
         'success': false,
         'error': 'Failed to validate payment: ${e.toString()}',
@@ -125,7 +126,7 @@ class PaymentService {
         },
       ];
     } catch (e) {
-      print('Error fetching payment history: $e');
+      AppLogger.e('Error fetching payment history', error: e, tag: 'PaymentService');
       return [];
     }
   }
@@ -146,7 +147,7 @@ class PaymentService {
 
       return result;
     } catch (e) {
-      print('Error processing refund: $e');
+      AppLogger.e('Error processing refund', error: e, tag: 'PaymentService');
       return {
         'success': false,
         'error': 'Refund processing failed: ${e.toString()}',
@@ -166,7 +167,7 @@ class PaymentService {
       // In a more complex system, you might have different prices per time slot
       return settings.defaultMealPrice * quantity;
     } catch (e) {
-      print('Error calculating reservation amount: $e');
+      AppLogger.e('Error calculating reservation amount', error: e, tag: 'PaymentService');
       return 5.0; // Default fallback price
     }
   }
@@ -199,7 +200,7 @@ class PaymentService {
       // In production, this would ping the D17 API health endpoint
       return true; // Assume service is available for simulation
     } catch (e) {
-      print('Error checking D17 service: $e');
+      AppLogger.e('Error checking D17 service', error: e, tag: 'PaymentService');
       return false;
     }
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '/auth/firebase_auth/auth_util.dart';
 import '/auth/role_middleware.dart';
+import '/utils/app_logger.dart';
 
 /// NavigationService provides role-aware navigation and route management
 /// Implements authorization guards for protected routes (Requirements 1.2, 1.3, 1.4)
@@ -432,7 +433,7 @@ class RoutePermissionMiddleware extends NavigatorObserver {
       final canAccess = await NavigationService.canAccessRoute(routeName);
       if (!canAccess) {
         // Log unauthorized access attempt
-        print('Unauthorized access attempt to route: $routeName');
+        AppLogger.w('Unauthorized access attempt to route: $routeName', tag: 'NavigationService');
         
         // Optionally redirect to appropriate page
         WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -440,7 +441,7 @@ class RoutePermissionMiddleware extends NavigatorObserver {
         });
       }
     } catch (e) {
-      print('Error checking route permissions for $routeName: $e');
+      AppLogger.e('Error checking route permissions for $routeName', error: e, tag: 'NavigationService');
     }
   }
 }

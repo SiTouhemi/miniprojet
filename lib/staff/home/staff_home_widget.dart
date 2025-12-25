@@ -54,48 +54,27 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
             key: scaffoldKey,
             backgroundColor: Colors.white,
             appBar: AppBar(
-              backgroundColor: Colors.white,
+              backgroundColor: Color(0xFF1C1284),
               automaticallyImplyLeading: false,
               title: Text(
                 'ISET Restaurant - Personnel',
                 style: FlutterFlowTheme.of(context).headlineMedium.override(
                       fontFamily: 'Inter Tight',
-                      color: Color(0xFF1C1284),
+                      color: Colors.white,
                       letterSpacing: 0.0,
                       fontWeight: FontWeight.w600,
                     ),
               ),
               actions: [
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 8.0, 0.0),
+                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 16.0, 0.0),
                   child: FlutterFlowIconButton(
                     borderRadius: 20.0,
                     buttonSize: 40.0,
                     fillColor: Colors.transparent,
                     icon: Icon(
-                      Icons.notifications,
-                      color: FlutterFlowTheme.of(context).primaryText,
-                      size: 24.0,
-                    ),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Notifications bientôt disponibles!'),
-                          backgroundColor: FlutterFlowTheme.of(context).primary,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 16.0, 0.0),
-                  child: FlutterFlowIconButton(
-                    borderRadius: 20.0,
-                    buttonSize: 40.0,
-                    fillColor: Colors.red.shade50,
-                    icon: Icon(
                       Icons.logout,
-                      color: Colors.red.shade600,
+                      color: Colors.white,
                       size: 24.0,
                     ),
                     onPressed: () async {
@@ -144,388 +123,241 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                 ),
               ],
               centerTitle: false,
-              elevation: 0.0,
+              elevation: 2.0,
             ),
             body: SafeArea(
               top: true,
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(20.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 16.0),
+                      SizedBox(height: 20.0),
                       
                       // Welcome message
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.max,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  user != null 
-                                      ? 'Bonjour, ${user.nom.isNotEmpty ? user.nom : user.displayName}'
-                                      : 'Bonjour, Personnel',
-                                  style: FlutterFlowTheme.of(context)
-                                      .headlineMedium
-                                      .override(
-                                        fontFamily: 'Inter Tight',
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                                Text(
-                                  'Tableau de bord du personnel',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
-                                        letterSpacing: 0.0,
-                                      ),
-                                ),
-                              ],
-                            ),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(20.0),
+                        decoration: BoxDecoration(
+                          color: Color(0xFFF8F9FA),
+                          borderRadius: BorderRadius.circular(16.0),
+                          border: Border.all(
+                            color: Color(0xFFE9ECEF),
+                            width: 1.0,
                           ),
-                          Container(
-                            width: 100.0,
-                            height: 50.0,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              shape: BoxShape.rectangle,
-                              border: Border.all(
-                                color: Colors.transparent,
-                                width: 2.0,
-                              ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user != null 
+                                  ? 'Bonjour, ${user.nom.isNotEmpty ? user.nom : user.displayName}'
+                                  : 'Bonjour, Personnel',
+                              style: FlutterFlowTheme.of(context)
+                                  .headlineMedium
+                                  .override(
+                                    fontFamily: 'Inter Tight',
+                                    color: Color(0xFF1C1284),
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(0.0),
-                              child: Image.asset(
-                                'assets/images/logo_iset_com.jpg',
-                                width: 200.0,
-                                height: 211.6,
-                                fit: BoxFit.cover,
-                              ),
+                            SizedBox(height: 8.0),
+                            Text(
+                              'Tableau de bord du personnel ISET Restaurant',
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyLarge
+                                  .override(
+                                    fontFamily: 'Inter',
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryText,
+                                    letterSpacing: 0.0,
+                                  ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       
-                      SizedBox(height: 32.0),
+                      SizedBox(height: 30.0),
                       
                       // Main action buttons
                       Text(
                         'Actions Principales',
-                        style: FlutterFlowTheme.of(context).titleMedium.override(
+                        style: FlutterFlowTheme.of(context).headlineSmall.override(
                               fontFamily: 'Inter Tight',
+                              color: Color(0xFF1C1284),
                               letterSpacing: 0.0,
                               fontWeight: FontWeight.w600,
                             ),
                       ),
                       
-                      SizedBox(height: 16.0),
+                      SizedBox(height: 20.0),
                       
-                      GridView(
-                        padding: EdgeInsets.zero,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 16.0,
-                          mainAxisSpacing: 16.0,
-                          childAspectRatio: 1.2,
-                        ),
-                        primary: false,
-                        shrinkWrap: true,
-                        scrollDirection: Axis.vertical,
-                        children: [
-                          // Manage Menus card
-                          InkWell(
-                            onTap: () {
-                              // TODO: Navigate to menu management page
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Gestion des menus bientôt disponible'),
-                                  backgroundColor: Color(0xFF1C1284),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).secondaryBackground,
-                                boxShadow: [
-                                  BoxShadow(
-                                    blurRadius: 4.0,
-                                    color: Color(0x1A000000),
-                                    offset: Offset(0.0, 2.0),
-                                  )
-                                ],
-                                borderRadius: BorderRadius.circular(12.0),
-                                border: Border.all(
-                                  color: Color(0xFF1C1284),
-                                  width: 1.0,
-                                ),
-                              ),
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.restaurant_menu,
-                                      color: Color(0xFF1C1284),
-                                      size: 40.0,
-                                    ),
-                                    SizedBox(height: 12.0),
-                                    Text(
-                                      'Gérer Menus',
-                                      textAlign: TextAlign.center,
-                                      style: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .override(
-                                            fontFamily: 'Inter Tight',
-                                            color: Color(0xFF1C1284),
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                    ),
-                                    Text(
-                                      'Ajouter/Modifier menus',
-                                      textAlign: TextAlign.center,
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodySmall
-                                          .override(
-                                            fontFamily: 'Inter',
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
-                                            letterSpacing: 0.0,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          
-                          // Scan QR codes card
-                          InkWell(
-                            onTap: () {
-                              context.pushNamed('monjeya_scan');
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).secondaryBackground,
-                                boxShadow: [
-                                  BoxShadow(
-                                    blurRadius: 4.0,
-                                    color: Color(0x1A000000),
-                                    offset: Offset(0.0, 2.0),
-                                  )
-                                ],
-                                borderRadius: BorderRadius.circular(12.0),
-                                border: Border.all(
-                                  color: Color(0xFF00A4E4),
-                                  width: 1.0,
-                                ),
-                              ),
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.qr_code_scanner,
-                                      color: Color(0xFF00A4E4),
-                                      size: 40.0,
-                                    ),
-                                    SizedBox(height: 12.0),
-                                    Text(
-                                      'Scanner QR',
-                                      textAlign: TextAlign.center,
-                                      style: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .override(
-                                            fontFamily: 'Inter Tight',
-                                            color: Color(0xFF00A4E4),
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                    ),
-                                    Text(
-                                      'Valider les réservations',
-                                      textAlign: TextAlign.center,
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodySmall
-                                          .override(
-                                            fontFamily: 'Inter',
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
-                                            letterSpacing: 0.0,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      SizedBox(height: 32.0),
-                      
-                      // Daily statistics
-                      Text(
-                        'Statistiques du Jour',
-                        style: FlutterFlowTheme.of(context).titleMedium.override(
-                              fontFamily: 'Inter Tight',
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                      
-                      SizedBox(height: 16.0),
-                      
-                      // Tickets scanned today card
+                      // Manage Menus Button
                       Container(
                         width: double.infinity,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Color(0xFF052753), Color(0xFF1E46E)],
-                            stops: [0.0, 1.0],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                        margin: EdgeInsets.only(bottom: 16.0),
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            context.pushNamed('DailyMenuManagement');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF1C1284),
+                            foregroundColor: Colors.white,
+                            elevation: 4.0,
+                            padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 24.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16.0),
+                            ),
                           ),
-                          borderRadius: BorderRadius.circular(16.0),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(20.0),
                           child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Expanded(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Tickets Scannés Aujourd\'hui',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            fontFamily: 'Inter Tight',
-                                            color: Colors.white70,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 8.0, 0.0, 0.0),
-                                      child: Text(
-                                        '0', // TODO: Get real count from database
-                                        style: FlutterFlowTheme.of(context)
-                                            .headlineLarge
-                                            .override(
-                                              fontFamily: 'Inter Tight',
-                                              color: Colors.white,
-                                              letterSpacing: 0.0,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 4.0, 0.0, 0.0),
-                                      child: Text(
-                                        'Réservations validées',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodySmall
-                                            .override(
-                                              fontFamily: 'Inter',
-                                              color: Colors.white70,
-                                              letterSpacing: 0.0,
-                                            ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              Icon(
+                                Icons.restaurant_menu,
+                                color: Colors.white,
+                                size: 28.0,
                               ),
-                              Container(
-                                width: 60.0,
-                                height: 60.0,
-                                decoration: BoxDecoration(
-                                  color: Color(0x33FFFFFF),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Align(
-                                  alignment: AlignmentDirectional(0.0, 0.0),
-                                  child: Icon(
-                                    Icons.qr_code_2,
-                                    color: Colors.white,
-                                    size: 30.0,
+                              SizedBox(width: 12.0),
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Gérer les Menus',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
+                                  Text(
+                                    'Menus de la semaine',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ),
                       ),
                       
-                      SizedBox(height: 24.0),
+                      // QR Scanner Button
+                      Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.only(bottom: 16.0),
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            context.pushNamed('monjeya_scan');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF00A4E4),
+                            foregroundColor: Colors.white,
+                            elevation: 4.0,
+                            padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 24.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16.0),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.qr_code_scanner,
+                                color: Colors.white,
+                                size: 28.0,
+                              ),
+                              SizedBox(width: 12.0),
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Scanner QR Code',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Valider les réservations',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                       
-                      // Additional stats row
+                      SizedBox(height: 30.0),
+                      
+                      // Statistics Section
+                      Text(
+                        'Statistiques du Jour',
+                        style: FlutterFlowTheme.of(context).headlineSmall.override(
+                              fontFamily: 'Inter Tight',
+                              color: Color(0xFF1C1284),
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                      
+                      SizedBox(height: 20.0),
+                      
+                      // Stats Cards Row
                       Row(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Expanded(
                             child: Container(
-                              padding: EdgeInsets.all(16.0),
+                              padding: EdgeInsets.all(20.0),
                               decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).secondaryBackground,
-                                boxShadow: [
-                                  BoxShadow(
-                                    blurRadius: 4.0,
-                                    color: Color(0x1A000000),
-                                    offset: Offset(0.0, 2.0),
-                                  )
-                                ],
-                                borderRadius: BorderRadius.circular(12.0),
+                                gradient: LinearGradient(
+                                  colors: [Color(0xFF052753), Color(0xFF1E46E4)],
+                                  stops: [0.0, 1.0],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(16.0),
                               ),
                               child: Column(
                                 children: [
                                   Icon(
-                                    Icons.schedule,
-                                    color: Color(0xFF00A4E4),
-                                    size: 24.0,
+                                    Icons.qr_code_2,
+                                    color: Colors.white,
+                                    size: 32.0,
                                   ),
-                                  SizedBox(height: 8.0),
+                                  SizedBox(height: 12.0),
                                   Text(
-                                    'Créneaux Actifs',
+                                    '0',
                                     style: FlutterFlowTheme.of(context)
-                                        .bodySmall
+                                        .headlineLarge
                                         .override(
-                                          fontFamily: 'Inter',
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
+                                          fontFamily: 'Inter Tight',
+                                          color: Colors.white,
                                           letterSpacing: 0.0,
+                                          fontWeight: FontWeight.bold,
                                         ),
                                   ),
                                   Text(
-                                    '3', // TODO: Get real count
+                                    'Tickets Scannés',
+                                    textAlign: TextAlign.center,
                                     style: FlutterFlowTheme.of(context)
-                                        .headlineSmall
+                                        .bodyMedium
                                         .override(
-                                          fontFamily: 'Inter Tight',
-                                          color: Color(0xFF00A4E4),
+                                          fontFamily: 'Inter',
+                                          color: Colors.white70,
                                           letterSpacing: 0.0,
-                                          fontWeight: FontWeight.bold,
                                         ),
                                   ),
                                 ],
@@ -535,46 +367,43 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                           SizedBox(width: 16.0),
                           Expanded(
                             child: Container(
-                              padding: EdgeInsets.all(16.0),
+                              padding: EdgeInsets.all(20.0),
                               decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).secondaryBackground,
-                                boxShadow: [
-                                  BoxShadow(
-                                    blurRadius: 4.0,
-                                    color: Color(0x1A000000),
-                                    offset: Offset(0.0, 2.0),
-                                  )
-                                ],
-                                borderRadius: BorderRadius.circular(12.0),
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16.0),
+                                border: Border.all(
+                                  color: Color(0xFF00A4E4),
+                                  width: 2.0,
+                                ),
                               ),
                               child: Column(
                                 children: [
                                   Icon(
                                     Icons.restaurant,
-                                    color: Color(0xFF1C1284),
-                                    size: 24.0,
+                                    color: Color(0xFF00A4E4),
+                                    size: 32.0,
                                   ),
-                                  SizedBox(height: 8.0),
+                                  SizedBox(height: 12.0),
                                   Text(
-                                    'Menus Disponibles',
+                                    '7',
                                     style: FlutterFlowTheme.of(context)
-                                        .bodySmall
+                                        .headlineLarge
                                         .override(
-                                          fontFamily: 'Inter',
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
+                                          fontFamily: 'Inter Tight',
+                                          color: Color(0xFF00A4E4),
                                           letterSpacing: 0.0,
+                                          fontWeight: FontWeight.bold,
                                         ),
                                   ),
                                   Text(
-                                    '7', // TODO: Get real count
+                                    'Menus Actifs',
+                                    textAlign: TextAlign.center,
                                     style: FlutterFlowTheme.of(context)
-                                        .headlineSmall
+                                        .bodyMedium
                                         .override(
-                                          fontFamily: 'Inter Tight',
-                                          color: Color(0xFF1C1284),
+                                          fontFamily: 'Inter',
+                                          color: Color(0xFF00A4E4),
                                           letterSpacing: 0.0,
-                                          fontWeight: FontWeight.bold,
                                         ),
                                   ),
                                 ],
@@ -584,7 +413,80 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                         ],
                       ),
                       
-                      SizedBox(height: 32.0),
+                      SizedBox(height: 40.0),
+                      
+                      // Logout button
+                      Container(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            final shouldLogout = await showDialog<bool>(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text('Déconnexion'),
+                                  content: Text('Êtes-vous sûr de vouloir vous déconnecter?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(false),
+                                      child: Text('Annuler'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(true),
+                                      child: Text(
+                                        'Déconnexion',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                            
+                            if (shouldLogout == true) {
+                              try {
+                                await signOut();
+                                if (context.mounted) {
+                                  context.goNamed('Login');
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Erreur lors de la déconnexion: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            }
+                          },
+                          icon: Icon(
+                            Icons.logout,
+                            color: Colors.white,
+                            size: 20.0,
+                          ),
+                          label: Text(
+                            'Se Déconnecter',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red.shade600,
+                            foregroundColor: Colors.white,
+                            elevation: 3.0,
+                            padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                      SizedBox(height: 40.0),
                     ],
                   ),
                 ),

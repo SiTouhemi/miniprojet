@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:iset_restaurant/auth/firebase_auth/auth_util.dart';
 import 'package:iset_restaurant/auth/role_middleware.dart';
+import 'package:iset_restaurant/auth/role_aware_mixin.dart';
 
 void main() {
   group('Authentication Logic Tests - No Firebase Required', () {

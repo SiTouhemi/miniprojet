@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '/config/app_config.dart';
+import '/utils/app_logger.dart';
 
 class PerformanceMonitor {
   static final Map<String, DateTime> _startTimes = {};
@@ -10,7 +11,7 @@ class PerformanceMonitor {
     _startTimes[traceName] = DateTime.now();
     
     if (AppConfig.enableDebugLogging) {
-      debugPrint('PERFORMANCE: Started trace $traceName');
+      AppLogger.performance('Started trace $traceName');
     }
   }
   
@@ -23,7 +24,7 @@ class PerformanceMonitor {
       _startTimes.remove(traceName);
       
       if (AppConfig.enableDebugLogging) {
-        debugPrint('PERFORMANCE: $traceName took ${duration.inMilliseconds}ms');
+        AppLogger.performance('$traceName completed', duration: duration);
       }
       
       // In production, send to Firebase Performance
@@ -38,7 +39,7 @@ class PerformanceMonitor {
     if (!AppConfig.enablePerformanceMonitoring) return;
     
     if (AppConfig.enableDebugLogging) {
-      debugPrint('METRIC: $metricName = $value');
+      AppLogger.performance('$metricName = $value', value: value.toInt());
     }
     
     // In production, send to analytics
@@ -52,7 +53,7 @@ class PerformanceMonitor {
     if (!AppConfig.enableAnalytics) return;
     
     if (AppConfig.enableDebugLogging) {
-      debugPrint('USER ACTION: $action ${parameters ?? ''}');
+      AppLogger.userAction(action, params: parameters);
     }
     
     // In production, send to analytics

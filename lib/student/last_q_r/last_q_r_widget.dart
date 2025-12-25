@@ -2,6 +2,7 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/utils/app_logger.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -134,7 +135,7 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                     size: 20.0,
                   ),
                   onPressed: () {
-                    print('IconButton pressed ...');
+                    AppLogger.d('IconButton pressed', tag: 'UI');
                   },
                 ),
               ),
@@ -220,7 +221,7 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                           size: 20.0,
                         ),
                         onPressed: () {
-                          print('IconButton pressed ...');
+                          AppLogger.d('IconButton pressed', tag: 'UI');
                         },
                       ),
                     ],
@@ -1042,7 +1043,7 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                       Expanded(
                         child: FFButtonWidget(
                           onPressed: () {
-                            print('Button pressed ...');
+                            AppLogger.d('Button pressed', tag: 'UI');
                           },
                           text: 'Historique des Tickets',
                           icon: Icon(
@@ -1086,7 +1087,7 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                       Expanded(
                         child: FFButtonWidget(
                           onPressed: () {
-                            print('Button pressed ...');
+                            AppLogger.d('Button pressed', tag: 'UI');
                           },
                           text: 'Nouvelle Réservation',
                           icon: Icon(

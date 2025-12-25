@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/utils/app_logger.dart';
 
 class AppService {
   static AppService? _instance;
@@ -33,7 +34,7 @@ class AppService {
       _lastSettingsFetch = DateTime.now();
       return _cachedSettings!;
     } catch (e) {
-      print('Error fetching app settings: $e');
+      AppLogger.e('Error fetching app settings', error: e, tag: 'AppService');
       // Return default settings on error
       return _getDefaultSettings();
     }
@@ -58,7 +59,7 @@ class AppService {
       final doc = await docRef.get();
       return AppSettingsRecord.fromSnapshot(doc);
     } catch (e) {
-      print('Error creating default settings: $e');
+      AppLogger.e('Error creating default settings', error: e, tag: 'AppService');
       return _getDefaultSettings();
     }
   }
@@ -88,7 +89,7 @@ class AppService {
       }
       return false;
     } catch (e) {
-      print('Error updating app settings: $e');
+      AppLogger.e('Error updating app settings', error: e, tag: 'AppService');
       return false;
     }
   }
@@ -112,7 +113,7 @@ class AppService {
       return timeSlots.where((slot) => 
         slot.currentReservations < slot.maxCapacity).toList();
     } catch (e) {
-      print('Error fetching time slots: $e');
+      AppLogger.e('Error fetching time slots', error: e, tag: 'AppService');
       return [];
     }
   }
@@ -129,7 +130,7 @@ class AppService {
       final snapshot = await query.orderBy('created_at', descending: true).get();
       return snapshot.docs.map((doc) => ReservationRecord.fromSnapshot(doc)).toList();
     } catch (e) {
-      print('Error fetching user reservations: $e');
+      AppLogger.e('Error fetching user reservations', error: e, tag: 'AppService');
       return [];
     }
   }
@@ -142,7 +143,7 @@ class AppService {
       
       return activeReservations.length < settings.maxReservationsPerUser;
     } catch (e) {
-      print('Error checking reservation limit: $e');
+      AppLogger.e('Error checking reservation limit', error: e, tag: 'AppService');
       return false;
     }
   }
@@ -193,7 +194,7 @@ class AppService {
       
       return true;
     } catch (e) {
-      print('Error cancelling reservation: $e');
+      AppLogger.e('Error cancelling reservation', error: e, tag: 'AppService');
       return false;
     }
   }
@@ -205,7 +206,7 @@ class AppService {
         queryBuilder: (query) => query.orderBy('categorie').orderBy('nom'),
       );
     } catch (e) {
-      print('Error fetching menu: $e');
+      AppLogger.e('Error fetching menu', error: e, tag: 'AppService');
       return [];
     }
   }
@@ -256,7 +257,7 @@ class AppService {
         'dailyData': analytics,
       };
     } catch (e) {
-      print('Error fetching analytics: $e');
+      AppLogger.e('Error fetching analytics', error: e, tag: 'AppService');
       return {};
     }
   }

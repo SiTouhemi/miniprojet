@@ -4,10 +4,11 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/auth/role_middleware.dart';
 import '/auth/firebase_auth/auth_util.dart';
+import '/auth/role_aware_mixin.dart';
+import '/utils/app_logger.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'admin_dashboard_model.dart';
 export 'admin_dashboard_model.dart';
 
@@ -94,6 +95,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
               ),
               Text(
                 'Admin Dashboard',
+                overflow: TextOverflow.ellipsis,
                 style: FlutterFlowTheme.of(context).headlineMedium.override(
                       font: GoogleFonts.urbanist(
                         fontWeight: FontWeight.bold,
@@ -102,7 +104,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                             .fontStyle,
                       ),
                       color: Color(0xFF0B191E),
-                      fontSize: 24.0,
+                      fontSize: 18.0,
                       letterSpacing: 0.0,
                       fontWeight: FontWeight.bold,
                       fontStyle:
@@ -127,7 +129,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                       size: 20.0,
                     ),
                     onPressed: () {
-                      print('IconButton pressed ...');
+                      AppLogger.d('IconButton pressed', tag: 'UI');
                     },
                   ),
                   FlutterFlowIconButton(
@@ -140,7 +142,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                       size: 20.0,
                     ),
                     onPressed: () {
-                      print('IconButton pressed ...');
+                      AppLogger.d('IconButton pressed', tag: 'UI');
                     },
                   ),
                   Container(
@@ -1742,7 +1744,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                               Expanded(
                                 child: FFButtonWidget(
                                   onPressed: () {
-                                    print('Button pressed ...');
+                                    AppLogger.d('Button pressed', tag: 'UI');
                                   },
                                   text: 'Add New Plat',
                                   options: FFButtonOptions(
@@ -1779,7 +1781,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                               Expanded(
                                 child: FFButtonWidget(
                                   onPressed: () {
-                                    print('Button pressed ...');
+                                    AppLogger.d('Button pressed', tag: 'UI');
                                   },
                                   text: 'Create Time Slot',
                                   options: FFButtonOptions(
@@ -1816,7 +1818,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                               Expanded(
                                 child: FFButtonWidget(
                                   onPressed: () {
-                                    print('Button pressed ...');
+                                    AppLogger.d('Button pressed', tag: 'UI');
                                   },
                                   text: 'Export Data',
                                   options: FFButtonOptions(

@@ -2,6 +2,7 @@ import '/flutter_flow/flutter_flow_model.dart';
 import '/backend/backend.dart';
 import '/backend/services/reservation_service.dart';
 import '/backend/services/time_slot_service.dart';
+import '/utils/app_logger.dart';
 import 'reservation_management_widget.dart' show ReservationManagementWidget;
 import 'package:flutter/material.dart';
 
@@ -50,7 +51,7 @@ class ReservationManagementModel extends FlutterFlowModel<ReservationManagementW
       final tomorrow = DateTime.now().add(const Duration(days: 1));
       availableTimeSlots = await timeSlotService.getAvailableTimeSlots(tomorrow);
     } catch (e) {
-      print('Error loading time slots: $e');
+      AppLogger.e('Error loading time slots', error: e, tag: 'ReservationManagementModel');
     }
   }
 

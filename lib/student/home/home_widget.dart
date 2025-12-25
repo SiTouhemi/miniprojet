@@ -5,6 +5,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/app_state.dart';
 import '/auth/firebase_auth/auth_util.dart';
+import '/utils/app_logger.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -65,14 +66,14 @@ class _HomeWidgetState extends State<HomeWidget> {
       final userDoc = await authService.getCurrentUserDocument();
       if (userDoc != null) {
         appState.setCurrentUser(userDoc);
-        print('User data loaded: ${userDoc.nom} (${userDoc.pocket} DT)');
+        AppLogger.i('User data loaded: ${userDoc.nom} (${userDoc.pocket} DT)', tag: 'HomeWidget');
       } else if (authService.isLoggedIn) {
         // User is logged in but document doesn't exist - this shouldn't happen
-        print('Warning: User is authenticated but no user document found');
+        AppLogger.w('User is authenticated but no user document found', tag: 'HomeWidget');
         appState.setLastError('Données utilisateur introuvables. Veuillez vous reconnecter.');
       }
     } catch (e) {
-      print('Error loading current user: $e');
+      AppLogger.e('Error loading current user', error: e, tag: 'HomeWidget');
       appState.setLastError('Erreur de chargement des données utilisateur');
     }
   }

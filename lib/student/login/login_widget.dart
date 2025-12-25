@@ -620,7 +620,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                                           welcomeMessage = 'Bienvenue, Administrateur !';
                                           break;
                                         case UserRole.staff:
-                                          targetRoute = 'monjeya_scan';
+                                          targetRoute = 'StaffHome';
                                           welcomeMessage = 'Bienvenue, Personnel !';
                                           break;
                                         case UserRole.student:

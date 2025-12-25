@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '/backend/backend.dart';
+import '/utils/app_logger.dart';
 
 /// Service for managing time slots with real-time capacity updates
 /// Implements Requirements 4.1, 4.2, 4.3, 4.5, 4.6, 4.7
@@ -55,8 +56,7 @@ class TimeSlotService {
           .map((doc) => TimeSlotRecord.fromSnapshot(doc))
           .toList();
     } catch (e) {
-      // Log error in production - replace with proper logging service
-      debugPrint('Error fetching time slots: $e');
+      AppLogger.e('Error fetching time slots', error: e, tag: 'TimeSlotService');
       return [];
     }
   }
@@ -75,7 +75,7 @@ class TimeSlotService {
       final timeSlot = TimeSlotRecord.fromSnapshot(doc);
       return timeSlot.currentReservations < timeSlot.maxCapacity;
     } catch (e) {
-      debugPrint('Error checking time slot capacity: $e');
+      AppLogger.e('Error checking time slot capacity', error: e, tag: 'TimeSlotService');
       return false;
     }
   }
@@ -92,7 +92,7 @@ class TimeSlotService {
 
       return TimeSlotRecord.fromSnapshot(doc);
     } catch (e) {
-      debugPrint('Error fetching time slot: $e');
+      AppLogger.e('Error fetching time slot', error: e, tag: 'TimeSlotService');
       return null;
     }
   }
@@ -161,7 +161,7 @@ class TimeSlotService {
         timeSlot: timeSlot,
       );
     } catch (e) {
-      debugPrint('Error validating time slot: $e');
+      AppLogger.e('Error validating time slot', error: e, tag: 'TimeSlotService');
       return TimeSlotValidationResult(
         isValid: false,
         errorMessage: 'Error validating time slot: $e',
@@ -187,7 +187,7 @@ class TimeSlotService {
           .map((doc) => TimeSlotRecord.fromSnapshot(doc))
           .toList();
     } catch (e) {
-      debugPrint('Error fetching time slots in range: $e');
+      AppLogger.e('Error fetching time slots in range', error: e, tag: 'TimeSlotService');
       return [];
     }
   }
@@ -230,7 +230,7 @@ class TimeSlotService {
 
       return docRef.id;
     } catch (e) {
-      debugPrint('Error creating time slot: $e');
+      AppLogger.e('Error creating time slot', error: e, tag: 'TimeSlotService');
       return null;
     }
   }
@@ -262,7 +262,7 @@ class TimeSlotService {
 
       return true;
     } catch (e) {
-      debugPrint('Error updating time slot capacity: $e');
+      AppLogger.e('Error updating time slot capacity', error: e, tag: 'TimeSlotService');
       return false;
     }
   }
@@ -278,7 +278,7 @@ class TimeSlotService {
 
       return true;
     } catch (e) {
-      debugPrint('Error deactivating time slot: $e');
+      AppLogger.e('Error deactivating time slot', error: e, tag: 'TimeSlotService');
       return false;
     }
   }
@@ -307,7 +307,7 @@ class TimeSlotService {
 
       return true;
     } catch (e) {
-      debugPrint('Error deleting time slot: $e');
+      AppLogger.e('Error deleting time slot', error: e, tag: 'TimeSlotService');
       return false;
     }
   }

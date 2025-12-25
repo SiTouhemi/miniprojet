@@ -2,6 +2,7 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/utils/app_logger.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -71,7 +72,7 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
               size: 24.0,
             ),
             onPressed: () {
-              print('IconButton pressed ...');
+              AppLogger.d('IconButton pressed', tag: 'UI');
             },
           ),
           title: Text(
@@ -101,7 +102,7 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                   size: 24.0,
                 ),
                 onPressed: () {
-                  print('IconButton pressed ...');
+                  AppLogger.d('IconButton pressed', tag: 'UI');
                 },
               ),
             ),
@@ -607,7 +608,7 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                     Expanded(
                       child: FFButtonWidget(
                         onPressed: () {
-                          print('Button pressed ...');
+                          AppLogger.d('Button pressed', tag: 'UI');
                         },
                         text: 'Télécharger',
                         icon: Icon(
@@ -662,14 +663,14 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                         size: 20.0,
                       ),
                       onPressed: () {
-                        print('IconButton pressed ...');
+                        AppLogger.d('IconButton pressed', tag: 'UI');
                       },
                     ),
                   ].divide(SizedBox(width: 12.0)),
                 ),
                 FFButtonWidget(
                   onPressed: () {
-                    print('Button pressed ...');
+                    AppLogger.d('Button pressed', tag: 'UI');
                   },
                   text: 'Retour à l\'accueil',
                   options: FFButtonOptions(

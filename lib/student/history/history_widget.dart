@@ -2,6 +2,7 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/utils/app_logger.dart';
 import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
@@ -529,7 +530,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                   children: [
                                     FFButtonWidget(
                                       onPressed: () {
-                                        print('Button pressed ...');
+                                        AppLogger.d('Button pressed', tag: 'UI');
                                       },
                                       text: 'Voir Détails',
                                       options: FFButtonOptions(
@@ -801,7 +802,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                   children: [
                                     FFButtonWidget(
                                       onPressed: () {
-                                        print('Button pressed ...');
+                                        AppLogger.d('Button pressed', tag: 'UI');
                                       },
                                       text: 'Voir Détails',
                                       options: FFButtonOptions(
@@ -1073,7 +1074,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                   children: [
                                     FFButtonWidget(
                                       onPressed: () {
-                                        print('Button pressed ...');
+                                        AppLogger.d('Button pressed', tag: 'UI');
                                       },
                                       text: 'Voir Détails',
                                       options: FFButtonOptions(
@@ -1345,7 +1346,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                   children: [
                                     FFButtonWidget(
                                       onPressed: () {
-                                        print('Button pressed ...');
+                                        AppLogger.d('Button pressed', tag: 'UI');
                                       },
                                       text: 'Voir Détails',
                                       options: FFButtonOptions(

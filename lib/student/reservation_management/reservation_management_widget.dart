@@ -6,6 +6,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/auth/firebase_auth/auth_util.dart';
+import '/utils/app_logger.dart';
 
 /// Widget for managing user reservations with cancellation and modification
 /// Implements Requirements 5.5, 5.7 for reservation management
@@ -66,7 +67,7 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
         _availableTimeSlots = timeSlots;
       });
     } catch (e) {
-      print('Error loading time slots: $e');
+      AppLogger.e('Error loading time slots', error: e, tag: 'ReservationManagementWidget');
     }
   }
 

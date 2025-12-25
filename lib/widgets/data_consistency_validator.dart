@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '/backend/schema/user_record.dart';
 import '/backend/services/data_validation_service.dart';
 import '/utils/error_handler.dart';
+import '/utils/app_logger.dart';
 import '/flutter_flow/app_state.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
@@ -107,9 +108,9 @@ class _DataConsistencyValidatorState extends State<DataConsistencyValidator> {
 
       // Log validation issues for debugging
       if (!comprehensiveValidation.isValid) {
-        print('Data validation issues detected:');
+        AppLogger.w('Data validation issues detected:', tag: 'DataConsistencyValidator');
         for (final error in comprehensiveValidation.allErrors) {
-          print('  - $error');
+          AppLogger.d('  - $error', tag: 'DataConsistencyValidator');
         }
       }
 
@@ -244,7 +245,7 @@ class HardcodedDataChecker extends StatelessWidget {
     
     if (!validation.isValid) {
       // Log the hardcoded data detection
-      print('Hardcoded data detected: ${validation.errors}');
+      AppLogger.w('Hardcoded data detected: ${validation.errors}', tag: 'DataConsistencyValidator');
       
       // In debug mode, show warning
       if (kDebugMode) {

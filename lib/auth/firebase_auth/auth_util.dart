@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/app_state.dart';
 import '/backend/schema/user_record.dart';
+import '/utils/app_logger.dart';
 
 enum UserRole { student, staff, admin }
 
@@ -51,12 +52,16 @@ class AuthService {
         throw Exception('Le mot de passe ne respecte pas les critères de sécurité.');
       }
 
+      AppLogger.auth('Attempting login for: $email');
+
       final UserCredential result = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
       if (result.user != null) {
+        AppLogger.auth('Firebase Auth successful for: ${result.user!.email}', success: true, userId: result.user!.uid);
+        
         // Clear failed attempts on successful login
         _failedAttempts.remove(email);
         _lockoutTimes.remove(email);
@@ -70,6 +75,8 @@ class AuthService {
         
         // Initialize real-time user data synchronization
         await _initializeUserDataSync(result.user!.uid);
+        
+        AppLogger.auth('Login complete for role: ${await getUserRole()}', success: true, userId: result.user!.uid);
       }
 
       return result;
@@ -77,9 +84,11 @@ class AuthService {
       // Track failed attempts
       _trackFailedAttempt(email);
       
+      AppLogger.auth('Firebase Auth Error: ${e.code} - ${e.message}', success: false);
       String errorMessage = _getErrorMessage(e.code);
       throw Exception(errorMessage);
     } catch (e) {
+      AppLogger.e('General Auth Error', error: e, tag: 'AuthService');
       if (e.toString().contains('Compte verrouillé')) {
         rethrow;
       }
@@ -127,7 +136,7 @@ class AuthService {
       
       return null;
     } catch (e) {
-      print('Error getting user role: $e');
+      AppLogger.e('Error getting user role', error: e, tag: 'AuthService');
       return null;
     }
   }
@@ -213,7 +222,7 @@ class AuthService {
       }
       return null;
     } catch (e) {
-      print('Error getting user document: $e');
+      AppLogger.e('Error getting user document', error: e, tag: 'AuthService');
       return null;
     }
   }
@@ -374,7 +383,7 @@ class AuthService {
         'last_login': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('Error updating last login: $e');
+      AppLogger.w('Error updating last login', error: e, tag: 'AuthService');
     }
   }
 
@@ -397,7 +406,7 @@ class AuthService {
         });
       }
     } catch (e) {
-      print('Error ensuring user document: $e');
+      AppLogger.e('Error ensuring user document', error: e, tag: 'AuthService');
     }
   }
 
@@ -416,7 +425,7 @@ class AuthService {
         }
       }
     } catch (e) {
-      print('Error ensuring user role: $e');
+      AppLogger.w('Error ensuring user role', error: e, tag: 'AuthService');
     }
   }
 
@@ -426,7 +435,7 @@ class AuthService {
       // Initialize user synchronization in app state
       await FFAppState().initializeUserSync(uid);
     } catch (e) {
-      print('Error initializing user data sync: $e');
+      AppLogger.e('Error initializing user data sync', error: e, tag: 'AuthService');
     }
   }
 
