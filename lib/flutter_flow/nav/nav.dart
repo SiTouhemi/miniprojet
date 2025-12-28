@@ -63,13 +63,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => HomeWidget(),
         ),
         FFRoute(
-          name: EnhancedHomeWidget.routeName,
-          path: EnhancedHomeWidget.routePath,
-          requireAuth: true,
-          allowedRoles: [UserRole.student, UserRole.staff, UserRole.admin],
-          builder: (context, params) => EnhancedHomeWidget(),
-        ),
-        FFRoute(
           name: ReservationWidget.routeName,
           path: ReservationWidget.routePath,
           requireAuth: true,

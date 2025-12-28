@@ -5,6 +5,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/app_state.dart';
 import '/auth/firebase_auth/auth_util.dart';
+import '/widgets/logout_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -77,48 +78,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                       color: Colors.white,
                       size: 24.0,
                     ),
-                    onPressed: () async {
-                      final shouldLogout = await showDialog<bool>(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text('Déconnexion'),
-                            content: Text('Êtes-vous sûr de vouloir vous déconnecter?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(false),
-                                child: Text('Annuler'),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(true),
-                                child: Text(
-                                  'Déconnexion',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                      
-                      if (shouldLogout == true) {
-                        try {
-                          await signOut();
-                          if (context.mounted) {
-                            context.goNamed('Login');
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Erreur lors de la déconnexion: $e'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
-                        }
-                      }
-                    },
+                    onPressed: () => LogoutDialog.handleLogout(context),
                   ),
                 ),
               ],
@@ -339,7 +299,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                                   ),
                                   SizedBox(height: 12.0),
                                   Text(
-                                    '0',
+                                    '--',
                                     style: FlutterFlowTheme.of(context)
                                         .headlineLarge
                                         .override(
@@ -385,7 +345,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                                   ),
                                   SizedBox(height: 12.0),
                                   Text(
-                                    '7',
+                                    '--',
                                     style: FlutterFlowTheme.of(context)
                                         .headlineLarge
                                         .override(
@@ -411,79 +371,6 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                             ),
                           ),
                         ],
-                      ),
-                      
-                      SizedBox(height: 40.0),
-                      
-                      // Logout button
-                      Container(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () async {
-                            final shouldLogout = await showDialog<bool>(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text('Déconnexion'),
-                                  content: Text('Êtes-vous sûr de vouloir vous déconnecter?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(false),
-                                      child: Text('Annuler'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(true),
-                                      child: Text(
-                                        'Déconnexion',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                            
-                            if (shouldLogout == true) {
-                              try {
-                                await signOut();
-                                if (context.mounted) {
-                                  context.goNamed('Login');
-                                }
-                              } catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Erreur lors de la déconnexion: $e'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              }
-                            }
-                          },
-                          icon: Icon(
-                            Icons.logout,
-                            color: Colors.white,
-                            size: 20.0,
-                          ),
-                          label: Text(
-                            'Se Déconnecter',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red.shade600,
-                            foregroundColor: Colors.white,
-                            elevation: 3.0,
-                            padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                          ),
-                        ),
                       ),
                       
                       SizedBox(height: 40.0),

@@ -4,12 +4,9 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/app_state.dart';
-import '/auth/firebase_auth/auth_util.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import 'reservationcreneau_model.dart';
 export 'reservationcreneau_model.dart';
 
@@ -47,6 +44,13 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => ReservationcreneauModel());
+    
+    // Set up state change callback
+    _model.onStateChanged = () {
+      if (mounted) {
+        setState(() {});
+      }
+    };
   }
 
   @override
@@ -56,12 +60,161 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
     super.dispose();
   }
 
+  /// Show reservation confirmation dialog
+  Future<bool> _showReservationConfirmationDialog(BuildContext context) async {
+    if (_model.selectedTimeSlot == null) return false;
+    
+    return await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        title: Row(
+          children: [
+            Container(
+              width: 40.0,
+              height: 40.0,
+              decoration: BoxDecoration(
+                color: Color(0xFF005BAA),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.restaurant_menu,
+                color: Colors.white,
+                size: 20.0,
+              ),
+            ),
+            SizedBox(width: 12.0),
+            Text(
+              'Confirmer la réservation',
+              style: FlutterFlowTheme.of(context).titleLarge.override(
+                font: GoogleFonts.interTight(
+                  fontWeight: FontWeight.w600,
+                ),
+                color: Color(0xFF005BAA),
+                letterSpacing: 0.0,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Détails de la réservation:',
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                font: GoogleFonts.inter(
+                  fontWeight: FontWeight.w600,
+                ),
+                color: Color(0xFF005BAA),
+                letterSpacing: 0.0,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 12.0),
+            _buildConfirmationRow('Date:', DateFormat('dd MMMM yyyy').format(_model.selectedTimeSlot!.date!)),
+            _buildConfirmationRow('Heure:', '${DateFormat('HH:mm').format(_model.selectedTimeSlot!.startTime!)} - ${DateFormat('HH:mm').format(_model.selectedTimeSlot!.endTime!)}'),
+            _buildConfirmationRow('Type:', _model.selectedTimeSlot!.mealType.toUpperCase()),
+            _buildConfirmationRow('Prix:', '${_model.selectedTimeSlot!.price.toStringAsFixed(2)} TND'),
+            SizedBox(height: 16.0),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                color: Color(0xFFF0F8FF),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Text(
+                'Le montant sera débité de votre compte D17. Cette action est irréversible.',
+                style: FlutterFlowTheme.of(context).bodySmall.override(
+                  font: GoogleFonts.inter(),
+                  color: Color(0xFF005BAA),
+                  letterSpacing: 0.0,
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Annuler',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          FFButtonWidget(
+            onPressed: () => Navigator.of(context).pop(true),
+            text: 'Confirmer',
+            options: FFButtonOptions(
+              height: 40.0,
+              padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+              iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+              color: Color(0xFF005BAA),
+              textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                font: GoogleFonts.interTight(
+                  fontWeight: FontWeight.w600,
+                ),
+                color: Colors.white,
+                letterSpacing: 0.0,
+                fontWeight: FontWeight.w600,
+              ),
+              elevation: 2.0,
+              borderSide: BorderSide(
+                color: Colors.transparent,
+                width: 1.0,
+              ),
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+        ],
+      ),
+    ) ?? false;
+  }
+
+  /// Build confirmation dialog row
+  Widget _buildConfirmationRow(String label, String value) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+              font: GoogleFonts.inter(),
+              color: Colors.grey.shade600,
+              letterSpacing: 0.0,
+            ),
+          ),
+          Text(
+            value,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+              font: GoogleFonts.inter(
+                fontWeight: FontWeight.w600,
+              ),
+              color: Color(0xFF005BAA),
+              letterSpacing: 0.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<FFAppState>(
       builder: (context, appState, _) {
-        final user = appState.currentUser;
-        
         return GestureDetector(
           onTap: () {
             FocusScope.of(context).unfocus();
@@ -183,9 +336,9 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
-                                    user != null 
-                                        ? '${user.pocket.toStringAsFixed(2)} DT'
-                                        : '0.00 DT',
+                                    _model.isLoadingBalance
+                                        ? 'Chargement...'
+                                        : '${_model.userBalance.toStringAsFixed(2)} DT',
                                     style: FlutterFlowTheme.of(context)
                                         .headlineMedium
                                         .override(
@@ -332,6 +485,7 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                     onTap: () {
                                       setState(() {
                                         _model.selectedTimeSlot = timeSlot;
+                                        _model.clearMessages();
                                       });
                                     },
                                     child: Container(
@@ -700,38 +854,230 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                     // Reserve button
                     Padding(
                       padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
-                      child: FFButtonWidget(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Réservation en cours de développement'),
-                              backgroundColor: Color(0xFF005BAA),
-                            ),
-                          );
-                        },
-                        text: 'Réserver',
-                        options: FFButtonOptions(
-                          width: double.infinity,
-                          height: 56.0,
-                          padding: EdgeInsets.all(8.0),
-                          iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                          color: Color(0xFF005BAA),
-                          textStyle: FlutterFlowTheme.of(context).titleMedium.override(
-                                font: GoogleFonts.interTight(
-                                  fontWeight: FontWeight.w600,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                              // Error message
+                              if (_model.errorMessage != null)
+                                Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.all(12.0),
+                                  margin: EdgeInsets.only(bottom: 16.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.shade50,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    border: Border.all(color: Colors.red.shade200),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.error_outline, color: Colors.red.shade700, size: 20.0),
+                                      SizedBox(width: 8.0),
+                                      Expanded(
+                                        child: Text(
+                                          _model.errorMessage!,
+                                          style: TextStyle(
+                                            color: Colors.red.shade700,
+                                            fontSize: 14.0,
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.close, color: Colors.red.shade700, size: 18.0),
+                                        onPressed: () => _model.clearMessages(),
+                                        padding: EdgeInsets.zero,
+                                        constraints: BoxConstraints(),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                color: Colors.white,
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.w600,
+                              
+                              // Success message
+                              if (_model.successMessage != null)
+                                Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.all(12.0),
+                                  margin: EdgeInsets.only(bottom: 16.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade50,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    border: Border.all(color: Colors.green.shade200),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.check_circle_outline, color: Colors.green.shade700, size: 20.0),
+                                      SizedBox(width: 8.0),
+                                      Expanded(
+                                        child: Text(
+                                          _model.successMessage!,
+                                          style: TextStyle(
+                                            color: Colors.green.shade700,
+                                            fontSize: 14.0,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              
+                              // Balance and validation info
+                              if (_model.selectedTimeSlot != null)
+                                Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.all(12.0),
+                                  margin: EdgeInsets.only(bottom: 16.0),
+                                  decoration: BoxDecoration(
+                                    color: _model.canAffordSelectedSlot() 
+                                        ? Colors.green.shade50 
+                                        : Colors.orange.shade50,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    border: Border.all(
+                                      color: _model.canAffordSelectedSlot() 
+                                          ? Colors.green.shade200 
+                                          : Colors.orange.shade200,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'Prix du créneau:',
+                                            style: TextStyle(
+                                              color: Colors.grey.shade700,
+                                              fontSize: 14.0,
+                                            ),
+                                          ),
+                                          Text(
+                                            '${_model.selectedTimeSlot!.price.toStringAsFixed(2)} TND',
+                                            style: TextStyle(
+                                              color: Color(0xFF005BAA),
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 4.0),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'Votre solde:',
+                                            style: TextStyle(
+                                              color: Colors.grey.shade700,
+                                              fontSize: 14.0,
+                                            ),
+                                          ),
+                                          Text(
+                                            _model.isLoadingBalance 
+                                                ? 'Chargement...'
+                                                : '${_model.userBalance.toStringAsFixed(2)} TND',
+                                            style: TextStyle(
+                                              color: _model.canAffordSelectedSlot() 
+                                                  ? Colors.green.shade700 
+                                                  : Colors.orange.shade700,
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      if (!_model.canAffordSelectedSlot() && !_model.isLoadingBalance) ...[
+                                        SizedBox(height: 8.0),
+                                        Text(
+                                          'Solde insuffisant pour cette réservation',
+                                          style: TextStyle(
+                                            color: Colors.orange.shade700,
+                                            fontSize: 12.0,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              
+                              // Reserve button
+                              FFButtonWidget(
+                                onPressed: _model.selectedTimeSlot == null || 
+                                          _model.isProcessingReservation ||
+                                          _model.isLoadingBalance ||
+                                          !_model.canAffordSelectedSlot()
+                                    ? null
+                                    : () async {
+                                        // Show confirmation dialog
+                                        final confirmed = await _showReservationConfirmationDialog(context);
+                                        if (!confirmed) return;
+                                        
+                                        // Create reservation
+                                        final result = await _model.createReservation();
+                                        
+                                        if (result['success']) {
+                                          // Navigate to confirmation page
+                                          context.pushNamed(
+                                            'Reservationconfirme',
+                                            queryParameters: {
+                                              'reservationId': result['reservationId'],
+                                              'paymentId': result['paymentId'],
+                                            },
+                                          );
+                                        }
+                                      },
+                                text: _model.isProcessingReservation
+                                    ? 'Réservation en cours...'
+                                    : _model.selectedTimeSlot == null
+                                        ? 'Sélectionnez un créneau'
+                                        : !_model.canAffordSelectedSlot()
+                                            ? 'Solde insuffisant'
+                                            : 'Réserver',
+                                icon: _model.isProcessingReservation
+                                    ? SizedBox(
+                                        width: 20.0,
+                                        height: 20.0,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.0,
+                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                        ),
+                                      )
+                                    : Icon(
+                                        Icons.restaurant_menu,
+                                        color: Colors.white,
+                                        size: 20.0,
+                                      ),
+                                options: FFButtonOptions(
+                                  width: double.infinity,
+                                  height: 56.0,
+                                  padding: EdgeInsets.all(8.0),
+                                  iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                  color: _model.selectedTimeSlot == null || 
+                                         _model.isProcessingReservation ||
+                                         _model.isLoadingBalance ||
+                                         !_model.canAffordSelectedSlot()
+                                      ? Colors.grey.shade400
+                                      : Color(0xFF005BAA),
+                                  textStyle: FlutterFlowTheme.of(context).titleMedium.override(
+                                        font: GoogleFonts.interTight(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        color: Colors.white,
+                                        letterSpacing: 0.0,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                  elevation: _model.selectedTimeSlot != null && 
+                                            !_model.isProcessingReservation &&
+                                            !_model.isLoadingBalance &&
+                                            _model.canAffordSelectedSlot() ? 2.0 : 0.0,
+                                  borderSide: BorderSide(
+                                    color: Colors.transparent,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
                               ),
-                          elevation: 0.0,
-                          borderSide: BorderSide(
-                            color: Colors.transparent,
-                          ),
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
+                            ],
+                          );
                       ),
-                    ),
                   ]
                       .divide(SizedBox(height: 24.0))
                       .addToStart(SizedBox(height: 16.0))

@@ -6,7 +6,6 @@ import '/auth/role_middleware.dart';
 import '/auth/firebase_auth/auth_util.dart';
 import '/auth/role_aware_mixin.dart';
 import '/utils/app_logger.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'admin_dashboard_model.dart';
@@ -116,50 +115,19 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
           actions: [
             Padding(
               padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  FlutterFlowIconButton(
-                    borderRadius: 20.0,
-                    buttonSize: 40.0,
-                    fillColor: Color(0x4D4B986C),
-                    icon: Icon(
-                      Icons.notifications,
-                      color: Color(0xFF4B986C),
-                      size: 20.0,
-                    ),
-                    onPressed: () {
-                      AppLogger.d('IconButton pressed', tag: 'UI');
-                    },
+              child: Container(
+                width: 32.0,
+                height: 32.0,
+                decoration: BoxDecoration(
+                  color: Color(0xFF6D604A),
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: Image.network(
+                      'https://images.unsplash.com/photo-1600818272779-cfa6145222f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NjMxMjc3ODl8&ixlib=rb-4.1.0&q=80&w=1080',
+                    ).image,
                   ),
-                  FlutterFlowIconButton(
-                    borderRadius: 20.0,
-                    buttonSize: 40.0,
-                    fillColor: Color(0x4D928163),
-                    icon: Icon(
-                      Icons.settings,
-                      color: Color(0xFF928163),
-                      size: 20.0,
-                    ),
-                    onPressed: () {
-                      AppLogger.d('IconButton pressed', tag: 'UI');
-                    },
-                  ),
-                  Container(
-                    width: 32.0,
-                    height: 32.0,
-                    decoration: BoxDecoration(
-                      color: Color(0xFF6D604A),
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: Image.network(
-                          'https://images.unsplash.com/photo-1600818272779-cfa6145222f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NjMxMjc3ODl8&ixlib=rb-4.1.0&q=80&w=1080',
-                        ).image,
-                      ),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ].divide(SizedBox(width: 8.0)),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
           ],
@@ -354,7 +322,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    '247',
+                                    '--',
                                     textAlign: TextAlign.center,
                                     style: FlutterFlowTheme.of(context)
                                         .headlineSmall
@@ -417,7 +385,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    '85%',
+                                    '--%',
                                     textAlign: TextAlign.center,
                                     style: FlutterFlowTheme.of(context)
                                         .headlineSmall
@@ -480,7 +448,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    '45',
+                                    '--',
                                     textAlign: TextAlign.center,
                                     style: FlutterFlowTheme.of(context)
                                         .headlineSmall

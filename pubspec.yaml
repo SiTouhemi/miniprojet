@@ -80,6 +80,10 @@ dependencies:
   
   # Logging
   logger: ^2.4.0
+  
+  # QR Code generation and scanning
+  qr_flutter: ^4.1.0
+  qr_code_scanner: ^1.0.1
 
 dependency_overrides:
   http: 1.4.0

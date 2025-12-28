@@ -3,10 +3,10 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/utils/app_logger.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'reservationconfirme_model.dart';
 export 'reservationconfirme_model.dart';
 
@@ -20,7 +20,14 @@ export 'reservationconfirme_model.dart';
 /// Un bouton permet de télécharger ou actualiser le QR code, et un message
 /// rappelle à l’utilisateur d’arriver à l’heure du créneau choisi.
 class ReservationconfirmeWidget extends StatefulWidget {
-  const ReservationconfirmeWidget({super.key});
+  const ReservationconfirmeWidget({
+    super.key,
+    this.reservationId,
+    this.paymentId,
+  });
+
+  final String? reservationId;
+  final String? paymentId;
 
   static String routeName = 'Reservationconfirme';
   static String routePath = '/reservationconfirme';
@@ -39,6 +46,18 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => ReservationconfirmeModel());
+    
+    // Load reservation data if ID is provided
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final reservationId = widget.reservationId ?? 
+                           context.routeSettings?.queryParameters?['reservationId'];
+      
+      if (reservationId != null && reservationId.isNotEmpty) {
+        _model.loadReservationData(reservationId).then((_) {
+          if (mounted) setState(() {});
+        });
+      }
+    });
   }
 
   @override
@@ -223,12 +242,37 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                                 ),
                                 child: Align(
                                   alignment: AlignmentDirectional(0.0, 0.0),
-                                  child: Image.network(
-                                    'https://images.unsplash.com/photo-1600818272779-cfa6145222f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NjI1MzAzMTR8&ixlib=rb-4.1.0&q=80&w=1080',
-                                    width: 180.0,
-                                    height: 180.0,
-                                    fit: BoxFit.contain,
-                                  ),
+                                  child: _model.isLoading
+                                      ? CircularProgressIndicator(
+                                          color: FlutterFlowTheme.of(context).primary,
+                                        )
+                                      : _model.hasQRCode()
+                                          ? QrImageView(
+                                              data: _model.getQRCodeData(),
+                                              version: QrVersions.auto,
+                                              size: 180.0,
+                                              backgroundColor: Colors.white,
+                                              foregroundColor: Colors.black,
+                                              errorCorrectionLevel: QrErrorCorrectLevel.M,
+                                            )
+                                          : Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons.qr_code,
+                                                  size: 60.0,
+                                                  color: Colors.grey.shade400,
+                                                ),
+                                                SizedBox(height: 8.0),
+                                                Text(
+                                                  'QR Code non disponible',
+                                                  style: TextStyle(
+                                                    color: Colors.grey.shade600,
+                                                    fontSize: 12.0,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                 ),
                               ),
                             ),
@@ -327,7 +371,7 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                                     ),
                               ),
                               Text(
-                                'Déjeuner',
+                                _model.getMealType(),
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -380,7 +424,7 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                                     ),
                               ),
                               Text(
-                                '15 Janvier 2024',
+                                _model.getFormattedDate(),
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -433,7 +477,7 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                                     ),
                               ),
                               Text(
-                                '12h00 - 13h30',
+                                _model.getFormattedTime(),
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -490,13 +534,13 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                                     8.0, 4.0, 8.0, 4.0),
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context).success,
+                                    color: _model.getPaymentStatusColor(context),
                                     borderRadius: BorderRadius.circular(12.0),
                                   ),
                                   child: Padding(
                                     padding: EdgeInsets.all(8.0),
                                     child: Text(
-                                      'Payé',
+                                      _model.getPaymentStatus(),
                                       style: FlutterFlowTheme.of(context)
                                           .labelSmall
                                           .override(

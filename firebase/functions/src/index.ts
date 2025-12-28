@@ -324,12 +324,12 @@ export const createReservation = functions.https.onCall(async (data: Reservation
                 id: reservationRef.id,
                 userId: uid,
                 timeSlotId,
-                status: 'pending',
+                status: 'confirmed', // Automatically confirm paid reservations
                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
                 capacity,
                 amount,
                 paymentId: null,
-                qrToken: null
+                qrToken: null // Will be generated after creation
             };
 
             transaction.set(reservationRef, reservationData);
@@ -352,10 +352,25 @@ export const createReservation = functions.https.onCall(async (data: Reservation
             result: 'success'
         });
 
+        // Generate QR token for the confirmed reservation
+        const qrToken = createQRToken(
+            result.reservationId,
+            uid,
+            result.timeSlot.startTime.toDate().toISOString(),
+            capacity
+        );
+
+        // Update reservation with QR token
+        await db.collection('reservation').doc(result.reservationId).update({
+            qrToken,
+            qrGeneratedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+
         return {
             success: true,
             reservationId: result.reservationId,
-            message: 'Reservation created successfully'
+            qrToken,
+            message: 'Reservation created successfully with QR code'
         };
     } catch (error) {
         console.error('Error creating reservation:', error);
@@ -460,6 +475,146 @@ export const generateQRToken = functions.https.onCall(async (data: { reservation
             throw error;
         }
         throw new functions.https.HttpsError('internal', 'Failed to generate QR token');
+    }
+});
+
+/**
+ * Validate QR token for staff scanning
+ * Marks reservation as used and invalidates QR code
+ */
+export const validateQRCode = functions.https.onCall(async (data: { qrToken: string }, context) => {
+    try {
+        const { uid, role } = await validateAuth(context);
+        const { qrToken } = data;
+
+        // Only staff and admin can validate QR codes
+        if (!['staff', 'admin'].includes(role)) {
+            throw new functions.https.HttpsError('permission-denied', 'Only staff can validate QR codes');
+        }
+
+        if (!qrToken) {
+            throw new functions.https.HttpsError('invalid-argument', 'QR token is required');
+        }
+
+        // Use transaction for atomic operations
+        const result = await db.runTransaction(async (transaction) => {
+            // Find reservation by QR token
+            const reservationsQuery = await db.collection('reservation')
+                .where('qrToken', '==', qrToken)
+                .limit(1)
+                .get();
+
+            if (reservationsQuery.empty) {
+                throw new functions.https.HttpsError('not-found', 'Invalid QR code or reservation not found');
+            }
+
+            const reservationDoc = reservationsQuery.docs[0];
+            const reservation = reservationDoc.data()!;
+
+            // Check if reservation is confirmed
+            if (reservation.status !== 'confirmed') {
+                if (reservation.status === 'used') {
+                    throw new functions.https.HttpsError('failed-precondition', 'QR code has already been used');
+                } else if (reservation.status === 'cancelled') {
+                    throw new functions.https.HttpsError('failed-precondition', 'Reservation has been cancelled');
+                } else {
+                    throw new functions.https.HttpsError('failed-precondition', 'Reservation is not confirmed');
+                }
+            }
+
+            // Verify QR token is valid (not expired)
+            const qrPayload = verifyQRToken(qrToken);
+            if (!qrPayload) {
+                throw new functions.https.HttpsError('failed-precondition', 'Invalid or expired QR code');
+            }
+
+            // Check if QR is for today's meal
+            const now = new Date();
+            const reservationTime = reservation.creneaux.toDate();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const reservationDate = new Date(reservationTime.getFullYear(), reservationTime.getMonth(), reservationTime.getDate());
+
+            if (reservationDate.getTime() !== today.getTime()) {
+                throw new functions.https.HttpsError('failed-precondition', 'QR code is not valid for today');
+            }
+
+            // Check if it's within the valid time window (e.g., 30 minutes before to 30 minutes after meal time)
+            const timeDiff = now.getTime() - reservationTime.getTime();
+            const thirtyMinutes = 30 * 60 * 1000;
+
+            if (timeDiff < -thirtyMinutes || timeDiff > thirtyMinutes) {
+                throw new functions.https.HttpsError('failed-precondition', 'QR code can only be used within 30 minutes of the reserved time');
+            }
+
+            // Get user information
+            const userDoc = await db.collection('users').doc(reservation.userId).get();
+            const user = userDoc.exists ? userDoc.data() : null;
+
+            // Mark reservation as used and invalidate QR
+            transaction.update(reservationDoc.ref, {
+                status: 'used',
+                usedAt: admin.firestore.FieldValue.serverTimestamp(),
+                validatedBy: uid,
+                qrToken: null, // Invalidate the QR token
+                modifiedAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+
+            return {
+                reservationId: reservationDoc.id,
+                userId: reservation.userId,
+                userName: user?.displayName || user?.nom || 'Unknown Student',
+                userClass: user?.classe || '',
+                mealType: reservation.type || 'meal',
+                reservationTime: reservationTime.toISOString(),
+                capacity: reservation.capacity || 1,
+                price: reservation.prix || 0
+            };
+        });
+
+        await createAuditLog({
+            userId: uid,
+            userRole: role,
+            action: 'validate_qr_code',
+            resource: 'reservation',
+            resourceId: result.reservationId,
+            details: {
+                qrToken: qrToken.substring(0, 10) + '...', // Log partial token for security
+                studentId: result.userId,
+                studentName: result.userName
+            },
+            result: 'success'
+        });
+
+        return {
+            success: true,
+            message: 'QR code validated successfully',
+            reservation: {
+                id: result.reservationId,
+                studentName: result.userName,
+                studentClass: result.userClass,
+                mealType: result.mealType,
+                reservationTime: result.reservationTime,
+                capacity: result.capacity,
+                price: result.price
+            }
+        };
+    } catch (error) {
+        console.error('Error validating QR code:', error);
+
+        await createAuditLog({
+            userId: context.auth?.uid || 'unknown',
+            userRole: context.auth?.token?.role || 'unknown',
+            action: 'validate_qr_code',
+            resource: 'reservation',
+            details: { qrToken: data.qrToken?.substring(0, 10) + '...' },
+            result: 'failure',
+            errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        });
+
+        if (error instanceof functions.https.HttpsError) {
+            throw error;
+        }
+        throw new functions.https.HttpsError('internal', 'Failed to validate QR code');
     }
 });
 
