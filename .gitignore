@@ -118,17 +118,6 @@ firebase/functions/.nyc_output/
 firebase/functions/coverage/
 firebase/functions/lib/
 
-# Environment files (if you have any sensitive keys)
-.env
-.env.local
-.env.production
-.env.staging
-
-# Local configuration override
-android/local.properties
-ios/Runner/GoogleService-Info.plist
-android/app/google-services.json
-
 # Generated files
 *.g.dart
 *.freezed.dart
@@ -190,10 +179,6 @@ pids
 
 # Yarn Integrity file
 .yarn-integrity
-
-# dotenv environment variables file
-.env
-.env.test
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
