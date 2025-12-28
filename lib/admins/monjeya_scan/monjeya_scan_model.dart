@@ -4,13 +4,13 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/utils/app_logger.dart';
 import 'monjeya_scan_widget.dart' show MonjeyaScanWidget;
 import 'package:flutter/material.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:intl/intl.dart';
 
 class MonjeyaScanModel extends FlutterFlowModel<MonjeyaScanWidget> {
   
-  /// QR Scanner controller
-  QRViewController? qrController;
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  /// Mobile Scanner controller
+  MobileScannerController? scannerController;
   
   /// State fields
   bool isScanning = false;
@@ -23,15 +23,25 @@ class MonjeyaScanModel extends FlutterFlowModel<MonjeyaScanWidget> {
   /// Callback for state updates
   VoidCallback? onStateChanged;
   
-  /// Initialize QR scanner
-  void onQRViewCreated(QRViewController controller) {
-    qrController = controller;
-    controller.scannedDataStream.listen((scanData) {
-      if (!isProcessing && scanData.code != null && scanData.code != lastScannedCode) {
-        lastScannedCode = scanData.code;
-        validateQRCode(scanData.code!);
+  /// Initialize scanner
+  void initializeScanner() {
+    scannerController = MobileScannerController(
+      detectionSpeed: DetectionSpeed.noDuplicates,
+      facing: CameraFacing.back,
+      torchEnabled: false,
+    );
+  }
+  
+  /// Handle barcode detection
+  void onBarcodeDetected(BarcodeCapture capture) {
+    final List<Barcode> barcodes = capture.barcodes;
+    if (barcodes.isNotEmpty && !isProcessing) {
+      final String? code = barcodes.first.rawValue;
+      if (code != null && code != lastScannedCode) {
+        lastScannedCode = code;
+        validateQRCode(code);
       }
-    });
+    }
   }
   
   /// Validate scanned QR code
@@ -46,7 +56,7 @@ class MonjeyaScanModel extends FlutterFlowModel<MonjeyaScanWidget> {
     
     try {
       // Pause scanning while processing
-      await qrController?.pauseCamera();
+      await scannerController?.stop();
       
       final result = await ReservationService.instance.validateQRCode(
         qrCode: qrToken,
@@ -93,7 +103,7 @@ class MonjeyaScanModel extends FlutterFlowModel<MonjeyaScanWidget> {
   /// Resume scanning
   Future<void> resumeScanning() async {
     lastScannedCode = null; // Reset to allow rescanning same code
-    await qrController?.resumeCamera();
+    await scannerController?.start();
     onStateChanged?.call();
   }
   
@@ -107,12 +117,12 @@ class MonjeyaScanModel extends FlutterFlowModel<MonjeyaScanWidget> {
   
   /// Toggle flashlight
   Future<void> toggleFlash() async {
-    await qrController?.toggleFlash();
+    await scannerController?.toggleTorch();
   }
   
   /// Flip camera
   Future<void> flipCamera() async {
-    await qrController?.flipCamera();
+    await scannerController?.switchCamera();
   }
   
   /// Get student name from validation result
@@ -155,7 +165,6 @@ class MonjeyaScanModel extends FlutterFlowModel<MonjeyaScanWidget> {
 
   @override
   void dispose() {
-    qrController?.dispose();
-    super.dispose();
+    scannerController?.dispose();
   }
 }

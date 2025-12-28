@@ -19,4 +19,3 @@ export '/admins/user_management/user_management_widget.dart' show UserManagement
 export '/admins/ajout_plat/ajout_plat_widget.dart' show AjoutPlatWidget;
 export '/student/browse_slots/browse_slots_widget.dart' show BrowseSlotsWidget;
 export '/student/profile/profile_widget.dart' show ProfileWidget;
-export '/student/home/home_widget.dart' show HomeWidget;

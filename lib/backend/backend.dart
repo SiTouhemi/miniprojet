@@ -18,7 +18,6 @@ export 'package:firebase_core/firebase_core.dart';
 export 'schema/index.dart';
 export 'schema/util/firestore_util.dart';
 export 'schema/util/schema_util.dart';
-
 export 'schema/plat_record.dart';
 export 'schema/reservation_record.dart';
 export 'schema/user_record.dart';
@@ -26,6 +25,19 @@ export 'schema/time_slot_record.dart';
 export 'schema/app_settings_record.dart';
 export 'schema/analytics_record.dart';
 export 'schema/daily_menu_record.dart';
+
+// Mock class for error handling
+class MockAggregateQuerySnapshot implements AggregateQuerySnapshot {
+  final int _count;
+  
+  MockAggregateQuerySnapshot(this._count);
+  
+  @override
+  int? get count => _count;
+  
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 /// Functions to query PlatRecords (as a Stream and as a Future).
 Future<int> queryPlatRecordCount({
@@ -151,6 +163,8 @@ Future<int> queryCollectionCount(
 
   return query.count().get().catchError((err) {
     AppLogger.e('Error querying $collection', error: err, tag: 'Backend');
+    // Return a mock AggregateQuerySnapshot with count 0
+    return Future.value(MockAggregateQuerySnapshot(0));
   }).then((value) => value.count!);
 }
 

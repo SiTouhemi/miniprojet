@@ -50,7 +50,7 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
     // Load reservation data if ID is provided
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final reservationId = widget.reservationId ?? 
-                           context.routeSettings?.queryParameters?['reservationId'];
+                           ModalRoute.of(context)?.settings.arguments as String?;
       
       if (reservationId != null && reservationId.isNotEmpty) {
         _model.loadReservationData(reservationId).then((_) {

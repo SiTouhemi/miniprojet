@@ -6,6 +6,7 @@ import '/utils/app_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'monjeya_scan_model.dart';
 export 'monjeya_scan_model.dart';
 
@@ -30,6 +31,16 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => MonjeyaScanModel());
+    
+    // Initialize the scanner
+    _model.initializeScanner();
+    
+    // Set up state change callback
+    _model.onStateChanged = () {
+      if (mounted) {
+        setState(() {});
+      }
+    };
   }
 
   @override
@@ -153,71 +164,43 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
                       ],
                       borderRadius: BorderRadius.circular(24.0),
                     ),
-                    child: Stack(
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          height: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF1A1A1A),
-                            borderRadius: BorderRadius.circular(24.0),
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.qr_code_scanner,
-                                  color: Color(0xFF1C1284),
-                                  size: 80.0,
-                                ),
-                                SizedBox(height: 16.0),
-                                Text(
-                                  'Positionnez le QR code dans le cadre',
-                                  textAlign: TextAlign.center,
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        color: Colors.white,
-                                        letterSpacing: 0.0,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Align(
-                          alignment: AlignmentDirectional(0.0, 0.0),
-                          child: Container(
-                            width: 220.0,
-                            height: 220.0,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16.0),
-                              border: Border.all(
-                                color: Color(0xFF00A4E4),
-                                width: 3.0,
-                              ),
-                            ),
-                            child: Container(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24.0),
+                      child: _model.scannerController != null
+                          ? MobileScanner(
+                              controller: _model.scannerController!,
+                              onDetect: _model.onBarcodeDetected,
+                            )
+                          : Container(
                               width: double.infinity,
                               height: double.infinity,
                               decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                    blurRadius: 15.0,
-                                    color: Color(0x3300A4E4),
-                                  )
+                                color: Color(0xFF1A1A1A),
+                                borderRadius: BorderRadius.circular(24.0),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.qr_code_scanner,
+                                    color: Color(0xFF1C1284),
+                                    size: 80.0,
+                                  ),
+                                  SizedBox(height: 16.0),
+                                  Text(
+                                    'Positionnez le QR code dans le cadre',
+                                    textAlign: TextAlign.center,
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'Inter',
+                                          color: Colors.white,
+                                          letterSpacing: 0.0,
+                                        ),
+                                  ),
                                 ],
-                                borderRadius: BorderRadius.circular(16.0),
                               ),
                             ),
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                   
@@ -227,8 +210,11 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
                   Container(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         AppLogger.d('Scanner activated', tag: 'QR_SCAN');
+                        if (_model.scannerController != null) {
+                          await _model.scannerController!.start();
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFF1C1284),

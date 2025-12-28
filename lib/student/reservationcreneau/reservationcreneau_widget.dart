@@ -1076,7 +1076,7 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                 ),
                               ),
                             ],
-                          );
+                          ),
                       ),
                   ]
                       .divide(SizedBox(height: 24.0))
