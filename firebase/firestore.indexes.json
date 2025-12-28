@@ -1,6 +1,24 @@
 {
   "indexes": [
     {
+      "collectionGroup": "plat",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "isActive",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "availableDate",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "reservation",
       "queryScope": "COLLECTION",
       "fields": [
