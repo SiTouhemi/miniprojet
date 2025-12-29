@@ -227,6 +227,12 @@ class ReservationService {
         transaction.update(timeSlot.reference, {
           'current_reservations': FieldValue.increment(-reservation.capacity),
         });
+
+        // Bug Fix: Refund the ticket to the user
+        final userRef = UserRecord.collection.doc(userId);
+        transaction.update(userRef, {
+          'tickets': FieldValue.increment(reservation.capacity), // Assuming 1 ticket per person capacity
+        });
         
         return {
           'success': true,
@@ -354,6 +360,42 @@ class ReservationService {
         }
         
         final oldTimeSlot = oldTimeSlotQuery.first;
+
+        // NEW: Handle price difference
+        final double oldTotal = reservation.total;
+        final double newTotal = newTimeSlot.price * reservation.capacity;
+        final double priceDiff = newTotal - oldTotal;
+
+        if (priceDiff != 0) {
+           final userRef = UserRecord.collection.doc(userId);
+           final userDoc = await transaction.get(userRef);
+           
+           if (!userDoc.exists) {
+             return {
+               'success': false,
+               'error': 'User not found',
+               'errorCode': 'USER_NOT_FOUND'
+             };
+           }
+           
+           final user = UserRecord.fromSnapshot(userDoc);
+           
+           if (priceDiff > 0) {
+             // Upgrade: Check balance
+             if (user.pocket < priceDiff) {
+               return {
+                 'success': false,
+                 'error': 'Insufficient balance for this modification. Additional cost: ${priceDiff}DT',
+                 'errorCode': 'INSUFFICIENT_FUNDS'
+               };
+             }
+           }
+           
+           // Update user balance (deduct diff; if negative, it adds)
+           transaction.update(userRef, {
+             'pocket': FieldValue.increment(-priceDiff),
+           });
+        }
         
         // Atomic updates
         // Update reservation with new time slot details

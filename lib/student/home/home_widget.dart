@@ -347,23 +347,19 @@ class _HomeWidgetState extends State<HomeWidget> {
           ),
         ),
         Container(
-          width: 100.0,
-          height: 50.0,
+          width: 80.0,
+          height: 80.0,
           decoration: BoxDecoration(
             color: Colors.transparent,
-            shape: BoxShape.rectangle,
-            border: Border.all(
-              color: Colors.transparent,
-              width: 2.0,
-            ),
+            shape: BoxShape.circle,
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(0.0),
+            borderRadius: BorderRadius.circular(40.0),
             child: Image.asset(
               'assets/images/logo_iset_com.jpg',
-              width: 200.0,
-              height: 211.6,
-              fit: BoxFit.cover,
+              width: 80.0,
+              height: 80.0,
+              fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
                 return Icon(
                   Icons.school,

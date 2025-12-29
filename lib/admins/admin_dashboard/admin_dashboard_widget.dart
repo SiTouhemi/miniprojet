@@ -574,7 +574,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                       InkWell(
                         onTap: () {
                           // Navigate to time slots management
-                          AppLogger.d('Time Slots clicked', tag: 'UI');
+                          context.pushNamed('TimeSlots');
                         },
                         child: Material(
                           color: Colors.transparent,
@@ -646,7 +646,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                       InkWell(
                         onTap: () {
                           // Navigate to reservations management
-                          AppLogger.d('Reservations clicked', tag: 'UI');
+                          context.pushNamed('ReservationList');
                         },
                         child: Material(
                           color: Colors.transparent,

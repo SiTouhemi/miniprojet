@@ -16,6 +16,9 @@ import 'serialization_util.dart';
 import '/index.dart';
 import '/auth/role_middleware.dart';
 import '/auth/firebase_auth/auth_util.dart';
+import '/admins/time_slots/time_slots_widget.dart';
+import '/admins/reservation_list/reservation_list_widget.dart';
+import '/staff/monjeya_scan/monjeya_scan_widget.dart';
 
 export 'package:go_router/go_router.dart';
 export 'serialization_util.dart';
@@ -97,13 +100,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           allowedRoles: [UserRole.student, UserRole.staff, UserRole.admin],
           builder: (context, params) => LastQRWidget(),
         ),
-        FFRoute(
-          name: BrowseSlotsWidget.routeName,
-          path: BrowseSlotsWidget.routePath,
-          requireAuth: true,
-          allowedRoles: [UserRole.student, UserRole.staff, UserRole.admin],
-          builder: (context, params) => BrowseSlotsWidget(),
-        ),
+// BrowseSlotsWidget removed (redundant)
         FFRoute(
           name: ProfileWidget.routeName,
           path: ProfileWidget.routePath,
@@ -161,6 +158,27 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           requireAuth: true,
           allowedRoles: [UserRole.admin],
           builder: (context, params) => UserManagementWidget(),
+        ),
+        FFRoute(
+          name: UserManagementWidget.routeName,
+          path: UserManagementWidget.routePath,
+          requireAuth: true,
+          allowedRoles: [UserRole.admin],
+          builder: (context, params) => UserManagementWidget(),
+        ),
+        FFRoute(
+          name: TimeSlotsWidget.routeName,
+          path: TimeSlotsWidget.routePath,
+          requireAuth: true,
+          allowedRoles: [UserRole.admin],
+          builder: (context, params) => TimeSlotsWidget(),
+        ),
+        FFRoute(
+          name: ReservationListWidget.routeName,
+          path: ReservationListWidget.routePath,
+          requireAuth: true,
+          allowedRoles: [UserRole.admin],
+          builder: (context, params) => ReservationListWidget(),
         ),
         FFRoute(
           name: AjoutPlatWidget.routeName,
