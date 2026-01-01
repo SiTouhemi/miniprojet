@@ -160,13 +160,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => UserManagementWidget(),
         ),
         FFRoute(
-          name: UserManagementWidget.routeName,
-          path: UserManagementWidget.routePath,
-          requireAuth: true,
-          allowedRoles: [UserRole.admin],
-          builder: (context, params) => UserManagementWidget(),
-        ),
-        FFRoute(
           name: TimeSlotsWidget.routeName,
           path: TimeSlotsWidget.routePath,
           requireAuth: true,

@@ -165,7 +165,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
       final result = await _reservationService.modifyReservation(
         reservationId: reservation.reference.id,
         newTimeSlotId: newSlot.reference.id,
-        userId: currentUserUid,
+        userId: currentUser?.uid ?? '',
       );
 
       if (result['success'] == true) {
@@ -210,7 +210,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
     try {
       final result = await _reservationService.cancelReservation(
         reservationId: reservation.reference.id,
-        userId: currentUserUid,
+        userId: currentUser?.uid ?? '',
         reason: 'User cancelled via History',
       );
 
@@ -290,7 +290,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                     : StreamBuilder<List<ReservationRecord>>(
                         stream: queryReservationRecord(
                           queryBuilder: (query) => query
-                              .where('user_id', isEqualTo: currentUserUid)
+                              .where('user_id', isEqualTo: currentUser?.uid ?? '')
                               .orderBy('creneaux', descending: true),
                         ),
                         builder: (context, snapshot) {
@@ -464,7 +464,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                       ),
                       SizedBox(height: 8.0),
                       Text(
-                        reservation.mealType, // 'Déjeuner' or 'Dîner'
+                        reservation.type, // 'Déjeuner' or 'Dîner'
                         style: GoogleFonts.interTight(
                           fontSize: 18.0, 
                           fontWeight: FontWeight.w600,

@@ -386,6 +386,23 @@ class _ReservationWidgetState extends State<ReservationWidget> {
                                       '23 places restantes',
                                       textAlign: TextAlign.center,
                                       style: FlutterFlowTheme.of(context)
+                                          .bodySmall
+                                          .override(
+                                            color: Colors.grey[600],
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(12.0),
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12.0),
                                 border: Border.all(
                                   color: FlutterFlowTheme.of(context).primary,
                                   width: 2.0,

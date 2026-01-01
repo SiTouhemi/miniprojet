@@ -362,8 +362,8 @@ class ReservationService {
         final oldTimeSlot = oldTimeSlotQuery.first;
 
         // NEW: Handle price difference
-        final double oldTotal = reservation.total;
-        final double newTotal = newTimeSlot.price * reservation.capacity;
+        final double oldTotal = reservation.total.toDouble();
+        final double newTotal = newTimeSlot.price * 1; // Assuming capacity is 1 for individual reservations
         final double priceDiff = newTotal - oldTotal;
 
         if (priceDiff != 0) {

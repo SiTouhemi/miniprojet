@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:intl/intl.dart';
 
 import '/flutter_flow/app_state.dart';
 import '/backend/backend.dart';
@@ -133,7 +134,7 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                    child: Column(
                      mainAxisAlignment: MainAxisAlignment.center,
                      children: [
-                       Icon(Icons.qr_code_scanner_off, size: 64, color: Colors.grey),
+                       Icon(Icons.qr_code_scanner, size: 64, color: Colors.grey),
                        SizedBox(height: 16),
                        Text(
                          'Aucune réservation active',
@@ -159,7 +160,7 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                        FFButtonWidget(
                           onPressed: () async {
                               // Refresh logic
-                              await FFAppState().loadReservations(DateTime.now());
+                              await FFAppState().loadUserReservations();
                           },
                           text: 'Actualiser',
                           options: FFButtonOptions(
@@ -247,7 +248,7 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                               ),
                               onPressed: () async {
                                 final now = DateTime.now();
-                                await FFAppState().loadReservations(now);
+                                await FFAppState().loadUserReservations();
                               },
                             ),
                           ],

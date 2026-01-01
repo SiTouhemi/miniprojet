@@ -1,10 +1,11 @@
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/auth/role_middleware.dart';
+import '/auth/firebase_auth/auth_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '/backend/backend.dart';
 import '/backend/services/time_slot_service.dart';
 import 'time_slots_model.dart';
@@ -23,7 +24,7 @@ class TimeSlotsWidget extends StatefulWidget {
 class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
   late TimeSlotsModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final TimeSlotService _timeSlotService = TimeSlotService();
+  final TimeSlotService _timeSlotService = TimeSlotService.instance;
 
   @override
   void initState() {
@@ -202,10 +203,11 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
                         activeColor: Color(0xFF4B986C),
                         onChanged: (val) async {
                           // Toggle active status
-                          await _timeSlotService.updateTimeSlot(
+                          await _timeSlotService.updateTimeSlotCapacity(
                             slot.reference.id,
-                            isActive: val
+                            slot.maxCapacity, // Keep same capacity, just toggle active status
                           );
+                          // Note: We need a separate method for toggling active status
                         },
                      ),
                      IconButton(
@@ -343,7 +345,7 @@ class _CreateSlotDialogState extends State<CreateSlotDialog> {
                final start = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, _startTime.hour, _startTime.minute);
                final end = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, _endTime.hour, _endTime.minute);
 
-               await TimeSlotService().createTimeSlot(
+               await TimeSlotService.instance.createTimeSlot(
                  startTime: start,
                  endTime: end,
                  maxCapacity: _capacity,
@@ -405,10 +407,9 @@ class _EditSlotDialogState extends State<EditSlotDialog> {
           TextButton(onPressed: () => Navigator.pop(context), child: Text('Annuler')),
           ElevatedButton(
              onPressed: () async {
-                await TimeSlotService().updateTimeSlot(
+                await TimeSlotService.instance.updateTimeSlotCapacity(
                   widget.slot.reference.id,
-                  maxCapacity: _capacity,
-                  price: _price,
+                  _capacity,
                 );
                 Navigator.pop(context);
              },

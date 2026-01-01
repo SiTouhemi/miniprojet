@@ -1,10 +1,11 @@
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/auth/role_middleware.dart';
+import '/auth/firebase_auth/auth_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '/backend/backend.dart';
 import '/backend/services/reservation_service.dart';
 import 'reservation_list_model.dart';
@@ -23,7 +24,7 @@ class ReservationListWidget extends StatefulWidget {
 class _ReservationListWidgetState extends State<ReservationListWidget> {
   late ReservationListModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final ReservationService _reservationService = ReservationService();
+  final ReservationService _reservationService = ReservationService.instance;
 
   @override
   void initState() {
@@ -243,8 +244,15 @@ class _ReservationListWidgetState extends State<ReservationListWidget> {
                     );
                     
                     if (confirm == true) {
-                       await _reservationService.cancelReservation(res.reference.id);
-                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Réservation annulée')));
+                       final result = await _reservationService.cancelReservation(
+                         reservationId: res.reference.id,
+                         userId: res.userId,
+                       );
+                       if (result['success'] == true) {
+                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Réservation annulée')));
+                       } else {
+                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: ${result['error']}')));
+                       }
                     }
                  },
                ),
