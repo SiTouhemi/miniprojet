@@ -107,7 +107,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     try {
       final upcomingReservations = appState.getUpcomingReservations();
       if (upcomingReservations.isNotEmpty) {
-        context.pushNamed('lastQR');
+        context.pushNamed('LastQR');
       } else {
         _errorHandler.showError(
           context,
@@ -645,7 +645,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         InkWell(
           onTap: () {
             try {
-              context.pushNamed('profile');
+              context.pushNamed('Profile');
             } catch (e) {
               _errorHandler.showError(
                 context,
