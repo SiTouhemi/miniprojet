@@ -763,7 +763,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                       InkWell(
                         onTap: () {
                           // Navigate to user management
-                          context.pushNamed('UserManagement');
+                          context.pushNamed('user_management');
                         },
                         child: Material(
                           color: Colors.transparent,
