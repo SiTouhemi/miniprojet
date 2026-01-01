@@ -5,6 +5,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/utils/app_logger.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -110,7 +111,12 @@ class _AjoutPlatWidgetState extends State<AjoutPlatWidget> {
                   size: 24.0,
                 ),
                 onPressed: () {
-                  AppLogger.d('IconButton pressed', tag: 'UI');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Aucune nouvelle notification'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
                 },
               ),
             ),
@@ -788,8 +794,98 @@ class _AjoutPlatWidgetState extends State<AjoutPlatWidget> {
                               ),
                             ),
                             FFButtonWidget(
-                              onPressed: () {
-                                AppLogger.d('Button pressed', tag: 'UI');
+                              onPressed: () async {
+                                // Validate form
+                                if (_model.formKey.currentState == null ||
+                                    !_model.formKey.currentState!.validate()) {
+                                  return;
+                                }
+                                
+                                // Get form values
+                                final nom = _model.textController1?.text ?? '';
+                                final description = _model.textController2?.text ?? '';
+                                final ingredients = _model.textController3?.text ?? '';
+                                final prixStr = _model.textController4?.text ?? '0';
+                                final categorie = _model.dropDownValue ?? 'Déjeuner';
+                                
+                                // Validate required fields
+                                if (nom.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Veuillez entrer le nom du plat'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  return;
+                                }
+                                
+                                // Parse price
+                                double prix = 0.0;
+                                try {
+                                  prix = double.parse(prixStr.replaceAll(',', '.'));
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Prix invalide'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  return;
+                                }
+                                
+                                // Show loading indicator
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) => Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                                
+                                try {
+                                  // Add plat to Firestore
+                                  await FirebaseFirestore.instance.collection('plat').add({
+                                    'nom': nom,
+                                    'description': description,
+                                    'ingredients': ingredients,
+                                    'prix': prix,
+                                    'categorie': categorie,
+                                    'is_available': _model.switchValue ?? true,
+                                    'created_at': FieldValue.serverTimestamp(),
+                                  });
+                                  
+                                  // Close loading dialog
+                                  Navigator.of(context).pop();
+                                  
+                                  // Show success message
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Plat ajouté avec succès'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                  
+                                  // Clear form
+                                  _model.textController1?.clear();
+                                  _model.textController2?.clear();
+                                  _model.textController3?.clear();
+                                  _model.textController4?.clear();
+                                  setState(() {
+                                    _model.switchValue = true;
+                                  });
+                                  
+                                } catch (e) {
+                                  // Close loading dialog
+                                  Navigator.of(context).pop();
+                                  
+                                  // Show error message
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Erreur: ${e.toString()}'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
                               },
                               text: 'Ajouter le Plat',
                               options: FFButtonOptions(

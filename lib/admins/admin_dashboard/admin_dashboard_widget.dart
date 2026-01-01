@@ -5,6 +5,7 @@ import '/auth/role_middleware.dart';
 import '/auth/firebase_auth/auth_util.dart';
 import '/auth/role_aware_mixin.dart';
 import '/widgets/logout_dialog.dart';
+import '/backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'admin_dashboard_model.dart';
@@ -308,177 +309,225 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                 Padding(
                   padding:
                       EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 8.0),
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12.0),
-                      border: Border.all(
-                        color: Color(0xFFC8D7E4),
-                        width: 1.0,
-                      ),
+                  child: StreamBuilder<List<ReservationRecord>>(
+                    stream: queryReservationRecord(
+                      queryBuilder: (query) {
+                        final now = DateTime.now();
+                        final startOfDay = DateTime(now.year, now.month, now.day);
+                        final endOfDay = startOfDay.add(Duration(days: 1));
+                        return query
+                            .where('creneaux', isGreaterThanOrEqualTo: startOfDay)
+                            .where('creneaux', isLessThan: endOfDay);
+                      },
                     ),
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 80.0,
-                              decoration: BoxDecoration(
-                                color: Color(0x4D4B986C),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: Padding(
-                                padding: EdgeInsets.all(12.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      '--',
-                                      textAlign: TextAlign.center,
-                                      style: FlutterFlowTheme.of(context)
-                                          .headlineMedium
-                                          .override(
-                                            font: GoogleFonts.urbanist(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            color: Color(0xFF4B986C),
-                                            fontSize: 20.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                    ),
-                                    SizedBox(height: 4.0),
-                                    Text(
-                                      'Today\'s\nReservations',
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      style: FlutterFlowTheme.of(context)
-                                          .labelSmall
-                                          .override(
-                                            font: GoogleFonts.plusJakartaSans(
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                            color: Color(0xFF4B986C),
-                                            fontSize: 10.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                    ),
-                                  ],
-                                ),
+                    builder: (context, reservationSnapshot) {
+                      return StreamBuilder<List<TimeSlotRecord>>(
+                        stream: queryTimeSlotRecord(
+                          queryBuilder: (query) {
+                            final now = DateTime.now();
+                            final startOfDay = DateTime(now.year, now.month, now.day);
+                            final endOfDay = startOfDay.add(Duration(days: 1));
+                            return query
+                                .where('date', isGreaterThanOrEqualTo: startOfDay)
+                                .where('date', isLessThan: endOfDay)
+                                .where('is_active', isEqualTo: true);
+                          },
+                        ),
+                        builder: (context, slotSnapshot) {
+                          final reservations = reservationSnapshot.data ?? [];
+                          final slots = slotSnapshot.data ?? [];
+                          
+                          final todayReservations = reservations.where((r) => 
+                            r.status == 'confirmed' || r.status == 'used'
+                          ).length;
+                          
+                          int totalCapacity = 0;
+                          int currentReservations = 0;
+                          for (var slot in slots) {
+                            totalCapacity += slot.maxCapacity;
+                            currentReservations += slot.currentReservations;
+                          }
+                          
+                          final occupancyRate = totalCapacity > 0 
+                              ? ((currentReservations / totalCapacity) * 100).round()
+                              : 0;
+                          final remainingSeats = totalCapacity - currentReservations;
+                          
+                          return Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12.0),
+                              border: Border.all(
+                                color: Color(0xFFC8D7E4),
+                                width: 1.0,
                               ),
                             ),
-                          ),
-                          SizedBox(width: 12.0),
-                          Expanded(
-                            child: Container(
-                              height: 80.0,
-                              decoration: BoxDecoration(
-                                color: Color(0x4D928163),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: Padding(
-                                padding: EdgeInsets.all(12.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      '--%',
-                                      textAlign: TextAlign.center,
-                                      style: FlutterFlowTheme.of(context)
-                                          .headlineMedium
-                                          .override(
-                                            font: GoogleFonts.urbanist(
-                                              fontWeight: FontWeight.bold,
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      height: 80.0,
+                                      decoration: BoxDecoration(
+                                        color: Color(0x4D4B986C),
+                                        borderRadius: BorderRadius.circular(8.0),
+                                      ),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(12.0),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              '$todayReservations',
+                                              textAlign: TextAlign.center,
+                                              style: FlutterFlowTheme.of(context)
+                                                  .headlineMedium
+                                                  .override(
+                                                    font: GoogleFonts.urbanist(
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                    color: Color(0xFF4B986C),
+                                                    fontSize: 20.0,
+                                                    letterSpacing: 0.0,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
                                             ),
-                                            color: Color(0xFF928163),
-                                            fontSize: 20.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                    ),
-                                    SizedBox(height: 4.0),
-                                    Text(
-                                      'Occupancy\nRate',
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      style: FlutterFlowTheme.of(context)
-                                          .labelSmall
-                                          .override(
-                                            font: GoogleFonts.plusJakartaSans(
-                                              fontWeight: FontWeight.w500,
+                                            SizedBox(height: 4.0),
+                                            Text(
+                                              'Réservations\nAujourd\'hui',
+                                              textAlign: TextAlign.center,
+                                              maxLines: 2,
+                                              style: FlutterFlowTheme.of(context)
+                                                  .labelSmall
+                                                  .override(
+                                                    font: GoogleFonts.plusJakartaSans(
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                    color: Color(0xFF4B986C),
+                                                    fontSize: 10.0,
+                                                    letterSpacing: 0.0,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
                                             ),
-                                            color: Color(0xFF928163),
-                                            fontSize: 10.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  SizedBox(width: 12.0),
+                                  Expanded(
+                                    child: Container(
+                                      height: 80.0,
+                                      decoration: BoxDecoration(
+                                        color: Color(0x4D928163),
+                                        borderRadius: BorderRadius.circular(8.0),
+                                      ),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(12.0),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              '$occupancyRate%',
+                                              textAlign: TextAlign.center,
+                                              style: FlutterFlowTheme.of(context)
+                                                  .headlineMedium
+                                                  .override(
+                                                    font: GoogleFonts.urbanist(
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                    color: Color(0xFF928163),
+                                                    fontSize: 20.0,
+                                                    letterSpacing: 0.0,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                            ),
+                                            SizedBox(height: 4.0),
+                                            Text(
+                                              'Taux\nOccupation',
+                                              textAlign: TextAlign.center,
+                                              maxLines: 2,
+                                              style: FlutterFlowTheme.of(context)
+                                                  .labelSmall
+                                                  .override(
+                                                    font: GoogleFonts.plusJakartaSans(
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                    color: Color(0xFF928163),
+                                                    fontSize: 10.0,
+                                                    letterSpacing: 0.0,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.0),
+                                  Expanded(
+                                    child: Container(
+                                      height: 80.0,
+                                      decoration: BoxDecoration(
+                                        color: Color(0x4C6D604A),
+                                        borderRadius: BorderRadius.circular(8.0),
+                                      ),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(12.0),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              '$remainingSeats',
+                                              textAlign: TextAlign.center,
+                                              style: FlutterFlowTheme.of(context)
+                                                  .headlineMedium
+                                                  .override(
+                                                    font: GoogleFonts.urbanist(
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                    color: Color(0xFF6D604A),
+                                                    fontSize: 20.0,
+                                                    letterSpacing: 0.0,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                            ),
+                                            SizedBox(height: 4.0),
+                                            Text(
+                                              'Places\nRestantes',
+                                              textAlign: TextAlign.center,
+                                              maxLines: 2,
+                                              style: FlutterFlowTheme.of(context)
+                                                  .labelSmall
+                                                  .override(
+                                                    font: GoogleFonts.plusJakartaSans(
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                    color: Color(0xFF6D604A),
+                                                    fontSize: 10.0,
+                                                    letterSpacing: 0.0,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                          SizedBox(width: 12.0),
-                          Expanded(
-                            child: Container(
-                              height: 80.0,
-                              decoration: BoxDecoration(
-                                color: Color(0x4C6D604A),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: Padding(
-                                padding: EdgeInsets.all(12.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      '--',
-                                      textAlign: TextAlign.center,
-                                      style: FlutterFlowTheme.of(context)
-                                          .headlineMedium
-                                          .override(
-                                            font: GoogleFonts.urbanist(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            color: Color(0xFF6D604A),
-                                            fontSize: 20.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                    ),
-                                    SizedBox(height: 4.0),
-                                    Text(
-                                      'Remaining\nSeats',
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      style: FlutterFlowTheme.of(context)
-                                          .labelSmall
-                                          .override(
-                                            font: GoogleFonts.plusJakartaSans(
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                            color: Color(0xFF6D604A),
-                                            fontSize: 10.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
                 Padding(

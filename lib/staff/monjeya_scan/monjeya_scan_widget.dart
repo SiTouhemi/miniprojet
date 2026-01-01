@@ -3,10 +3,12 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/utils/app_logger.dart';
+import '/backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:intl/intl.dart';
 import 'monjeya_scan_model.dart';
 export 'monjeya_scan_model.dart';
 
@@ -249,7 +251,53 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
                   
                   SizedBox(height: 40.0),
                   
-                  // Recent Scans Section
+                  // Scan Result Display
+                  if (_model.successMessage != null || _model.errorMessage != null)
+                    Container(
+                      width: double.infinity,
+                      margin: EdgeInsets.only(bottom: 20.0),
+                      padding: EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: _model.successMessage != null ? Colors.green.shade50 : Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(12.0),
+                        border: Border.all(
+                          color: _model.successMessage != null ? Colors.green : Colors.red,
+                          width: 2.0,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            _model.successMessage != null ? Icons.check_circle : Icons.error,
+                            color: _model.successMessage != null ? Colors.green : Colors.red,
+                            size: 48.0,
+                          ),
+                          SizedBox(height: 12.0),
+                          Text(
+                            _model.successMessage ?? _model.errorMessage ?? '',
+                            textAlign: TextAlign.center,
+                            style: FlutterFlowTheme.of(context).titleMedium.override(
+                              fontFamily: 'Inter Tight',
+                              color: _model.successMessage != null ? Colors.green.shade700 : Colors.red.shade700,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (_model.validationResult != null) ...[
+                            SizedBox(height: 12.0),
+                            Text(
+                              'Étudiant: ${_model.getStudentName()}',
+                              style: FlutterFlowTheme.of(context).bodyMedium,
+                            ),
+                            Text(
+                              'Repas: ${_model.getMealType()} - ${_model.getReservationTime()}',
+                              style: FlutterFlowTheme.of(context).bodyMedium,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  
+                  // Recent Scans Section - Real Data
                   Text(
                     'Scans Récents',
                     style: FlutterFlowTheme.of(context).headlineSmall.override(
@@ -262,281 +310,122 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
                   
                   SizedBox(height: 20.0),
                   
-                  // Valid Ticket Example
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 8.0,
-                          color: Color(0x1A000000),
-                          offset: Offset(0.0, 2.0),
-                        )
-                      ],
-                      borderRadius: BorderRadius.circular(16.0),
-                      border: Border.all(
-                        color: Colors.green.shade200,
-                        width: 1.0,
-                      ),
+                  // Real Recent Scans from Database
+                  StreamBuilder<List<ReservationRecord>>(
+                    stream: queryReservationRecord(
+                      queryBuilder: (query) {
+                        final now = DateTime.now();
+                        final startOfDay = DateTime(now.year, now.month, now.day);
+                        return query
+                            .where('creneaux', isGreaterThanOrEqualTo: startOfDay)
+                            .where('status', whereIn: ['confirmed', 'used'])
+                            .orderBy('creneaux', descending: true)
+                            .limit(5);
+                      },
                     ),
-                    child: Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(20.0),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFF8F9FA),
+                            borderRadius: BorderRadius.circular(16.0),
+                          ),
+                          child: Column(
                             children: [
-                              Expanded(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Ahmed Ben Salem',
-                                      style: FlutterFlowTheme.of(context)
-                                          .titleMedium
-                                          .override(
-                                            fontFamily: 'Inter Tight',
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                    ),
-                                    SizedBox(height: 8.0),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.calendar_today,
-                                          color: Color(0xFF666666),
-                                          size: 16.0,
-                                        ),
-                                        SizedBox(width: 8.0),
-                                        Text(
-                                          'March 15, 2024',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                fontFamily: 'Inter',
-                                                color: Color(0xFF666666),
-                                                letterSpacing: 0.0,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 4.0),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.access_time,
-                                          color: Color(0xFF666666),
-                                          size: 16.0,
-                                        ),
-                                        SizedBox(width: 8.0),
-                                        Text(
-                                          '12:30 - 13:30',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                fontFamily: 'Inter',
-                                                color: Color(0xFF666666),
-                                                letterSpacing: 0.0,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
-                                  borderRadius: BorderRadius.circular(16.0),
-                                ),
-                                child: Text(
-                                  'VALIDE',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        color: Colors.white,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                              Icon(Icons.inbox, size: 48, color: Colors.grey),
+                              SizedBox(height: 12.0),
+                              Text(
+                                'Aucun scan récent',
+                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                  fontFamily: 'Inter',
+                                  color: Colors.grey,
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 16.0),
-                          Divider(
-                            thickness: 1.0,
-                            color: Color(0xFFEEEEEE),
-                          ),
-                          SizedBox(height: 16.0),
-                          Container(
+                        );
+                      }
+                      
+                      return Column(
+                        children: snapshot.data!.map((reservation) {
+                          final isUsed = reservation.status == 'used';
+                          final date = reservation.creneaux ?? DateTime.now();
+                          
+                          return Container(
                             width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                AppLogger.d('Ticket marked as used', tag: 'QR_SCAN');
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                foregroundColor: Colors.white,
-                                elevation: 2.0,
-                                padding: EdgeInsets.symmetric(vertical: 12.0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.0),
-                                ),
-                              ),
-                              child: Text(
-                                'Marquer comme Utilisé',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            margin: EdgeInsets.only(bottom: 12.0),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  blurRadius: 8.0,
+                                  color: Color(0x1A000000),
+                                  offset: Offset(0.0, 2.0),
+                                )
+                              ],
+                              borderRadius: BorderRadius.circular(16.0),
+                              border: Border.all(
+                                color: isUsed ? Colors.orange.shade200 : Colors.green.shade200,
+                                width: 1.0,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  
-                  SizedBox(height: 16.0),
-                  
-                  // Used Ticket Example
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 8.0,
-                          color: Color(0x1A000000),
-                          offset: Offset(0.0, 2.0),
-                        )
-                      ],
-                      borderRadius: BorderRadius.circular(16.0),
-                      border: Border.all(
-                        color: Colors.orange.shade200,
-                        width: 1.0,
-                      ),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Sara Mansouri',
-                                      style: FlutterFlowTheme.of(context)
-                                          .titleMedium
-                                          .override(
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          reservation.type.isNotEmpty ? reservation.type : 'Repas',
+                                          style: FlutterFlowTheme.of(context).titleMedium.override(
                                             fontFamily: 'Inter Tight',
-                                            letterSpacing: 0.0,
                                             fontWeight: FontWeight.bold,
                                           ),
-                                    ),
-                                    SizedBox(height: 8.0),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.calendar_today,
-                                          color: Color(0xFF666666),
-                                          size: 16.0,
                                         ),
-                                        SizedBox(width: 8.0),
-                                        Text(
-                                          'March 14, 2024',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
+                                        SizedBox(height: 4.0),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.access_time, size: 14, color: Color(0xFF666666)),
+                                            SizedBox(width: 4.0),
+                                            Text(
+                                              DateFormat('HH:mm').format(date),
+                                              style: FlutterFlowTheme.of(context).bodySmall.override(
                                                 fontFamily: 'Inter',
                                                 color: Color(0xFF666666),
-                                                letterSpacing: 0.0,
                                               ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                    SizedBox(height: 4.0),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.access_time,
-                                          color: Color(0xFF666666),
-                                          size: 16.0,
-                                        ),
-                                        SizedBox(width: 8.0),
-                                        Text(
-                                          '13:00 - 14:00',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                fontFamily: 'Inter',
-                                                color: Color(0xFF666666),
-                                                letterSpacing: 0.0,
-                                              ),
-                                        ),
-                                      ],
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                                    decoration: BoxDecoration(
+                                      color: isUsed ? Color(0xFFFF5722) : Colors.green,
+                                      borderRadius: BorderRadius.circular(16.0),
                                     ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-                                decoration: BoxDecoration(
-                                  color: Color(0xFFFF5722),
-                                  borderRadius: BorderRadius.circular(16.0),
-                                ),
-                                child: Text(
-                                  'UTILISÉ',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .override(
+                                    child: Text(
+                                      isUsed ? 'UTILISÉ' : 'VALIDE',
+                                      style: FlutterFlowTheme.of(context).bodySmall.override(
                                         fontFamily: 'Inter',
                                         color: Colors.white,
-                                        letterSpacing: 0.0,
                                         fontWeight: FontWeight.bold,
                                       ),
-                                ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          SizedBox(height: 16.0),
-                          Divider(
-                            thickness: 1.0,
-                            color: Color(0xFFEEEEEE),
-                          ),
-                          SizedBox(height: 16.0),
-                          Text(
-                            'Ce ticket a déjà été validé',
-                            textAlign: TextAlign.center,
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  fontFamily: 'Inter',
-                                  color: Color(0xFFFF5722),
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    },
                   ),
                   
                   SizedBox(height: 40.0),

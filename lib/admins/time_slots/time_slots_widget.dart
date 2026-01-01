@@ -203,11 +203,7 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
                         activeColor: Color(0xFF4B986C),
                         onChanged: (val) async {
                           // Toggle active status
-                          await _timeSlotService.updateTimeSlotCapacity(
-                            slot.reference.id,
-                            slot.maxCapacity, // Keep same capacity, just toggle active status
-                          );
-                          // Note: We need a separate method for toggling active status
+                          await slot.reference.update({'is_active': val});
                         },
                      ),
                      IconButton(
@@ -217,6 +213,17 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
                      IconButton(
                        icon: Icon(Icons.delete_outline, color: Colors.red),
                         onPressed: () async {
+                           // Check if slot has reservations
+                           if (slot.currentReservations > 0) {
+                             ScaffoldMessenger.of(context).showSnackBar(
+                               SnackBar(
+                                 content: Text('Impossible de supprimer: ${slot.currentReservations} réservation(s) existante(s)'),
+                                 backgroundColor: Colors.red,
+                               ),
+                             );
+                             return;
+                           }
+                           
                            final confirm = await showDialog<bool>(
                              context: context,
                              builder: (c) => AlertDialog(

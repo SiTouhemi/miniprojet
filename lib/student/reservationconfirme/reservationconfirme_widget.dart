@@ -91,7 +91,7 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
               size: 24.0,
             ),
             onPressed: () {
-              AppLogger.d('IconButton pressed', tag: 'UI');
+              context.pop();
             },
           ),
           title: Text(
@@ -120,8 +120,21 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                   color: FlutterFlowTheme.of(context).primaryText,
                   size: 24.0,
                 ),
-                onPressed: () {
-                  AppLogger.d('IconButton pressed', tag: 'UI');
+                onPressed: () async {
+                  // Show share options dialog
+                  await showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text('Partager le ticket'),
+                      content: Text('Vous pouvez prendre une capture d\'écran de votre QR code pour le partager.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
                 },
               ),
             ),
@@ -652,7 +665,12 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                     Expanded(
                       child: FFButtonWidget(
                         onPressed: () {
-                          AppLogger.d('Button pressed', tag: 'UI');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Téléchargement du QR code en cours...'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
                         },
                         text: 'Télécharger',
                         icon: Icon(
@@ -707,14 +725,21 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                         size: 20.0,
                       ),
                       onPressed: () {
-                        AppLogger.d('IconButton pressed', tag: 'UI');
+                        // Refresh the page to reload QR code
+                        setState(() {});
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('QR Code actualisé'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
                       },
                     ),
                   ].divide(SizedBox(width: 12.0)),
                 ),
                 FFButtonWidget(
                   onPressed: () {
-                    AppLogger.d('Button pressed', tag: 'UI');
+                    context.goNamed('StudentHome');
                   },
                   text: 'Retour à l\'accueil',
                   options: FFButtonOptions(

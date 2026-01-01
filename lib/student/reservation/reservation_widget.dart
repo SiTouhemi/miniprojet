@@ -79,7 +79,7 @@ class _ReservationWidgetState extends State<ReservationWidget> {
               size: 24.0,
             ),
             onPressed: () {
-              AppLogger.d('IconButton pressed', tag: 'UI');
+              context.pop();
             },
           ),
           title: Text(
@@ -107,7 +107,24 @@ class _ReservationWidgetState extends State<ReservationWidget> {
                   size: 24.0,
                 ),
                 onPressed: () {
-                  AppLogger.d('IconButton pressed', tag: 'UI');
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text('Aide - Réservation'),
+                      content: Text(
+                        'Sélectionnez le type de repas (Déjeuner ou Dîner) puis choisissez un créneau horaire disponible.\n\n'
+                        'Les créneaux verts ont des places disponibles.\n'
+                        'Les créneaux rouges sont complets.\n\n'
+                        'Après confirmation, vous recevrez un QR code pour accéder au restaurant.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text('Compris'),
+                        ),
+                      ],
+                    ),
+                  );
                 },
               ),
             ),
@@ -938,7 +955,8 @@ class _ReservationWidgetState extends State<ReservationWidget> {
                   ),
                   FFButtonWidget(
                     onPressed: () {
-                      AppLogger.d('Button pressed', tag: 'UI');
+                      // Navigate to reservation creneau page for proper slot selection
+                      context.pushNamed('Reservationcreneau');
                     },
                     text: 'Confirmer et Payer avec D17',
                     icon: Icon(

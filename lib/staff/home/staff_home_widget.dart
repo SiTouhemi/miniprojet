@@ -275,102 +275,120 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                       SizedBox(height: 20.0),
                       
                       // Stats Cards Row
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              padding: EdgeInsets.all(20.0),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [Color(0xFF052753), Color(0xFF1E46E4)],
-                                  stops: [0.0, 1.0],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
+                      StreamBuilder<List<ReservationRecord>>(
+                        stream: queryReservationRecord(
+                          queryBuilder: (query) {
+                            final now = DateTime.now();
+                            final startOfDay = DateTime(now.year, now.month, now.day);
+                            final endOfDay = startOfDay.add(Duration(days: 1));
+                            return query
+                                .where('creneaux', isGreaterThanOrEqualTo: startOfDay)
+                                .where('creneaux', isLessThan: endOfDay)
+                                .where('status', whereIn: ['confirmed', 'used']);
+                          },
+                        ),
+                        builder: (context, reservationSnapshot) {
+                          final todayReservations = reservationSnapshot.data?.length ?? 0;
+                          final usedTickets = reservationSnapshot.data?.where((r) => r.status == 'used').length ?? 0;
+                          
+                          return Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.all(20.0),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [Color(0xFF052753), Color(0xFF1E46E4)],
+                                      stops: [0.0, 1.0],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(16.0),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.qr_code_2,
+                                        color: Colors.white,
+                                        size: 32.0,
+                                      ),
+                                      SizedBox(height: 12.0),
+                                      Text(
+                                        '$usedTickets',
+                                        style: FlutterFlowTheme.of(context)
+                                            .headlineLarge
+                                            .override(
+                                              fontFamily: 'Inter Tight',
+                                              color: Colors.white,
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                      Text(
+                                        'Tickets Scannés',
+                                        textAlign: TextAlign.center,
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              fontFamily: 'Inter',
+                                              color: Colors.white70,
+                                              letterSpacing: 0.0,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                borderRadius: BorderRadius.circular(16.0),
                               ),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.qr_code_2,
+                              SizedBox(width: 16.0),
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.all(20.0),
+                                  decoration: BoxDecoration(
                                     color: Colors.white,
-                                    size: 32.0,
+                                    borderRadius: BorderRadius.circular(16.0),
+                                    border: Border.all(
+                                      color: Color(0xFF00A4E4),
+                                      width: 2.0,
+                                    ),
                                   ),
-                                  SizedBox(height: 12.0),
-                                  Text(
-                                    '--',
-                                    style: FlutterFlowTheme.of(context)
-                                        .headlineLarge
-                                        .override(
-                                          fontFamily: 'Inter Tight',
-                                          color: Colors.white,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.restaurant,
+                                        color: Color(0xFF00A4E4),
+                                        size: 32.0,
+                                      ),
+                                      SizedBox(height: 12.0),
+                                      Text(
+                                        '$todayReservations',
+                                        style: FlutterFlowTheme.of(context)
+                                            .headlineLarge
+                                            .override(
+                                              fontFamily: 'Inter Tight',
+                                              color: Color(0xFF00A4E4),
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                      Text(
+                                        'Réservations Jour',
+                                        textAlign: TextAlign.center,
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              fontFamily: 'Inter',
+                                              color: Color(0xFF00A4E4),
+                                              letterSpacing: 0.0,
+                                            ),
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    'Tickets Scannés',
-                                    textAlign: TextAlign.center,
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          fontFamily: 'Inter',
-                                          color: Colors.white70,
-                                          letterSpacing: 0.0,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 16.0),
-                          Expanded(
-                            child: Container(
-                              padding: EdgeInsets.all(20.0),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16.0),
-                                border: Border.all(
-                                  color: Color(0xFF00A4E4),
-                                  width: 2.0,
                                 ),
                               ),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.restaurant,
-                                    color: Color(0xFF00A4E4),
-                                    size: 32.0,
-                                  ),
-                                  SizedBox(height: 12.0),
-                                  Text(
-                                    '--',
-                                    style: FlutterFlowTheme.of(context)
-                                        .headlineLarge
-                                        .override(
-                                          fontFamily: 'Inter Tight',
-                                          color: Color(0xFF00A4E4),
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                  ),
-                                  Text(
-                                    'Menus Actifs',
-                                    textAlign: TextAlign.center,
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          fontFamily: 'Inter',
-                                          color: Color(0xFF00A4E4),
-                                          letterSpacing: 0.0,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+                            ],
+                          );
+                        },
                       ),
                       
                       SizedBox(height: 40.0),

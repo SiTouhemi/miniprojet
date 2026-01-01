@@ -6,6 +6,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/utils/app_logger.dart';
+import '/auth/firebase_auth/auth_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -95,7 +96,7 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
               size: 24.0,
             ),
             onPressed: () {
-              AppLogger.d('IconButton pressed', tag: 'UI');
+              context.pop();
             },
           ),
           title: Text(
@@ -1309,8 +1310,110 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                             ),
                           ),
                           FFButtonWidget(
-                            onPressed: () {
-                              AppLogger.d('Button pressed', tag: 'UI');
+                            onPressed: () async {
+                              // Validate form
+                              if (_model.formKey.currentState == null ||
+                                  !_model.formKey.currentState!.validate()) {
+                                return;
+                              }
+                              
+                              // Get form values
+                              final prenom = _model.textController1?.text ?? '';
+                              final nom = _model.textController2?.text ?? '';
+                              final email = _model.textController3?.text ?? '';
+                              final cin = _model.textController4?.text ?? '';
+                              final password = _model.textController5?.text ?? '';
+                              final confirmPassword = _model.textController6?.text ?? '';
+                              final classe = _model.dropDownValue ?? '';
+                              final roleStr = _model.choiceChipsValue ?? 'Étudiant';
+                              
+                              // Validate required fields
+                              if (prenom.isEmpty || nom.isEmpty || email.isEmpty || password.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Veuillez remplir tous les champs obligatoires'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                                return;
+                              }
+                              
+                              // Validate passwords match
+                              if (password != confirmPassword) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Les mots de passe ne correspondent pas'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                                return;
+                              }
+                              
+                              // Map role string to UserRole
+                              UserRole role;
+                              switch (roleStr) {
+                                case 'Admin':
+                                  role = UserRole.admin;
+                                  break;
+                                case 'Personnel':
+                                  role = UserRole.staff;
+                                  break;
+                                default:
+                                  role = UserRole.student;
+                              }
+                              
+                              // Show loading indicator
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context) => Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                              
+                              try {
+                                // Create user
+                                final result = await authService.createUserWithRole(
+                                  email: email,
+                                  password: password,
+                                  displayName: '$prenom $nom',
+                                  role: role,
+                                  cin: cin.isNotEmpty ? cin : null,
+                                  classe: classe.isNotEmpty ? classe : null,
+                                );
+                                
+                                // Close loading dialog
+                                Navigator.of(context).pop();
+                                
+                                // Show success message
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Utilisateur créé avec succès'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                                
+                                // Clear form
+                                _model.textController1?.clear();
+                                _model.textController2?.clear();
+                                _model.textController3?.clear();
+                                _model.textController4?.clear();
+                                _model.textController5?.clear();
+                                _model.textController6?.clear();
+                                setState(() {});
+                                
+                              } catch (e) {
+                                // Close loading dialog
+                                Navigator.of(context).pop();
+                                
+                                // Show error message
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Erreur: ${e.toString()}'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
                             },
                             text: 'Créer l\'Utilisateur',
                             icon: Icon(
