@@ -1,6 +1,5 @@
 // Export pages
 export '/student/home/home_widget.dart' show HomeWidget;
-export '/student/reservation/reservation_widget.dart' show ReservationWidget;
 export '/student/reservationconfirme/reservationconfirme_widget.dart'
     show ReservationconfirmeWidget;
 export '/student/history/history_widget.dart' show HistoryWidget;
