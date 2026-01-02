@@ -1,6 +1,7 @@
 import '/backend/cloud_functions/cloud_functions.dart';
 import '/backend/services/app_service.dart';
 import '/utils/app_logger.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PaymentService {
   static PaymentService? _instance;
@@ -48,26 +49,60 @@ class PaymentService {
     }
   }
 
-  // Check user's pocket balance
+  // Check user's pocket balance from Firestore
   Future<double> getUserBalance(String userId) async {
     try {
-      // This would typically come from the user record
-      // For now, we'll simulate checking D17 balance
-      return await _simulateD17BalanceCheck(userId);
+      final userDoc = await FirebaseFirestore.instance
+          .collection('user')
+          .doc(userId)
+          .get();
+      
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        final pocket = userData['pocket'] as double? ?? 0.0;
+        AppLogger.d('Retrieved user balance: $pocket DT for user: $userId', tag: 'PaymentService');
+        return pocket;
+      } else {
+        AppLogger.w('User document not found for userId: $userId', tag: 'PaymentService');
+        return 0.0;
+      }
     } catch (e) {
       AppLogger.e('Error checking user balance', error: e, tag: 'PaymentService');
       return 0.0;
     }
   }
 
-  // Simulate D17 balance check (replace with actual D17 API)
-  Future<double> _simulateD17BalanceCheck(String userId) async {
-    // Simulate API delay
-    await Future.delayed(Duration(milliseconds: 500));
-    
-    // Return a random balance for simulation
-    // In production, this would call the actual D17 API
-    return 25.0 + (userId.hashCode % 100); // Simulate balance between 25-125
+  // Update user balance in Firestore
+  Future<bool> updateUserBalance(String userId, double newBalance) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('user')
+          .doc(userId)
+          .update({'pocket': newBalance});
+      
+      AppLogger.i('Updated user balance to $newBalance DT for user: $userId', tag: 'PaymentService');
+      return true;
+    } catch (e) {
+      AppLogger.e('Error updating user balance', error: e, tag: 'PaymentService');
+      return false;
+    }
+  }
+
+  // Deduct amount from user balance
+  Future<bool> deductFromBalance(String userId, double amount) async {
+    try {
+      final currentBalance = await getUserBalance(userId);
+      if (currentBalance >= amount) {
+        final newBalance = currentBalance - amount;
+        return await updateUserBalance(userId, newBalance);
+      } else {
+        AppLogger.w('Insufficient balance. Current: $currentBalance DT, Required: $amount DT', tag: 'PaymentService');
+        return false;
+      }
+    } catch (e) {
+      AppLogger.e('Error deducting from balance', error: e, tag: 'PaymentService');
+      return false;
+    }
   }
 
   // Validate payment before reservation

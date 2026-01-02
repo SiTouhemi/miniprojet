@@ -242,6 +242,70 @@ class _ProfileWidgetState extends State<ProfileWidget> {
 
                     SizedBox(height: 24.0),
 
+                    // Balance Card Section
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF4B39EF), Color(0xFF6366F1)],
+                          stops: [0.0, 1.0],
+                          begin: AlignmentDirectional(0.0, -1.0),
+                          end: AlignmentDirectional(0, 1.0),
+                        ),
+                        borderRadius: BorderRadius.circular(16.0),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(20.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Solde Actuel',
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    fontFamily: 'Inter',
+                                    color: Colors.white70,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                            SizedBox(height: 8.0),
+                            Text(
+                              user != null 
+                                ? '${user.pocket.toStringAsFixed(2)} DT'
+                                : '0.00 DT',
+                              style: FlutterFlowTheme.of(context)
+                                  .headlineMedium
+                                  .override(
+                                    fontFamily: 'Inter Tight',
+                                    color: Colors.white,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            if (user != null)
+                              Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 0.0),
+                                child: Text(
+                                  '${user.tickets} ticket${user.tickets != 1 ? 's' : ''} disponible${user.tickets != 1 ? 's' : ''}',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodySmall
+                                      .override(
+                                        fontFamily: 'Inter',
+                                        color: Colors.white70,
+                                        letterSpacing: 0.0,
+                                      ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 24.0),
+
                     // Account Information Section
                     Text(
                       'Account Information',
