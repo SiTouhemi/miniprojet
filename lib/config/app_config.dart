@@ -1,110 +1,92 @@
+/// Application configuration constants
+/// This file contains all hardcoded values that should be configurable
 class AppConfig {
-  // Environment Configuration
-  static const String environment = String.fromEnvironment('ENV', defaultValue: 'production');
-  static const bool isProduction = environment == 'production';
-  static const bool isDevelopment = environment == 'development';
+  // Institution Information
+  static const String institutionName = 'ISETCOM Restaurant';
+  static const String institutionSubtitle = 'Restaurant Universitaire ISET';
+  static const String systemName = 'Système de Réservation';
+  static const String logoAssetPath = 'assets/images/logo_iset_com.jpg';
   
-  // App Information
-  static const String appName = 'ISET Com Restaurant';
-  static const String appVersion = '1.0.0';
-  static const String buildNumber = '1';
+  // Currency & Pricing
+  static const String currency = 'DT';
+  static const String currencySymbol = 'DT';
+  static const int priceDecimalPlaces = 2;
   
-  // Organization Details
-  static const String organizationName = 'ISET Com';
-  static const String organizationDomain = 'isetcom.tn';
-  static const String supportEmail = 'support@isetcom.tn';
-  static const String contactPhone = '+216 71 XXX XXX';
+  // Business Rules
+  static const int cancellationWindowHours = 2;
+  static const int reservationWindowDays = 30;
+  static const int lowAvailabilityThreshold = 5;
+  static const int historyRetentionDays = 90;
   
-  // App Store Information
-  static const String androidPackageId = 'tn.edu.isetcom.restaurant';
-  static const String iosAppId = 'tn.edu.isetcom.restaurant';
+  // Colors (should eventually move to theme)
+  static const int primaryColorValue = 0xFF005BAA;
+  static const int accentColorValue = 0xFF00A4E4;
+  static const int successColorValue = 0xFF00A855;
+  static const int warningColorValue = 0xFFFF6B35;
+  static const int errorColorValue = 0xFFE74C3C;
   
-  // Deep Linking
-  static const String deepLinkScheme = 'isetrestaurant';
-  static const String deepLinkHost = 'isetcom.tn';
+  // Status Labels (should eventually move to i18n)
+  static const Map<String, String> statusLabels = {
+    'confirmed': 'Confirmé',
+    'pending': 'En attente',
+    'cancelled': 'Annulé',
+    'used': 'Utilisé',
+    'expired': 'Expiré',
+  };
   
-  // Feature Flags
-  static const bool enableAnalytics = true;
-  static const bool enableCrashReporting = true;
-  static const bool enablePerformanceMonitoring = true;
-  static const bool enableRemoteConfig = true;
+  // UI Labels (should eventually move to i18n)
+  static const Map<String, String> labels = {
+    'current_balance': 'Solde Actuel',
+    'choose_time_slot': 'Choisir un Créneau',
+    'daily_menu': 'Plat du Jour',
+    'quick_actions': 'Actions Rapides',
+    'reservation_details': 'Détails de votre réservation',
+    'no_active_reservation': 'Aucune réservation active',
+    'no_reservations_found': 'Aucune réservation trouvée',
+    'no_slots_available': 'Aucun créneau disponible pour le moment',
+    'no_menu_available': 'Aucun menu disponible pour aujourd\'hui',
+    'reservation_confirmed': 'Réservation confirmée !',
+    'ticket_generated': 'Votre ticket repas a été généré avec succès',
+    'present_qr_code': 'Présentez ce code à l\'entrée du restaurant',
+    'arrive_on_time': 'Veuillez arriver à l\'heure de votre créneau',
+  };
   
-  // Business Rules - Tunisian University Restaurant
-  static const int maxReservationsPerUser = 2; // Lunch + Dinner max per day
-  static const int reservationDeadlineHours = 1; // 1 hour before meal
-  static const double fixedMealPrice = 0.2; // TND - government subsidized
-  static const int maxCapacityPerSlot = 200; // Students per meal time
+  // Button Labels (should eventually move to i18n)
+  static const Map<String, String> buttons = {
+    'reserve': 'Réserver',
+    'cancel': 'Annuler',
+    'modify': 'Modifier',
+    'refresh': 'Actualiser',
+    'confirm': 'Confirmer',
+    'back_to_home': 'Retour à l\'accueil',
+    'view_history': 'Voir l\'historique',
+    'view_qr': 'Voir le QR Code',
+  };
   
-  // Tunisian Meal Times
-  static const String lunchStartTime = '12:00';
-  static const String lunchEndTime = '14:00';
-  static const String dinnerStartTime = '19:00';
-  static const String dinnerEndTime = '21:00';
+  // Helper methods
+  static String formatPrice(double price) {
+    return '${price.toStringAsFixed(priceDecimalPlaces)} $currency';
+  }
   
-  // Currency and Subsidy
-  static const String currency = 'TND';
-  static const double governmentSubsidyRate = 0.95; // 95% subsidized
-  static const double actualMealCost = 4.0; // Real cost before subsidy
+  static String getStatusLabel(String status) {
+    return statusLabels[status] ?? status;
+  }
   
-  // API Configuration
-  static const String d17ApiBaseUrl = 'https://api.d17.tn';
-  static const Duration apiTimeout = Duration(seconds: 30);
-  static const int maxRetryAttempts = 3;
+  static String getLabel(String key) {
+    return labels[key] ?? key;
+  }
   
-  // Cache Configuration
-  static const Duration cacheExpiration = Duration(minutes: 5);
-  static const int maxCacheSize = 100; // MB
+  static String getButton(String key) {
+    return buttons[key] ?? key;
+  }
   
-  // Notification Configuration
-  static const String fcmSenderId = ''; // To be filled when Firebase is configured
-  static const bool enablePushNotifications = true;
+  static bool isLowAvailability(int availableSpots) {
+    return availableSpots <= lowAvailabilityThreshold;
+  }
   
-  // Security Configuration
-  static const bool enableBiometricAuth = false; // Future feature
-  static const bool enablePinAuth = false; // Future feature
-  static const Duration sessionTimeout = Duration(hours: 24);
-  
-  // UI Configuration
-  static const List<String> supportedLanguages = ['en', 'fr', 'ar'];
-  static const String defaultLanguage = 'fr'; // French for Tunisia
-  static const bool enableDarkMode = true;
-  
-  // Logging Configuration
-  static const bool enableDebugLogging = !isProduction;
-  static const bool enableNetworkLogging = !isProduction;
-  
-  // Get configuration based on environment
-  static Map<String, dynamic> getConfig() {
-    return {
-      'environment': environment,
-      'isProduction': isProduction,
-      'appName': appName,
-      'version': appVersion,
-      'buildNumber': buildNumber,
-      'organization': {
-        'name': organizationName,
-        'domain': organizationDomain,
-        'supportEmail': supportEmail,
-        'contactPhone': contactPhone,
-      },
-      'features': {
-        'analytics': enableAnalytics,
-        'crashReporting': enableCrashReporting,
-        'performanceMonitoring': enablePerformanceMonitoring,
-        'remoteConfig': enableRemoteConfig,
-        'pushNotifications': enablePushNotifications,
-      },
-      'business': {
-        'maxReservationsPerUser': maxReservationsPerUser,
-        'reservationDeadlineHours': reservationDeadlineHours,
-        'defaultMealPrice': fixedMealPrice,
-        'maxCapacityPerSlot': maxCapacityPerSlot,
-      },
-      'api': {
-        'd17BaseUrl': d17ApiBaseUrl,
-        'timeout': apiTimeout.inMilliseconds,
-        'maxRetryAttempts': maxRetryAttempts,
-      },
-    };
+  static bool canCancelReservation(DateTime reservationTime) {
+    final now = DateTime.now();
+    final hoursUntil = reservationTime.difference(now).inHours;
+    return hoursUntil >= cancellationWindowHours;
   }
 }

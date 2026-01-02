@@ -8,6 +8,7 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/utils/error_handler.dart';
 import '/utils/app_logger.dart';
 import '/widgets/logout_dialog.dart';
+import '/config/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -160,10 +161,10 @@ class _HomeWidgetState extends State<HomeWidget> {
               backgroundColor: Colors.white,
               automaticallyImplyLeading: false,
               title: Text(
-                'ISET Restaurant',
+                AppConfig.institutionName,
                 style: FlutterFlowTheme.of(context).headlineMedium.override(
                       fontFamily: 'Inter Tight',
-                      color: Color(0xFF1C1284),
+                      color: Color(AppConfig.primaryColorValue),
                       letterSpacing: 0.0,
                       fontWeight: FontWeight.w600,
                     ),
@@ -266,7 +267,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                 SizedBox(height: 24.0),
                                 
                                 Text(
-                                  'Actions Rapides',
+                                  AppConfig.getLabel('quick_actions'),
                                   style: FlutterFlowTheme.of(context).titleMedium.override(
                                         fontFamily: 'Inter Tight',
                                         letterSpacing: 0.0,
@@ -322,7 +323,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                     ),
               ),
               Text(
-                'Restaurant Universitaire ISET',
+                AppConfig.institutionSubtitle,
                 style: FlutterFlowTheme.of(context)
                     .bodyMedium
                     .override(
@@ -356,7 +357,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(40.0),
             child: Image.asset(
-              'assets/images/logo_iset_com.jpg',
+              AppConfig.logoAssetPath,
               width: 80.0,
               height: 80.0,
               fit: BoxFit.contain,
@@ -364,7 +365,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 return Icon(
                   Icons.school,
                   size: 40,
-                  color: FlutterFlowTheme.of(context).primary,
+                  color: Color(AppConfig.primaryColorValue),
                 );
               },
             ),
@@ -399,7 +400,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Solde Actuel',
+                    AppConfig.getLabel('current_balance'),
                     style: FlutterFlowTheme.of(context)
                         .bodyMedium
                         .override(
@@ -414,8 +415,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                         0.0, 8.0, 0.0, 0.0),
                     child: Text(
                       user != null 
-                        ? '${user.pocket.toStringAsFixed(2)} DT'
-                        : '0.00 DT',
+                        ? AppConfig.formatPrice(user.pocket)
+                        : AppConfig.formatPrice(0.0),
                       style: FlutterFlowTheme.of(context)
                           .headlineMedium
                           .override(
@@ -797,7 +798,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                   ),
                 ),
                 Text(
-                  '${plat.prix.toStringAsFixed(2)} DT',
+                  AppConfig.formatPrice(plat.prix),
                   style: FlutterFlowTheme.of(context).titleSmall.override(
                         fontFamily: 'Inter Tight',
                         color: FlutterFlowTheme.of(context).primary,
