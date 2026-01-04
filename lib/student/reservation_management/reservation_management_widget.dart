@@ -326,7 +326,7 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
               ),
             ),
             Text(
-              '${l10n.translate('price_label')}: ${AppConfig.formatPrice(reservation.prix)}',
+              '${l10n.translate('price_label')}: ${AppConfig.formatPrice(reservation.prix.toDouble())}',
               style: AppTypography.bodyLarge.copyWith(
                 color: AppColors.textPrimary,
               ),

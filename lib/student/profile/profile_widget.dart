@@ -61,6 +61,8 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   Future<void> _updateProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final l10n = AppLocalizations.of(context)!;
+
     setState(() {
       _isLoading = true;
     });

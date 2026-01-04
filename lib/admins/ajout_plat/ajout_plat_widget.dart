@@ -8,7 +8,6 @@ import '/utils/app_logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'ajout_plat_model.dart';
 export 'ajout_plat_model.dart';
 
