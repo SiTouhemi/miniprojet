@@ -5,6 +5,7 @@ import '../lib/backend/services/data_validation_service.dart';
 import '../lib/backend/schema/user_record.dart';
 import '../lib/backend/schema/reservation_record.dart';
 import '../lib/backend/schema/plat_record.dart';
+import '../lib/backend/schema/daily_menu_record.dart';
 import '../lib/backend/schema/time_slot_record.dart';
 import 'dart:math';
 
@@ -410,17 +411,21 @@ void main() {
           }
 
           // Create test menu
-          final menu = <PlatRecord>[];
+          final menu = <DailyMenuRecord>[];
           for (int i = 0; i < random.nextInt(3) + 1; i++) {
-            final platData = {
-              'nom': 'Plat ${i + 1}',
-              'prix': (random.nextDouble() * 20 + 5).roundToDouble(),
-              'description': 'Description du plat ${i + 1}',
-              'isActive': true,
+            final menuData = {
+              'mainDish': 'Plat Principal ${i + 1}',
+              'sideDish': 'Accompagnement ${i + 1}',
+              'dessert': 'Dessert ${i + 1}',
+              'price': (random.nextDouble() * 20 + 5).roundToDouble(),
               'availableDate': Timestamp.fromDate(DateTime.now()),
+              'isActive': true,
+              'createdAt': Timestamp.fromDate(DateTime.now()),
             };
             
-            await fakeFirestore.collection('plat').add(platData);
+            final docRef = await fakeFirestore.collection('daily_menu').add(menuData);
+            final doc = await docRef.get();
+            menu.add(DailyMenuRecord.fromSnapshot(doc));
           }
 
           // Get user and validate

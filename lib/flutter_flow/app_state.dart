@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '/backend/backend.dart';
 import '/backend/services/app_service.dart';
 import '/backend/services/time_slot_service.dart';
+import '/backend/services/menu_service.dart';
 import '/backend/services/data_validation_service.dart';
 import '/backend/services/sync_performance_monitor.dart';
 import '/config/app_config.dart';
@@ -28,7 +29,7 @@ class FFAppState extends ChangeNotifier {
   // Real-time listeners
   StreamSubscription<DocumentSnapshot>? _userDataSubscription;
   StreamSubscription<QuerySnapshot>? _reservationsSubscription;
-  StreamSubscription<QuerySnapshot>? _menuSubscription;
+  StreamSubscription<List<DailyMenuRecord>>? _menuSubscription;
   StreamSubscription<List<TimeSlotRecord>>? _timeSlotsSubscription;
 
   // Network connectivity state
@@ -69,8 +70,8 @@ class FFAppState extends ChangeNotifier {
   List<ReservationRecord> get userReservations => _userReservations;
 
   // Today's menu cache
-  List<PlatRecord> _todaysMenu = [];
-  List<PlatRecord> get todaysMenu => _todaysMenu;
+  List<DailyMenuRecord> _todaysMenu = [];
+  List<DailyMenuRecord> get todaysMenu => _todaysMenu;
 
   // Loading states
   bool _isLoadingSettings = false;
@@ -225,27 +226,17 @@ class FFAppState extends ChangeNotifier {
   void _setupMenuListener() {
     _menuSubscription?.cancel();
     
-    final today = DateTime.now();
-    final startOfDay = DateTime(today.year, today.month, today.day);
-    final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
+    final operationId = _performanceMonitor.startSyncOperation('menu_sync', metadata: {'date': DateTime.now().toIso8601String()});
     
-    final operationId = _performanceMonitor.startSyncOperation('menu_sync', metadata: {'date': today.toIso8601String()});
-    
-    _menuSubscription = FirebaseFirestore.instance
-        .collection('plat')
-        .where('availableDate', isGreaterThanOrEqualTo: startOfDay)
-        .where('availableDate', isLessThanOrEqualTo: endOfDay)
-        .where('isActive', isEqualTo: true)
-        .snapshots()
+    _menuSubscription = MenuService.instance
+        .getTodaysMenuStream()
         .listen(
-          (snapshot) {
+          (menus) {
             try {
-              _todaysMenu = snapshot.docs
-                  .map((doc) => PlatRecord.fromSnapshot(doc))
-                  .toList();
+              _todaysMenu = menus;
               _clearError();
               
-              _performanceMonitor.completeSyncOperation(operationId, success: true, recordsProcessed: snapshot.docs.length);
+              _performanceMonitor.completeSyncOperation(operationId, success: true, recordsProcessed: menus.length);
               _syncFailureCounts.remove('menu_sync');
               
               notifyListeners();
@@ -685,7 +676,7 @@ class FFAppState extends ChangeNotifier {
       _handleError('Error setting up menu sync: $e');
       // Fallback to one-time load if real-time fails
       try {
-        _todaysMenu = await AppService.instance.getTodaysMenu();
+        _todaysMenu = await MenuService.instance.getTodaysMenu();
         notifyListeners();
       } catch (fallbackError) {
         _handleError('Error loading today\'s menu: $fallbackError');

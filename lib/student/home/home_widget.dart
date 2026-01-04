@@ -757,7 +757,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             ),
           )
         else
-          ...menu.map((plat) => Container(
+          ...menu.map((dailyMenu) => Container(
             width: double.infinity,
             margin: EdgeInsets.only(bottom: 8.0),
             padding: EdgeInsets.all(16.0),
@@ -780,15 +780,15 @@ class _HomeWidgetState extends State<HomeWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        plat.nom,
+                        dailyMenu.mainDish,
                         style: FlutterFlowTheme.of(context).titleSmall.override(
                               fontFamily: 'Inter Tight',
                               fontWeight: FontWeight.w600,
                             ),
                       ),
-                      if (plat.description.isNotEmpty)
+                      if (dailyMenu.description.isNotEmpty)
                         Text(
-                          plat.description,
+                          dailyMenu.description,
                           style: FlutterFlowTheme.of(context).bodySmall.override(
                                 fontFamily: 'Inter',
                                 color: FlutterFlowTheme.of(context).secondaryText,
@@ -798,7 +798,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                   ),
                 ),
                 Text(
-                  AppConfig.formatPrice(plat.prix),
+                  '${dailyMenu.price.toStringAsFixed(3)} TND',
                   style: FlutterFlowTheme.of(context).titleSmall.override(
                         fontFamily: 'Inter Tight',
                         color: FlutterFlowTheme.of(context).primary,

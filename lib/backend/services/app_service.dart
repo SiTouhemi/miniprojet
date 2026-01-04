@@ -200,11 +200,23 @@ class AppService {
   }
 
   // Get today's menu
-  Future<List<PlatRecord>> getTodaysMenu() async {
+  Future<List<DailyMenuRecord>> getTodaysMenu() async {
     try {
-      return await queryPlatRecordOnce(
-        queryBuilder: (query) => query.orderBy('categorie').orderBy('nom'),
+      final today = DateTime.now();
+      final startOfDay = DateTime(today.year, today.month, today.day);
+      final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
+
+      // Query daily_menu collection for today's menu
+      final dailyMenus = await queryDailyMenuRecordOnce(
+        queryBuilder: (query) => query
+            .where('date', isGreaterThanOrEqualTo: startOfDay)
+            .where('date', isLessThanOrEqualTo: endOfDay)
+            .where('available', isEqualTo: true)
+            .orderBy('date')
+            .orderBy('meal_type'),
       );
+
+      return dailyMenus;
     } catch (e) {
       AppLogger.e('Error fetching menu', error: e, tag: 'AppService');
       return [];

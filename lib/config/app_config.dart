@@ -18,6 +18,13 @@ class AppConfig {
   static const int lowAvailabilityThreshold = 5;
   static const int historyRetentionDays = 90;
   
+  // Environment Configuration
+  static const bool isProduction = false; // Set to true for production builds
+  static const bool enableCrashReporting = true;
+  static const bool enableDebugLogging = !isProduction;
+  static const bool enablePerformanceMonitoring = true;
+  static const bool enableAnalytics = isProduction;
+  
   // Colors (should eventually move to theme)
   static const int primaryColorValue = 0xFF005BAA;
   static const int accentColorValue = 0xFF00A4E4;

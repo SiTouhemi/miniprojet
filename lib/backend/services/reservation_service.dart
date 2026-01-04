@@ -9,12 +9,14 @@ class ReservationService {
   static ReservationService get instance => _instance ??= ReservationService._();
   ReservationService._();
 
-  // Create a new reservation
+  // Create a new reservation with payment method support
   Future<Map<String, dynamic>> createReservation({
     required String userId,
     required String timeSlotId,
     required String mealType,
     String? paymentId,
+    String? paymentMethod,
+    String? transactionId,
   }) async {
     try {
       // Call cloud function to create reservation
@@ -23,6 +25,8 @@ class ReservationService {
         'timeSlotId': timeSlotId,
         'mealType': mealType,
         'paymentId': paymentId,
+        'paymentMethod': paymentMethod ?? 'wallet',
+        'transactionId': transactionId,
       });
 
       return result;

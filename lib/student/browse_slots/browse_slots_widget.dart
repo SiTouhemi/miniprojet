@@ -128,6 +128,59 @@ class _BrowseSlotsWidgetState extends State<BrowseSlotsWidget> {
                     );
                   }
 
+                  // Show error state if there's an error
+                  if (appState.lastError != null) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 64.0,
+                            color: Colors.red,
+                          ),
+                          SizedBox(height: 16.0),
+                          Text(
+                            'Error Loading Time Slots',
+                            style: FlutterFlowTheme.of(context).headlineSmall.override(
+                              color: Colors.red,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 8.0),
+                          Text(
+                            appState.lastError!,
+                            style: FlutterFlowTheme.of(context).bodyMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 16.0),
+                          FFButtonWidget(
+                            onPressed: () {
+                              context.read<FFAppState>().loadTimeSlots(selectedDate);
+                            },
+                            text: 'Retry',
+                            options: FFButtonOptions(
+                              height: 40.0,
+                              padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                              iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                              color: Colors.red,
+                              textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                    fontFamily: 'Readex Pro',
+                                    color: Colors.white,
+                                  ),
+                              elevation: 2.0,
+                              borderSide: BorderSide(
+                                color: Colors.transparent,
+                                width: 1.0,
+                              ),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
                   if (appState.availableTimeSlots.isEmpty) {
                     return Center(
                       child: Column(

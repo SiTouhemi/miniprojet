@@ -29,9 +29,13 @@ class TimeSlotService {
         .orderBy('start_time')
         .snapshots()
         .map((snapshot) {
+      final now = DateTime.now();
       return snapshot.docs
           .map((doc) => TimeSlotRecord.fromSnapshot(doc))
-          .where((slot) => slot.currentReservations < slot.maxCapacity)
+          .where((slot) => 
+            slot.currentReservations < slot.maxCapacity && // Has available capacity
+            (slot.startTime?.isAfter(now) ?? false) // Is in the future
+          )
           .toList();
     });
   }
@@ -42,6 +46,7 @@ class TimeSlotService {
     try {
       final startOfDay = DateTime(date.year, date.month, date.day);
       final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+      final now = DateTime.now();
 
       final snapshot = await FirebaseFirestore.instance
           .collection('time_slots')
@@ -54,6 +59,10 @@ class TimeSlotService {
 
       return snapshot.docs
           .map((doc) => TimeSlotRecord.fromSnapshot(doc))
+          .where((slot) => 
+            slot.currentReservations < slot.maxCapacity && // Has available capacity
+            (slot.startTime?.isAfter(now) ?? false) // Is in the future
+          )
           .toList();
     } catch (e) {
       AppLogger.e('Error fetching time slots', error: e, tag: 'TimeSlotService');

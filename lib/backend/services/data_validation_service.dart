@@ -3,7 +3,9 @@ import '/backend/schema/user_record.dart';
 import '/backend/schema/reservation_record.dart';
 import '/backend/schema/plat_record.dart';
 import '/backend/schema/time_slot_record.dart';
+import '/backend/schema/daily_menu_record.dart';
 import '/utils/error_handler.dart';
+import '/utils/app_logger.dart';
 
 /// Service for validating data consistency between Firestore and UI display
 /// Implements requirements 2.4, 5.1, 5.2, 5.3, 5.6 for real-time data synchronization
@@ -139,46 +141,46 @@ class DataValidationService {
 
   /// Validate menu data consistency
   /// Requirement 5.3: Ensure menu data is synchronized
-  Future<ValidationResult> validateMenuData(List<PlatRecord> localMenu, DateTime date) async {
+  Future<ValidationResult> validateMenuData(List<DailyMenuRecord> localMenu, DateTime date) async {
     try {
       final startOfDay = DateTime(date.year, date.month, date.day);
       final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
 
+      // Query daily_menu collection instead of plat collection
       final query = await FirebaseFirestore.instance
-          .collection('plat')
-          .where('availableDate', isGreaterThanOrEqualTo: startOfDay)
-          .where('availableDate', isLessThanOrEqualTo: endOfDay)
-          .where('isActive', isEqualTo: true)
+          .collection('daily_menu')
+          .where('date', isGreaterThanOrEqualTo: startOfDay)
+          .where('date', isLessThanOrEqualTo: endOfDay)
+          .where('available', isEqualTo: true)
           .get();
 
-      final firestoreMenu = query.docs
-          .map((doc) => PlatRecord.fromSnapshot(doc))
+      final firestoreMenus = query.docs
+          .map((doc) => DailyMenuRecord.fromSnapshot(doc))
           .toList();
 
       final errors = <String>[];
 
       // Check count consistency
-      if (localMenu.length != firestoreMenu.length) {
-        errors.add('Menu count mismatch: local=${localMenu.length}, firestore=${firestoreMenu.length}');
+      if (localMenu.length != firestoreMenus.length) {
+        errors.add('Menu count mismatch: local=${localMenu.length}, firestore=${firestoreMenus.length}');
       }
 
       // Check individual menu items
-      for (int i = 0; i < localMenu.length && i < firestoreMenu.length; i++) {
+      for (int i = 0; i < localMenu.length && i < firestoreMenus.length; i++) {
         final local = localMenu[i];
-        final firestore = firestoreMenu[i];
+        final firestore = firestoreMenus[i];
 
-        if (local.nom != firestore.nom) {
-          errors.add('Menu item ${i} name mismatch: local="${local.nom}", firestore="${firestore.nom}"');
+        if (local.mainDish != firestore.mainDish) {
+          errors.add('Menu item ${i} name mismatch: local="${local.mainDish}", firestore="${firestore.mainDish}"');
         }
 
-        if (local.prix != firestore.prix) {
-          errors.add('Menu item ${i} price mismatch: local=${local.prix}, firestore=${firestore.prix}');
+        if (local.price != firestore.price) {
+          errors.add('Menu item ${i} price mismatch: local=${local.price}, firestore=${firestore.price}');
         }
 
-        // Note: PlatRecord doesn't have isActive property, skipping this validation
-        // if (local.isActive != firestore.isActive) {
-        //   errors.add('Menu item ${i} active status mismatch: local=${local.isActive}, firestore=${firestore.isActive}');
-        // }
+        if (local.mealType != firestore.mealType) {
+          errors.add('Menu item ${i} meal type mismatch: local="${local.mealType}", firestore="${firestore.mealType}"');
+        }
       }
 
       return ValidationResult(
@@ -204,10 +206,10 @@ class DataValidationService {
       final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
 
       final query = await FirebaseFirestore.instance
-          .collection('time_slot')
+          .collection('time_slots')
           .where('date', isGreaterThanOrEqualTo: startOfDay)
           .where('date', isLessThanOrEqualTo: endOfDay)
-          .where('isActive', isEqualTo: true)
+          .where('is_active', isEqualTo: true)
           .get();
 
       final firestoreSlots = query.docs
@@ -305,7 +307,7 @@ class DataValidationService {
   Future<ComprehensiveValidationResult> validateAllUserData(
     UserRecord? localUser,
     List<ReservationRecord> localReservations,
-    List<PlatRecord> localMenu,
+    List<DailyMenuRecord> localMenu,
     List<TimeSlotRecord> localTimeSlots,
     DateTime selectedDate,
   ) async {

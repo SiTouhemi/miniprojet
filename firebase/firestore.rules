@@ -69,5 +69,21 @@ service cloud.firestore {
       allow read: if isAuthenticated() && getUserRole() == 'admin';
       allow write: if false; // Only cloud functions
     }
+
+    // Payment requests - for D17 integration
+    match /payment_requests/{document} {
+      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || getUserRole() in ['admin', 'staff']);
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow update: if isAuthenticated() && (isOwner(resource.data.userId) || getUserRole() in ['admin', 'staff']);
+      allow delete: if isAuthenticated() && getUserRole() == 'admin';
+    }
+
+    // Notifications - for payment and system notifications
+    match /notifications/{document} {
+      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || getUserRole() in ['admin', 'staff']);
+      allow create: if false; // Only cloud functions can create notifications
+      allow update: if isAuthenticated() && isOwner(resource.data.userId); // Users can mark as read
+      allow delete: if isAuthenticated() && getUserRole() == 'admin';
+    }
   }
 }
