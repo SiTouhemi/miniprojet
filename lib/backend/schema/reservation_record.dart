@@ -67,6 +67,26 @@ class ReservationRecord extends FirestoreRecord {
   DateTime? get usedAt => _usedAt;
   bool hasUsedAt() => _usedAt != null;
 
+  // "qr_generated_at" field.
+  DateTime? _qrGeneratedAt;
+  DateTime? get qrGeneratedAt => _qrGeneratedAt;
+  bool hasQrGeneratedAt() => _qrGeneratedAt != null;
+
+  // "qr_expires_at" field.
+  DateTime? _qrExpiresAt;
+  DateTime? get qrExpiresAt => _qrExpiresAt;
+  bool hasQrExpiresAt() => _qrExpiresAt != null;
+
+  // "scanned_by" field.
+  String? _scannedBy;
+  String get scannedBy => _scannedBy ?? '';
+  bool hasScannedBy() => _scannedBy != null;
+
+  // "scan_location" field.
+  String? _scanLocation;
+  String get scanLocation => _scanLocation ?? '';
+  bool hasScanLocation() => _scanLocation != null;
+
   // "capacity" field.
   int? _capacity;
   int get capacity => _capacity ?? 1;
@@ -83,6 +103,10 @@ class ReservationRecord extends FirestoreRecord {
     _paymentId = snapshotData['payment_id'] as String?;
     _createdAt = snapshotData['created_at'] as DateTime?;
     _usedAt = snapshotData['used_at'] as DateTime?;
+    _qrGeneratedAt = snapshotData['qr_generated_at'] as DateTime?;
+    _qrExpiresAt = snapshotData['qr_expires_at'] as DateTime?;
+    _scannedBy = snapshotData['scanned_by'] as String?;
+    _scanLocation = snapshotData['scan_location'] as String?;
     _capacity = castToType<int>(snapshotData['capacity']);
   }
 
@@ -131,6 +155,10 @@ Map<String, dynamic> createReservationRecordData({
   String? paymentId,
   DateTime? createdAt,
   DateTime? usedAt,
+  DateTime? qrGeneratedAt,
+  DateTime? qrExpiresAt,
+  String? scannedBy,
+  String? scanLocation,
   int? capacity,
 }) {
   final firestoreData = mapToFirestore(
@@ -145,6 +173,10 @@ Map<String, dynamic> createReservationRecordData({
       'payment_id': paymentId,
       'created_at': createdAt,
       'used_at': usedAt,
+      'qr_generated_at': qrGeneratedAt,
+      'qr_expires_at': qrExpiresAt,
+      'scanned_by': scannedBy,
+      'scan_location': scanLocation,
       'capacity': capacity,
     }.withoutNulls,
   );

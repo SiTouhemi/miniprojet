@@ -149,6 +149,20 @@ class AppTypography {
     fontWeight: semiBold,
     height: 1.2,
   );
+  
+  static const TextStyle buttonMedium = TextStyle(
+    fontFamily: bodyFontFamily,
+    fontSize: 16.0,
+    fontWeight: semiBold,
+    height: 1.2,
+  );
+  
+  static const TextStyle buttonLarge = TextStyle(
+    fontFamily: bodyFontFamily,
+    fontSize: 18.0,
+    fontWeight: semiBold,
+    height: 1.2,
+  );
 }
 
 /// Color system with semantic naming

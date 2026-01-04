@@ -10,6 +10,7 @@ import '/utils/app_logger.dart';
 import '/l10n/app_localizations.dart';
 import '/design_system/app_theme.dart';
 import '/config/app_config.dart';
+import '/student/qr_display/qr_display_widget.dart';
 
 /// Widget for managing user reservations with cancellation and modification
 /// Implements Requirements 5.5, 5.7 for reservation management
@@ -279,6 +280,14 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
     );
   }
 
+  void _showQRCode(ReservationRecord reservation) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => QRDisplayWidget(reservation: reservation),
+      ),
+    );
+  }
+
   Widget _buildReservationCard(ReservationRecord reservation, AppLocalizations l10n) {
     final now = DateTime.now();
     final hoursUntilMeal = reservation.creneaux?.difference(now).inHours ?? 0;
@@ -345,6 +354,24 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
                 color: hoursUntilMeal < 2 ? AppColors.error : AppColors.textSecondary,
               ),
             ),
+            // Show QR button for confirmed reservations
+            if (reservation.status == 'confirmed') ...[
+              AppSpacing.verticalMD,
+              SizedBox(
+                width: double.infinity,
+                child: FFButtonWidget(
+                  onPressed: () => _showQRCode(reservation),
+                  text: l10n.translate('show_qr'),
+                  icon: Icon(Icons.qr_code_2, size: AppIconSizes.md),
+                  options: FFButtonOptions(
+                    color: AppColors.success,
+                    textStyle: AppTypography.buttonMedium.copyWith(
+                      color: AppColors.textOnPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
             if (canModifyOrCancel) ...[
               AppSpacing.verticalMD,
               Row(

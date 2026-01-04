@@ -213,7 +213,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                         margin: EdgeInsets.only(bottom: 16.0),
                         child: ElevatedButton(
                           onPressed: () async {
-                            context.pushNamed('monjeya_scan');
+                            context.pushNamed('QRScanner');
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF00A4E4),

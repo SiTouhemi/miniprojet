@@ -84,6 +84,9 @@ dependencies:
   # QR Code generation and scanning
   qr_flutter: ^4.1.0
   mobile_scanner: ^5.2.3
+  
+  # Cryptography for QR code security
+  crypto: ^3.0.3
 
 dependency_overrides:
   http: 1.4.0

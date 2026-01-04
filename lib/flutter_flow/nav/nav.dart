@@ -19,6 +19,7 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/admins/time_slots/time_slots_widget.dart';
 import '/admins/reservation_list/reservation_list_widget.dart';
 import '/staff/monjeya_scan/monjeya_scan_widget.dart';
+import '/staff/qr_scanner/qr_scanner_widget.dart';
 
 export 'package:go_router/go_router.dart';
 export 'serialization_util.dart';
@@ -115,6 +116,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           requireAuth: true,
           allowedRoles: [UserRole.staff, UserRole.admin],
           builder: (context, params) => MonjeyaScanWidget(),
+        ),
+        FFRoute(
+          name: QRScannerWidget.routeName,
+          path: QRScannerWidget.routePath,
+          requireAuth: true,
+          allowedRoles: [UserRole.staff, UserRole.admin],
+          builder: (context, params) => QRScannerWidget(),
         ),
         FFRoute(
           name: MealManagementWidget.routeName,
