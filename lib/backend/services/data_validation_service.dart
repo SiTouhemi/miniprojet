@@ -149,8 +149,7 @@ class DataValidationService {
       // Query daily_menu collection instead of plat collection
       final query = await FirebaseFirestore.instance
           .collection('daily_menu')
-          .where('date', isGreaterThanOrEqualTo: startOfDay)
-          .where('date', isLessThanOrEqualTo: endOfDay)
+          .where('day_of_week', isEqualTo: date.weekday)
           .where('available', isEqualTo: true)
           .get();
 

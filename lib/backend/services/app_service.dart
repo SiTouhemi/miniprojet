@@ -209,10 +209,8 @@ class AppService {
       // Query daily_menu collection for today's menu
       final dailyMenus = await queryDailyMenuRecordOnce(
         queryBuilder: (query) => query
-            .where('date', isGreaterThanOrEqualTo: startOfDay)
-            .where('date', isLessThanOrEqualTo: endOfDay)
+            .where('day_of_week', isEqualTo: date.weekday)
             .where('available', isEqualTo: true)
-            .orderBy('date')
             .orderBy('meal_type'),
       );
 

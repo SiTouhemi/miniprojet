@@ -632,9 +632,9 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                         StreamBuilder<List<DailyMenuRecord>>(
                           stream: queryDailyMenuRecord(
                             queryBuilder: (dailyMenuRecord) => dailyMenuRecord
-                                .where('date', isGreaterThanOrEqualTo: DateTime.now().subtract(Duration(days: 1)))
+                                .where('day_of_week', isEqualTo: DateTime.now().weekday)
                                 .where('available', isEqualTo: true)
-                                .orderBy('date')
+                                .orderBy('meal_type')
                                 .limit(1),
                           ),
                           builder: (context, snapshot) {

@@ -213,11 +213,11 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "day_of_week",
+          "fieldPath": "available",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "available",
+          "fieldPath": "day_of_week",
           "order": "ASCENDING"
         },
         {

@@ -157,11 +157,11 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                   stream: queryDailyMenuRecord(
                     queryBuilder: (query) {
                       final weekStart = _getWeekStart(_model.selectedDate);
-                      final weekEnd = weekStart.add(Duration(days: 7));
+                      // Get all weekly menus (Monday to Saturday)
                       return query
-                          .where('date', isGreaterThanOrEqualTo: weekStart)
-                          .where('date', isLessThan: weekEnd)
-                          .orderBy('date');
+                          .where('available', isEqualTo: true)
+                          .orderBy('day_of_week')
+                          .orderBy('meal_type');
                     },
                   ),
                   builder: (context, snapshot) {
