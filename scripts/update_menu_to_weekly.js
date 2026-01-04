@@ -1,12 +1,14 @@
 // Script to update existing daily_menu documents to use day_of_week instead of date
-// Run this in Firebase Console or as a Cloud Function
+// Run this with Firebase Admin SDK
 
 const admin = require('firebase-admin');
+const serviceAccount = require('./service-account-key.json');
 
-// Initialize Firebase Admin (if not already initialized)
-if (!admin.apps.length) {
-    admin.initializeApp();
-}
+// Initialize Firebase Admin with service account
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    projectId: 'mafirstclienta'
+});
 
 const db = admin.firestore();
 
