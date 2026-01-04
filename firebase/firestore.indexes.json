@@ -199,7 +199,29 @@
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "date",
+          "fieldPath": "day_of_week",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "daily_menu",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "day_of_week",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "available",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "meal_type",
           "order": "ASCENDING"
         },
         {

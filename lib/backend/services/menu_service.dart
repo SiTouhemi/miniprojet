@@ -10,21 +10,27 @@ class MenuService {
   MenuService._();
 
   /// Get today's menu from daily_menu collection
+  /// Uses day of week (1=Monday, 2=Tuesday, ..., 6=Saturday, 7=Sunday)
   Future<List<DailyMenuRecord>> getTodaysMenu() async {
     try {
       final today = DateTime.now();
-      final startOfDay = DateTime(today.year, today.month, today.day);
-      final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
+      final dayOfWeek = today.weekday; // 1=Monday, 7=Sunday
+      
+      // Sunday (7) has no meals
+      if (dayOfWeek == 7) {
+        AppLogger.i('Sunday - no meals available', tag: 'MenuService');
+        return [];
+      }
 
       final snapshot = await FirebaseFirestore.instance
           .collection('daily_menu')
-          .where('date', isGreaterThanOrEqualTo: startOfDay)
-          .where('date', isLessThanOrEqualTo: endOfDay)
+          .where('day_of_week', isEqualTo: dayOfWeek)
           .where('available', isEqualTo: true)
-          .orderBy('date')
           .orderBy('meal_type')
           .get();
 
+      AppLogger.i('Found ${snapshot.docs.length} menus for day $dayOfWeek', tag: 'MenuService');
+      
       return snapshot.docs
           .map((doc) => DailyMenuRecord.fromSnapshot(doc))
           .toList();
@@ -35,17 +41,21 @@ class MenuService {
   }
 
   /// Get menu for a specific date
+  /// Uses day of week (1=Monday, 2=Tuesday, ..., 6=Saturday, 7=Sunday)
   Future<List<DailyMenuRecord>> getMenuForDate(DateTime date) async {
     try {
-      final startOfDay = DateTime(date.year, date.month, date.day);
-      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+      final dayOfWeek = date.weekday; // 1=Monday, 7=Sunday
+      
+      // Sunday (7) has no meals
+      if (dayOfWeek == 7) {
+        AppLogger.i('Sunday - no meals available', tag: 'MenuService');
+        return [];
+      }
 
       final snapshot = await FirebaseFirestore.instance
           .collection('daily_menu')
-          .where('date', isGreaterThanOrEqualTo: startOfDay)
-          .where('date', isLessThanOrEqualTo: endOfDay)
+          .where('day_of_week', isEqualTo: dayOfWeek)
           .where('available', isEqualTo: true)
-          .orderBy('date')
           .orderBy('meal_type')
           .get();
 
@@ -59,17 +69,20 @@ class MenuService {
   }
 
   /// Get real-time stream of today's menu
+  /// Uses day of week (1=Monday, 2=Tuesday, ..., 6=Saturday, 7=Sunday)
   Stream<List<DailyMenuRecord>> getTodaysMenuStream() {
     final today = DateTime.now();
-    final startOfDay = DateTime(today.year, today.month, today.day);
-    final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
+    final dayOfWeek = today.weekday; // 1=Monday, 7=Sunday
+    
+    // Sunday (7) has no meals
+    if (dayOfWeek == 7) {
+      return Stream.value([]);
+    }
 
     return FirebaseFirestore.instance
         .collection('daily_menu')
-        .where('date', isGreaterThanOrEqualTo: startOfDay)
-        .where('date', isLessThanOrEqualTo: endOfDay)
+        .where('day_of_week', isEqualTo: dayOfWeek)
         .where('available', isEqualTo: true)
-        .orderBy('date')
         .orderBy('meal_type')
         .snapshots()
         .map((snapshot) => snapshot.docs
@@ -78,16 +91,19 @@ class MenuService {
   }
 
   /// Get menu for a specific date with real-time updates
+  /// Uses day of week (1=Monday, 2=Tuesday, ..., 6=Saturday, 7=Sunday)
   Stream<List<DailyMenuRecord>> getMenuForDateStream(DateTime date) {
-    final startOfDay = DateTime(date.year, date.month, date.day);
-    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+    final dayOfWeek = date.weekday; // 1=Monday, 7=Sunday
+    
+    // Sunday (7) has no meals
+    if (dayOfWeek == 7) {
+      return Stream.value([]);
+    }
 
     return FirebaseFirestore.instance
         .collection('daily_menu')
-        .where('date', isGreaterThanOrEqualTo: startOfDay)
-        .where('date', isLessThanOrEqualTo: endOfDay)
+        .where('day_of_week', isEqualTo: dayOfWeek)
         .where('available', isEqualTo: true)
-        .orderBy('date')
         .orderBy('meal_type')
         .snapshots()
         .map((snapshot) => snapshot.docs
@@ -113,9 +129,93 @@ class MenuService {
     }
   }
 
-  /// Create a new daily menu
+  /// Get menu for a specific day of week (1=Monday, 7=Sunday)
+  Future<List<DailyMenuRecord>> getMenuForDayOfWeek(int dayOfWeek) async {
+    try {
+      // Sunday (7) has no meals
+      if (dayOfWeek == 7) {
+        AppLogger.i('Sunday - no meals available', tag: 'MenuService');
+        return [];
+      }
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection('daily_menu')
+          .where('day_of_week', isEqualTo: dayOfWeek)
+          .where('available', isEqualTo: true)
+          .orderBy('meal_type')
+          .get();
+
+      return snapshot.docs
+          .map((doc) => DailyMenuRecord.fromSnapshot(doc))
+          .toList();
+    } catch (e) {
+      AppLogger.e('Error fetching menu for day of week', error: e, tag: 'MenuService');
+      return [];
+    }
+  }
+
+  /// Get weekly menu (Monday to Saturday)
+  Future<Map<int, List<DailyMenuRecord>>> getWeeklyMenu() async {
+    try {
+      final weeklyMenu = <int, List<DailyMenuRecord>>{};
+      
+      // Get menus for Monday (1) to Saturday (6)
+      for (int dayOfWeek = 1; dayOfWeek <= 6; dayOfWeek++) {
+        final dayMenu = await getMenuForDayOfWeek(dayOfWeek);
+        weeklyMenu[dayOfWeek] = dayMenu;
+      }
+      
+      return weeklyMenu;
+    } catch (e) {
+      AppLogger.e('Error fetching weekly menu', error: e, tag: 'MenuService');
+      return {};
+    }
+  }
+
+  /// Helper method to get day name from day of week
+  static String getDayName(int dayOfWeek, {String locale = 'fr'}) {
+    switch (locale) {
+      case 'fr':
+        switch (dayOfWeek) {
+          case 1: return 'Lundi';
+          case 2: return 'Mardi';
+          case 3: return 'Mercredi';
+          case 4: return 'Jeudi';
+          case 5: return 'Vendredi';
+          case 6: return 'Samedi';
+          case 7: return 'Dimanche';
+          default: return 'Inconnu';
+        }
+      case 'en':
+        switch (dayOfWeek) {
+          case 1: return 'Monday';
+          case 2: return 'Tuesday';
+          case 3: return 'Wednesday';
+          case 4: return 'Thursday';
+          case 5: return 'Friday';
+          case 6: return 'Saturday';
+          case 7: return 'Sunday';
+          default: return 'Unknown';
+        }
+      case 'ar':
+        switch (dayOfWeek) {
+          case 1: return 'الاثنين';
+          case 2: return 'الثلاثاء';
+          case 3: return 'الأربعاء';
+          case 4: return 'الخميس';
+          case 5: return 'الجمعة';
+          case 6: return 'السبت';
+          case 7: return 'الأحد';
+          default: return 'غير معروف';
+        }
+      default:
+        return getDayName(dayOfWeek, locale: 'en');
+    }
+  }
+
+  /// Create a new daily menu with day of week
   Future<bool> createDailyMenu({
-    required DateTime date,
+    required int dayOfWeek,
     required String mealType,
     required String mainDish,
     required List<String> accompaniments,
@@ -126,7 +226,7 @@ class MenuService {
   }) async {
     try {
       await FirebaseFirestore.instance.collection('daily_menu').add({
-        'date': date,
+        'day_of_week': dayOfWeek,
         'meal_type': mealType,
         'main_dish': mainDish,
         'accompaniments': accompaniments,
@@ -200,14 +300,9 @@ class MenuService {
   /// Get menu statistics
   Future<Map<String, dynamic>> getMenuStats() async {
     try {
-      final today = DateTime.now();
-      final startOfWeek = today.subtract(Duration(days: today.weekday - 1));
-      final endOfWeek = startOfWeek.add(Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
-
       final snapshot = await FirebaseFirestore.instance
           .collection('daily_menu')
-          .where('date', isGreaterThanOrEqualTo: startOfWeek)
-          .where('date', isLessThanOrEqualTo: endOfWeek)
+          .where('available', isEqualTo: true)
           .get();
 
       final menus = snapshot.docs.map((doc) => DailyMenuRecord.fromSnapshot(doc)).toList();
@@ -226,8 +321,6 @@ class MenuService {
         'lunchMenus': lunchMenus,
         'dinnerMenus': dinnerMenus,
         'averagePrice': averagePrice,
-        'weekStart': startOfWeek,
-        'weekEnd': endOfWeek,
       };
     } catch (e) {
       AppLogger.e('Error fetching menu stats', error: e, tag: 'MenuService');

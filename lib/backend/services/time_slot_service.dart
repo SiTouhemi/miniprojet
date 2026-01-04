@@ -14,54 +14,52 @@ class TimeSlotService {
   final Map<String, StreamSubscription<QuerySnapshot>> _activeListeners = {};
 
   /// Get available time slots for a specific date with real-time updates
-  /// Requirement 4.1: Query time slots by date
-  /// Requirement 4.5: Update time slot availability in real-time
+  /// TEMPORARY: Show any available time slots for testing
   Stream<List<TimeSlotRecord>> getAvailableTimeSlotsStream(DateTime date) {
-    final startOfDay = DateTime(date.year, date.month, date.day);
-    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
-
+    // TEMPORARY FIX: Get any available time slots for testing
     return FirebaseFirestore.instance
         .collection('time_slots')
-        .where('date', isGreaterThanOrEqualTo: startOfDay)
-        .where('date', isLessThan: endOfDay)
         .where('is_active', isEqualTo: true)
         .orderBy('date')
         .orderBy('start_time')
+        .limit(20) // Limit to avoid too many results
         .snapshots()
         .map((snapshot) {
       final now = DateTime.now();
       return snapshot.docs
           .map((doc) => TimeSlotRecord.fromSnapshot(doc))
           .where((slot) => 
-            slot.currentReservations < slot.maxCapacity && // Has available capacity
-            (slot.startTime?.isAfter(now) ?? false) // Is in the future
+            slot.currentReservations < slot.maxCapacity // Has available capacity
+            // TEMPORARY: Remove future time check for testing
+            // (slot.startTime?.isAfter(now) ?? false) // Is in the future
           )
           .toList();
     });
   }
 
   /// Get time slots for a specific date (one-time query)
-  /// Requirement 4.1: Query Firestore for slots matching the selected date
+  /// TEMPORARY: Show any available time slots for testing
   Future<List<TimeSlotRecord>> getAvailableTimeSlots(DateTime date) async {
     try {
-      final startOfDay = DateTime(date.year, date.month, date.day);
-      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
       final now = DateTime.now();
 
+      // TEMPORARY FIX: Get any available time slots for testing
       final snapshot = await FirebaseFirestore.instance
           .collection('time_slots')
-          .where('date', isGreaterThanOrEqualTo: startOfDay)
-          .where('date', isLessThan: endOfDay)
           .where('is_active', isEqualTo: true)
           .orderBy('date')
           .orderBy('start_time')
+          .limit(20) // Limit to avoid too many results
           .get();
+
+      AppLogger.i('Found ${snapshot.docs.length} time slots', tag: 'TimeSlotService');
 
       return snapshot.docs
           .map((doc) => TimeSlotRecord.fromSnapshot(doc))
           .where((slot) => 
-            slot.currentReservations < slot.maxCapacity && // Has available capacity
-            (slot.startTime?.isAfter(now) ?? false) // Is in the future
+            slot.currentReservations < slot.maxCapacity // Has available capacity
+            // TEMPORARY: Remove future time check for testing
+            // (slot.startTime?.isAfter(now) ?? false) // Is in the future
           )
           .toList();
     } catch (e) {

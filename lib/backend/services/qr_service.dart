@@ -16,7 +16,7 @@ class QRService {
   Future<Map<String, dynamic>> generateQRCode({
     required String reservationId,
     required String userId,
-    required DateTime mealTime,
+    required DateTime creneaux,
     required String mealType,
   }) async {
     try {
@@ -50,14 +50,14 @@ class QRService {
       final user = UserRecord.fromSnapshot(userDoc);
       
       final now = DateTime.now();
-      final expiresAt = mealTime.add(const Duration(minutes: 30));
+      final expiresAt = creneaux.add(const Duration(minutes: 30));
 
       // Create QR data payload
       final qrData = {
         'type': 'ISETCOM_RESERVATION',
         'reservationId': reservationId,
         'userId': userId,
-        'mealTime': mealTime.toIso8601String(),
+        'creneaux': creneaux.toIso8601String(),
         'mealType': mealType,
         'studentName': user.displayName.isNotEmpty ? user.displayName : user.nom,
         'studentClass': user.classe,

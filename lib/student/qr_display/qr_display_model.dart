@@ -84,7 +84,7 @@ class QRDisplayModel extends ChangeNotifier {
       final result = await _qrService.generateQRCode(
         reservationId: _reservation!.reference.id,
         userId: _reservation!.userId,
-        mealTime: _reservation!.creneaux!,
+        creneaux: _reservation!.creneaux!,
         mealType: _reservation!.type,
       );
 

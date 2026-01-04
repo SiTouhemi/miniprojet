@@ -117,7 +117,7 @@ Added to `pubspec.yaml`:
   "type": "ISETCOM_RESERVATION",
   "reservationId": "abc123",
   "userId": "user456",
-  "mealTime": "2025-01-04T12:00:00Z",
+  "creneaux": "2025-01-04T12:00:00Z",
   "mealType": "lunch",
   "studentName": "Ahmed Ben Ali",
   "studentClass": "L3 INFO",
