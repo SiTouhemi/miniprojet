@@ -182,3 +182,7 @@ pids
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
+# Firebase service account keys (sensitive)
+scripts/service-account-key.json
+**/service-account-key.json
+firebase-adminsdk-*.json
