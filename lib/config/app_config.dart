@@ -5,12 +5,23 @@ class AppConfig {
   static const String institutionName = 'ISETCOM Restaurant';
   static const String institutionSubtitle = 'Restaurant Universitaire ISET';
   static const String systemName = 'Système de Réservation';
-  static const String logoAssetPath = 'assets/images/logo_iset_com.jpg';
+  
+  // Asset paths
+  static const Map<String, String> assets = {
+    'logo': 'assets/images/logo_iset_com.jpg',
+    'placeholder_user': 'assets/images/user_placeholder.png',
+    'empty_state': 'assets/images/empty_state.png',
+  };
+  
+  // Network images (fallback URLs)
+  static const Map<String, String> networkImages = {
+    'logo_fallback': 'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/bada-r5ikqy/assets/cnndd49655hs/logo_iset_com.jpg',
+  };
   
   // Currency & Pricing
   static const String currency = 'DT';
   static const String currencySymbol = 'DT';
-  static const int priceDecimalPlaces = 2;
+  static const int priceDecimalPlaces = 3; // Changed to 3 for Tunisian Dinar precision
   
   // Business Rules
   static const int cancellationWindowHours = 2;
@@ -25,66 +36,24 @@ class AppConfig {
   static const bool enablePerformanceMonitoring = true;
   static const bool enableAnalytics = isProduction;
   
-  // Colors (should eventually move to theme)
+  // Legacy color values (kept for backward compatibility)
   static const int primaryColorValue = 0xFF005BAA;
   static const int accentColorValue = 0xFF00A4E4;
   static const int successColorValue = 0xFF00A855;
   static const int warningColorValue = 0xFFFF6B35;
   static const int errorColorValue = 0xFFE74C3C;
   
-  // Status Labels (should eventually move to i18n)
-  static const Map<String, String> statusLabels = {
-    'confirmed': 'Confirmé',
-    'pending': 'En attente',
-    'cancelled': 'Annulé',
-    'used': 'Utilisé',
-    'expired': 'Expiré',
-  };
-  
-  // UI Labels (should eventually move to i18n)
-  static const Map<String, String> labels = {
-    'current_balance': 'Solde Actuel',
-    'choose_time_slot': 'Choisir un Créneau',
-    'daily_menu': 'Plat du Jour',
-    'quick_actions': 'Actions Rapides',
-    'reservation_details': 'Détails de votre réservation',
-    'no_active_reservation': 'Aucune réservation active',
-    'no_reservations_found': 'Aucune réservation trouvée',
-    'no_slots_available': 'Aucun créneau disponible pour le moment',
-    'no_menu_available': 'Aucun menu disponible pour aujourd\'hui',
-    'reservation_confirmed': 'Réservation confirmée !',
-    'ticket_generated': 'Votre ticket repas a été généré avec succès',
-    'present_qr_code': 'Présentez ce code à l\'entrée du restaurant',
-    'arrive_on_time': 'Veuillez arriver à l\'heure de votre créneau',
-  };
-  
-  // Button Labels (should eventually move to i18n)
-  static const Map<String, String> buttons = {
-    'reserve': 'Réserver',
-    'cancel': 'Annuler',
-    'modify': 'Modifier',
-    'refresh': 'Actualiser',
-    'confirm': 'Confirmer',
-    'back_to_home': 'Retour à l\'accueil',
-    'view_history': 'Voir l\'historique',
-    'view_qr': 'Voir le QR Code',
-  };
-  
   // Helper methods
   static String formatPrice(double price) {
     return '${price.toStringAsFixed(priceDecimalPlaces)} $currency';
   }
   
-  static String getStatusLabel(String status) {
-    return statusLabels[status] ?? status;
+  static String getAsset(String key) {
+    return assets[key] ?? '';
   }
   
-  static String getLabel(String key) {
-    return labels[key] ?? key;
-  }
-  
-  static String getButton(String key) {
-    return buttons[key] ?? key;
+  static String getNetworkImage(String key) {
+    return networkImages[key] ?? '';
   }
   
   static bool isLowAvailability(int availableSpots) {

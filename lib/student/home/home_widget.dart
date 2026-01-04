@@ -1,6 +1,5 @@
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/app_state.dart';
@@ -9,8 +8,9 @@ import '/utils/error_handler.dart';
 import '/utils/app_logger.dart';
 import '/widgets/logout_dialog.dart';
 import '/config/app_config.dart';
+import '/l10n/app_localizations.dart';
+import '/design_system/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'home_model.dart';
 export 'home_model.dart';
@@ -86,13 +86,14 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Future<void> _handleRefresh() async {
     final appState = Provider.of<FFAppState>(context, listen: false);
+    final l10n = AppLocalizations.of(context)!;
     
     try {
       await appState.refreshAll();
       _errorHandler.showError(
         context,
-        'Données actualisées avec succès',
-        duration: Duration(seconds: 2),
+        l10n.translate('data_refreshed'),
+        duration: const Duration(seconds: 2),
       );
     } catch (e) {
       _errorHandler.showError(
@@ -105,6 +106,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   void _handleQRCodeAccess(FFAppState appState) {
+    final l10n = AppLocalizations.of(context)!;
+    
     try {
       final upcomingReservations = appState.getUpcomingReservations();
       if (upcomingReservations.isNotEmpty) {
@@ -112,8 +115,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       } else {
         _errorHandler.showError(
           context,
-          'Aucune réservation confirmée trouvée',
-          duration: Duration(seconds: 3),
+          l10n.translate('no_confirmed_reservations'),
+          duration: const Duration(seconds: 3),
         );
       }
     } catch (e) {
@@ -145,6 +148,8 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Consumer<FFAppState>(
       builder: (context, appState, _) {
         final user = appState.currentUser;
@@ -156,30 +161,28 @@ class _HomeWidgetState extends State<HomeWidget> {
           },
           child: Scaffold(
             key: scaffoldKey,
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.background,
             appBar: AppBar(
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.background,
               automaticallyImplyLeading: false,
               title: Text(
-                AppConfig.institutionName,
-                style: FlutterFlowTheme.of(context).headlineMedium.override(
-                      fontFamily: 'Inter Tight',
-                      color: Color(AppConfig.primaryColorValue),
-                      letterSpacing: 0.0,
-                      fontWeight: FontWeight.w600,
-                    ),
+                l10n.appName,
+                style: AppTypography.h4.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: AppTypography.semiBold,
+                ),
               ),
               actions: [
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 16.0, 0.0),
+                  padding: const EdgeInsets.only(right: AppSpacing.md),
                   child: FlutterFlowIconButton(
-                    borderRadius: 20.0,
+                    borderRadius: AppBorders.radiusLG,
                     buttonSize: 40.0,
-                    fillColor: Colors.red.shade50,
+                    fillColor: AppColors.errorLight.withValues(alpha: 0.1),
                     icon: Icon(
                       Icons.logout,
-                      color: Colors.red.shade600,
-                      size: 24.0,
+                      color: AppColors.error,
+                      size: AppIconSizes.lg,
                     ),
                     onPressed: () => LogoutDialog.handleLogout(context),
                   ),
@@ -196,38 +199,32 @@ class _HomeWidgetState extends State<HomeWidget> {
                   if (appState.lastError != null)
                     Container(
                       width: double.infinity,
-                      padding: EdgeInsets.all(12.0),
-                      color: Colors.red.shade600,
+                      padding: AppSpacing.paddingMD,
+                      color: AppColors.error,
                       child: Row(
                         children: [
                           Icon(
                             Icons.error_outline,
-                            color: Colors.white,
-                            size: 16.0,
+                            color: AppColors.textOnPrimary,
+                            size: AppIconSizes.md,
                           ),
-                          SizedBox(width: 8.0),
+                          AppSpacing.horizontalSM,
                           Expanded(
                             child: Text(
                               appState.lastError!,
-                              style: FlutterFlowTheme.of(context)
-                                  .bodySmall
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    color: Colors.white,
-                                  ),
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.textOnPrimary,
+                              ),
                             ),
                           ),
                           TextButton(
                             onPressed: _handleRefresh,
                             child: Text(
-                              'Réessayer',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodySmall
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              l10n.retry,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.textOnPrimary,
+                                fontWeight: AppTypography.bold,
+                              ),
                             ),
                           ),
                         ],
@@ -241,49 +238,45 @@ class _HomeWidgetState extends State<HomeWidget> {
                   Expanded(
                     child: _errorHandler.buildLoadingWithError(
                       isLoading: _isInitializing,
-                      error: _isInitializing ? null : (user == null ? 'Impossible de charger les données utilisateur' : null),
+                      error: _isInitializing ? null : (user == null ? l10n.translate('unable_to_load_user_data') : null),
                       onRetry: _initializeUserData,
-                      loadingMessage: 'Chargement des données utilisateur...',
+                      loadingMessage: l10n.translate('loading_user_data'),
                       child: RefreshIndicator(
                         onRefresh: _handleRefresh,
                         child: Padding(
-                          padding: EdgeInsets.all(16.0),
+                          padding: AppSpacing.paddingMD,
                           child: SingleChildScrollView(
-                            physics: AlwaysScrollableScrollPhysics(),
+                            physics: const AlwaysScrollableScrollPhysics(),
                             child: Column(
                               mainAxisSize: MainAxisSize.max,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SizedBox(height: 16.0),
+                                AppSpacing.verticalMD,
                                 
                                 // User greeting with enhanced data validation
-                                _buildUserGreeting(user),
+                                _buildUserGreeting(user, l10n),
                                 
-                                SizedBox(height: 24.0),
+                                AppSpacing.verticalLG,
                                 
                                 // Balance card with real-time data and validation
-                                _buildBalanceCard(user),
+                                _buildBalanceCard(user, l10n),
                                 
-                                SizedBox(height: 24.0),
+                                AppSpacing.verticalLG,
                                 
                                 Text(
-                                  AppConfig.getLabel('quick_actions'),
-                                  style: FlutterFlowTheme.of(context).titleMedium.override(
-                                        fontFamily: 'Inter Tight',
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                  l10n.translate('quick_actions'),
+                                  style: AppTypography.h5,
                                 ),
                                 
-                                SizedBox(height: 16.0),
+                                AppSpacing.verticalMD,
                                 
                                 // Enhanced action cards with error handling
-                                _buildActionCards(appState),
+                                _buildActionCards(appState, l10n),
                                 
-                                SizedBox(height: 24.0),
+                                AppSpacing.verticalLG,
                                 
                                 // Today's menu section with error handling
-                                _buildTodaysMenu(appState),
+                                _buildTodaysMenu(appState, l10n),
                               ],
                             ),
                           ),
@@ -300,7 +293,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
-  Widget _buildUserGreeting(UserRecord? user) {
+  Widget _buildUserGreeting(UserRecord? user, AppLocalizations l10n) {
     return Row(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -312,37 +305,27 @@ class _HomeWidgetState extends State<HomeWidget> {
             children: [
               Text(
                 user != null 
-                    ? 'Bonjour, ${user.nom.isNotEmpty ? user.nom : user.displayName}'
-                    : 'Bonjour, Utilisateur',
-                style: FlutterFlowTheme.of(context)
-                    .headlineMedium
-                    .override(
-                      fontFamily: 'Inter Tight',
-                      letterSpacing: 0.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    ? l10n.translate('greeting', params: {
+                        'name': user.nom.isNotEmpty ? user.nom : user.displayName
+                      })
+                    : l10n.translate('greeting_default'),
+                style: AppTypography.h3.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
               Text(
-                AppConfig.institutionSubtitle,
-                style: FlutterFlowTheme.of(context)
-                    .bodyMedium
-                    .override(
-                      fontFamily: 'Inter',
-                      color: FlutterFlowTheme.of(context)
-                          .secondaryText,
-                      letterSpacing: 0.0,
-                    ),
+                l10n.appSubtitle,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
               if (user?.classe != null && user!.classe.isNotEmpty)
                 Text(
-                  'Classe: ${user.classe}',
-                  style: FlutterFlowTheme.of(context)
-                      .bodySmall
-                      .override(
-                        fontFamily: 'Inter',
-                        color: FlutterFlowTheme.of(context).primary,
-                        fontWeight: FontWeight.w600,
-                      ),
+                  l10n.translate('class_label', params: {'class': user.classe}),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: AppTypography.semiBold,
+                  ),
                 ),
             ],
           ),
@@ -350,14 +333,14 @@ class _HomeWidgetState extends State<HomeWidget> {
         Container(
           width: 80.0,
           height: 80.0,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.transparent,
             shape: BoxShape.circle,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(40.0),
             child: Image.asset(
-              AppConfig.logoAssetPath,
+              AppConfig.getAsset('logo'),
               width: 80.0,
               height: 80.0,
               fit: BoxFit.contain,
@@ -365,7 +348,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 return Icon(
                   Icons.school,
                   size: 40,
-                  color: Color(AppConfig.primaryColorValue),
+                  color: AppColors.primary,
                 );
               },
             ),
@@ -375,21 +358,16 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
-  Widget _buildBalanceCard(UserRecord? user) {
+  Widget _buildBalanceCard(UserRecord? user, AppLocalizations l10n) {
     return Container(
       width: double.infinity,
       height: 140.0,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF052753), Color(0xFF1E46E)],
-          stops: [0.0, 1.0],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16.0),
+      decoration: const BoxDecoration(
+        gradient: AppColors.balanceGradient,
+        borderRadius: AppBorders.borderLG,
       ),
       child: Padding(
-        padding: EdgeInsets.all(20.0),
+        padding: AppSpacing.paddingLG,
         child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -400,46 +378,34 @@ class _HomeWidgetState extends State<HomeWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    AppConfig.getLabel('current_balance'),
-                    style: FlutterFlowTheme.of(context)
-                        .bodyMedium
-                        .override(
-                          fontFamily: 'Inter Tight',
-                          color: Colors.white70,
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    l10n.translate('current_balance'),
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.textOnPrimary.withValues(alpha: 0.7),
+                      fontWeight: AppTypography.semiBold,
+                    ),
                   ),
                   Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(
-                        0.0, 8.0, 0.0, 0.0),
+                    padding: const EdgeInsets.only(top: AppSpacing.sm),
                     child: Text(
                       user != null 
                         ? AppConfig.formatPrice(user.pocket)
                         : AppConfig.formatPrice(0.0),
-                      style: FlutterFlowTheme.of(context)
-                          .headlineMedium
-                          .override(
-                            fontFamily: 'Inter Tight',
-                            color: Colors.white,
-                            letterSpacing: 0.0,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: AppTypography.h3.copyWith(
+                        color: AppColors.textOnPrimary,
+                        fontWeight: AppTypography.bold,
+                      ),
                     ),
                   ),
                   if (user != null)
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
-                          0.0, 4.0, 0.0, 0.0),
+                      padding: const EdgeInsets.only(top: AppSpacing.xs),
                       child: Text(
-                        '${user.tickets} ticket${user.tickets != 1 ? 's' : ''} disponible${user.tickets != 1 ? 's' : ''}',
-                        style: FlutterFlowTheme.of(context)
-                            .bodySmall
-                            .override(
-                              fontFamily: 'Inter',
-                              color: Colors.white70,
-                              letterSpacing: 0.0,
-                            ),
+                        l10n.translate('tickets_available', params: {
+                          'count': user.tickets.toString()
+                        }),
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textOnPrimary.withValues(alpha: 0.7),
+                        ),
                       ),
                     ),
                 ],
@@ -451,13 +417,13 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
-  Widget _buildActionCards(FFAppState appState) {
+  Widget _buildActionCards(FFAppState appState, AppLocalizations l10n) {
     return GridView(
       padding: EdgeInsets.zero,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 12.0,
-        mainAxisSpacing: 12.0,
+        crossAxisSpacing: AppSpacing.md,
+        mainAxisSpacing: AppSpacing.md,
         childAspectRatio: 1.5,
       ),
       primary: false,
@@ -465,119 +431,29 @@ class _HomeWidgetState extends State<HomeWidget> {
       scrollDirection: Axis.vertical,
       children: [
         // Reservation card with error handling
-        InkWell(
+        _buildActionCard(
+          icon: Icons.restaurant_menu,
+          iconColor: AppColors.primary,
+          title: l10n.translate('reserve_meal'),
+          subtitle: l10n.translate('reserve_meal_subtitle'),
           onTap: _handleReservationAccess,
-          child: Container(
-            decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).secondaryBackground,
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 4.0,
-                  color: Color(0x1A000000),
-                  offset: Offset(0.0, 2.0),
-                )
-              ],
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.restaurant_menu,
-                    color: FlutterFlowTheme.of(context).primary,
-                    size: 32.0,
-                  ),
-                  SizedBox(height: 8.0),
-                  Text(
-                    'Réserver Repas',
-                    textAlign: TextAlign.center,
-                    style: FlutterFlowTheme.of(context)
-                        .titleSmall
-                        .override(
-                          fontFamily: 'Inter Tight',
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  Text(
-                    'Réservez votre repas',
-                    textAlign: TextAlign.center,
-                    style: FlutterFlowTheme.of(context)
-                        .bodySmall
-                        .override(
-                          fontFamily: 'Inter',
-                          color: FlutterFlowTheme.of(context)
-                              .secondaryText,
-                          letterSpacing: 0.0,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ),
         
         // QR Code card with enhanced error handling
-        InkWell(
+        _buildActionCard(
+          icon: Icons.qr_code,
+          iconColor: AppColors.secondary,
+          title: l10n.translate('qr_code'),
+          subtitle: l10n.translate('restaurant_access'),
           onTap: () => _handleQRCodeAccess(appState),
-          child: Container(
-            decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).secondaryBackground,
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 4.0,
-                  color: Color(0x1A000000),
-                  offset: Offset(0.0, 2.0),
-                )
-              ],
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.qr_code,
-                    color: FlutterFlowTheme.of(context).tertiary,
-                    size: 32.0,
-                  ),
-                  SizedBox(height: 8.0),
-                  Text(
-                    'Code QR',
-                    textAlign: TextAlign.center,
-                    style: FlutterFlowTheme.of(context)
-                        .titleSmall
-                        .override(
-                          fontFamily: 'Inter Tight',
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  Text(
-                    'Accès restaurant',
-                    textAlign: TextAlign.center,
-                    style: FlutterFlowTheme.of(context)
-                        .bodySmall
-                        .override(
-                          fontFamily: 'Inter',
-                          color: FlutterFlowTheme.of(context)
-                              .secondaryText,
-                          letterSpacing: 0.0,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ),
         
         // History card
-        InkWell(
+        _buildActionCard(
+          icon: Icons.history,
+          iconColor: AppColors.secondary,
+          title: l10n.translate('history'),
+          subtitle: l10n.translate('your_reservations'),
           onTap: () {
             try {
               context.pushNamed('history');
@@ -589,61 +465,14 @@ class _HomeWidgetState extends State<HomeWidget> {
               );
             }
           },
-          child: Container(
-            decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).secondaryBackground,
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 4.0,
-                  color: Color(0x1A000000),
-                  offset: Offset(0.0, 2.0),
-                )
-              ],
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.history,
-                    color: FlutterFlowTheme.of(context).tertiary,
-                    size: 32.0,
-                  ),
-                  SizedBox(height: 8.0),
-                  Text(
-                    'Historique',
-                    textAlign: TextAlign.center,
-                    style: FlutterFlowTheme.of(context)
-                        .titleSmall
-                        .override(
-                          fontFamily: 'Inter Tight',
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  Text(
-                    'Vos réservations',
-                    textAlign: TextAlign.center,
-                    style: FlutterFlowTheme.of(context)
-                        .bodySmall
-                        .override(
-                          fontFamily: 'Inter',
-                          color: FlutterFlowTheme.of(context)
-                              .secondaryText,
-                          letterSpacing: 0.0,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ),
         
         // Profile card
-        InkWell(
+        _buildActionCard(
+          icon: Icons.person,
+          iconColor: AppColors.primary,
+          title: l10n.translate('profile'),
+          subtitle: l10n.translate('my_information'),
           onTap: () {
             try {
               context.pushNamed('Profile');
@@ -655,86 +484,80 @@ class _HomeWidgetState extends State<HomeWidget> {
               );
             }
           },
-          child: Container(
-            decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).secondaryBackground,
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 4.0,
-                  color: Color(0x1A000000),
-                  offset: Offset(0.0, 2.0),
-                )
-              ],
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.person,
-                    color: FlutterFlowTheme.of(context).primary,
-                    size: 32.0,
-                  ),
-                  SizedBox(height: 8.0),
-                  Text(
-                    'Profil',
-                    textAlign: TextAlign.center,
-                    style: FlutterFlowTheme.of(context)
-                        .titleSmall
-                        .override(
-                          fontFamily: 'Inter Tight',
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  Text(
-                    'Mes informations',
-                    textAlign: TextAlign.center,
-                    style: FlutterFlowTheme.of(context)
-                        .bodySmall
-                        .override(
-                          fontFamily: 'Inter',
-                          color: FlutterFlowTheme.of(context)
-                              .secondaryText,
-                          letterSpacing: 0.0,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ),
       ],
     );
   }
 
-  Widget _buildTodaysMenu(FFAppState appState) {
+  Widget _buildActionCard({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: AppBorders.borderMD,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          boxShadow: AppShadows.medium,
+          borderRadius: AppBorders.borderMD,
+        ),
+        child: Padding(
+          padding: AppSpacing.paddingMD,
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: iconColor,
+                size: AppIconSizes.xl,
+              ),
+              AppSpacing.verticalSM,
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: AppTypography.h6.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTodaysMenu(FFAppState appState, AppLocalizations l10n) {
     final menu = appState.todaysMenu;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Menu du Jour',
-          style: FlutterFlowTheme.of(context).titleMedium.override(
-                fontFamily: 'Inter Tight',
-                letterSpacing: 0.0,
-                fontWeight: FontWeight.w600,
-              ),
+          l10n.translate('todays_menu'),
+          style: AppTypography.h5,
         ),
-        SizedBox(height: 16.0),
+        AppSpacing.verticalMD,
         if (menu.isEmpty)
           Container(
             width: double.infinity,
-            padding: EdgeInsets.all(16.0),
+            padding: AppSpacing.paddingMD,
             decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).secondaryBackground,
-              borderRadius: BorderRadius.circular(12.0),
+              color: AppColors.surface,
+              borderRadius: AppBorders.borderMD,
               border: Border.all(
-                color: Colors.grey[300]!,
+                color: AppColors.border,
                 width: 1.0,
               ),
             ),
@@ -742,16 +565,15 @@ class _HomeWidgetState extends State<HomeWidget> {
               children: [
                 Icon(
                   Icons.restaurant,
-                  size: 48,
-                  color: Colors.grey[400],
+                  size: AppIconSizes.xxxl,
+                  color: AppColors.gray400,
                 ),
-                SizedBox(height: 8),
+                AppSpacing.verticalSM,
                 Text(
-                  'Aucun menu disponible aujourd\'hui',
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        fontFamily: 'Inter',
-                        color: Colors.grey[600],
-                      ),
+                  l10n.translate('no_menu_available'),
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -759,18 +581,12 @@ class _HomeWidgetState extends State<HomeWidget> {
         else
           ...menu.map((dailyMenu) => Container(
             width: double.infinity,
-            margin: EdgeInsets.only(bottom: 8.0),
-            padding: EdgeInsets.all(16.0),
+            margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+            padding: AppSpacing.paddingMD,
             decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).secondaryBackground,
-              borderRadius: BorderRadius.circular(12.0),
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 2.0,
-                  color: Color(0x1A000000),
-                  offset: Offset(0.0, 1.0),
-                )
-              ],
+              color: AppColors.surface,
+              borderRadius: AppBorders.borderMD,
+              boxShadow: AppShadows.small,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -781,29 +597,26 @@ class _HomeWidgetState extends State<HomeWidget> {
                     children: [
                       Text(
                         dailyMenu.mainDish,
-                        style: FlutterFlowTheme.of(context).titleSmall.override(
-                              fontFamily: 'Inter Tight',
-                              fontWeight: FontWeight.w600,
-                            ),
+                        style: AppTypography.h6.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                       if (dailyMenu.description.isNotEmpty)
                         Text(
                           dailyMenu.description,
-                          style: FlutterFlowTheme.of(context).bodySmall.override(
-                                fontFamily: 'Inter',
-                                color: FlutterFlowTheme.of(context).secondaryText,
-                              ),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                     ],
                   ),
                 ),
                 Text(
-                  '${dailyMenu.price.toStringAsFixed(3)} TND',
-                  style: FlutterFlowTheme.of(context).titleSmall.override(
-                        fontFamily: 'Inter Tight',
-                        color: FlutterFlowTheme.of(context).primary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  AppConfig.formatPrice(dailyMenu.price),
+                  style: AppTypography.h6.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: AppTypography.bold,
+                  ),
                 ),
               ],
             ),
