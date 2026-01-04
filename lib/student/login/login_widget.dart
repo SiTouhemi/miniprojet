@@ -2,6 +2,9 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/auth/firebase_auth/auth_util.dart';
+import '/l10n/app_localizations.dart';
+import '/design_system/app_theme.dart';
+import '/config/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'login_model.dart';
@@ -59,6 +62,8 @@ class _LoginWidgetState extends State<LoginWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -66,12 +71,12 @@ class _LoginWidgetState extends State<LoginWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.background,
         body: SafeArea(
           top: true,
           child: SingleChildScrollView(
             child: Padding(
-              padding: EdgeInsets.all(14.0),
+              padding: AppSpacing.paddingMD,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -88,141 +93,82 @@ class _LoginWidgetState extends State<LoginWidget> {
                           width: 80.0,
                           height: 80.0,
                           decoration: BoxDecoration(
-                            color: Color(0xFF005BAA),
-                            borderRadius: BorderRadius.circular(16.0),
+                            color: AppColors.primary,
+                            borderRadius: AppBorders.borderLG,
                           ),
                           child: Stack(
                             children: [
                               Align(
                                 alignment: AlignmentDirectional(0.0, 0.0),
                                 child: Padding(
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: AppSpacing.paddingSM,
                                   child: Text(
                                     'ISET',
-                                    style: FlutterFlowTheme.of(context)
-                                        .headlineMedium
-                                        .override(
-                                          font: GoogleFonts.interTight(
-                                            fontWeight: FontWeight.bold,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .headlineMedium
-                                                    .fontStyle,
-                                          ),
-                                          color: Colors.white,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.bold,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .headlineMedium
-                                                  .fontStyle,
-                                        ),
+                                    style: AppTypography.h3.copyWith(
+                                      color: AppColors.textOnPrimary,
+                                      fontWeight: AppTypography.bold,
+                                    ),
                                   ),
                                 ),
                               ),
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(0.0),
                                 child: Image.network(
-                                  'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/bada-r5ikqy/assets/cnndd49655hs/logo_iset_com.jpg',
+                                  AppConfig.getNetworkImage('logo_fallback'),
                                   width: 480.84,
                                   height: 200.0,
                                   fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      Icons.school,
+                                      size: AppIconSizes.xl,
+                                      color: AppColors.textOnPrimary,
+                                    );
+                                  },
                                 ),
                               ),
                             ],
                           ),
                         ),
                         Text(
-                          'ISETCOM Restaurant',
+                          l10n.appName,
                           textAlign: TextAlign.center,
-                          style: FlutterFlowTheme.of(context)
-                              .headlineMedium
-                              .override(
-                                font: GoogleFonts.interTight(
-                                  fontWeight: FontWeight.w600,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .headlineMedium
-                                      .fontStyle,
-                                ),
-                                color: Color(0xFF005BAA),
-                                fontSize: 24.0,
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.w600,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .headlineMedium
-                                    .fontStyle,
-                              ),
+                          style: AppTypography.h4.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: AppTypography.semiBold,
+                          ),
                         ),
                         Text(
-                          'Système de Réservation',
+                          l10n.systemName,
                           textAlign: TextAlign.center,
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    color: Color(0xFF666666),
-                                    fontSize: 16.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
+                          style: AppTypography.bodyLarge.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
-                      ].divide(SizedBox(height: 16.0)),
+                      ].divide(AppSpacing.verticalMD),
                     ),
                     Padding(
-                      padding: EdgeInsets.all(24.0),
+                      padding: AppSpacing.paddingLG,
                       child: Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              blurRadius: 8.0,
-                              color: Color(0x1A000000),
-                              offset: Offset(
-                                0.0,
-                                2.0,
-                              ),
-                            )
-                          ],
-                          borderRadius: BorderRadius.circular(16.0),
+                          color: AppColors.surface,
+                          boxShadow: AppShadows.large,
+                          borderRadius: AppBorders.borderLG,
                         ),
                         child: Padding(
-                          padding: EdgeInsets.all(16.0),
+                          padding: AppSpacing.paddingMD,
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                'Connexion',
+                                l10n.translate('login'),
                                 textAlign: TextAlign.center,
-                                style: FlutterFlowTheme.of(context)
-                                    .headlineMedium
-                                    .override(
-                                      font: GoogleFonts.interTight(
-                                        fontWeight: FontWeight.w600,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .headlineMedium
-                                            .fontStyle,
-                                      ),
-                                      color: Color(0xFF005BAA),
-                                      fontSize: 28.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .headlineMedium
-                                          .fontStyle,
-                                    ),
+                                style: AppTypography.h3.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: AppTypography.semiBold,
+                                ),
                               ),
                               Form(
                                 key: _model.formKey,
@@ -238,121 +184,51 @@ class _LoginWidgetState extends State<LoginWidget> {
                                       textInputAction: TextInputAction.next,
                                       obscureText: false,
                                       decoration: InputDecoration(
-                                        labelText: 'Adresse e-mail',
-                                        labelStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              font: GoogleFonts.inter(
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
-                                              color: Color(0xFF005BAA),
-                                              letterSpacing: 0.0,
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                        hintText: 'votre.email@isetcom.tn',
-                                        hintStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              font: GoogleFonts.inter(
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
-                                              color: Color(0xFF999999),
-                                              letterSpacing: 0.0,
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
+                                        labelText: l10n.translate('email'),
+                                        labelStyle: AppTypography.bodyMedium.copyWith(
+                                          color: AppColors.primary,
+                                        ),
+                                        hintText: l10n.translate('email_placeholder'),
+                                        hintStyle: AppTypography.bodyMedium.copyWith(
+                                          color: AppColors.textTertiary,
+                                        ),
                                         enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color(0xFFE0E0E0),
+                                          borderSide: const BorderSide(
+                                            color: AppColors.border,
                                             width: 1.0,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
+                                          borderRadius: AppBorders.borderMD,
                                         ),
                                         focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color(0xFF005BAA),
+                                          borderSide: const BorderSide(
+                                            color: AppColors.primary,
                                             width: 1.0,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
+                                          borderRadius: AppBorders.borderMD,
                                         ),
                                         errorBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color(0xFFFF4444),
+                                          borderSide: const BorderSide(
+                                            color: AppColors.error,
                                             width: 1.0,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
+                                          borderRadius: AppBorders.borderMD,
                                         ),
                                         focusedErrorBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color(0xFFFF4444),
+                                          borderSide: const BorderSide(
+                                            color: AppColors.error,
                                             width: 1.0,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
+                                          borderRadius: AppBorders.borderMD,
                                         ),
                                         filled: true,
-                                        fillColor: Color(0xFFFAFAFA),
-                                        contentPadding:
-                                            EdgeInsetsDirectional.fromSTEB(
-                                                16.0, 16.0, 16.0, 16.0),
+                                        fillColor: AppColors.surfaceVariant,
+                                        contentPadding: AppInputSizes.padding,
                                       ),
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            font: GoogleFonts.inter(
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                            color: Color(0xFF000000),
-                                            fontSize: 16.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
+                                      style: AppTypography.bodyMedium.copyWith(
+                                        color: AppColors.textPrimary,
+                                      ),
                                       keyboardType: TextInputType.emailAddress,
-                                      cursorColor: Color(0xFF005BAA),
+                                      cursorColor: AppColors.primary,
                                       validator: _model.textController1Validator
                                           .asValidator(context),
                                     ),
@@ -364,93 +240,45 @@ class _LoginWidgetState extends State<LoginWidget> {
                                       textInputAction: TextInputAction.done,
                                       obscureText: !_model.passwordVisibility,
                                       decoration: InputDecoration(
-                                        labelText: 'Mot de passe',
-                                        labelStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              font: GoogleFonts.inter(
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
-                                              color: Color(0xFF005BAA),
-                                              letterSpacing: 0.0,
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                        hintText: 'Votre mot de passe',
-                                        hintStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              font: GoogleFonts.inter(
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
-                                              color: Color(0xFF999999),
-                                              letterSpacing: 0.0,
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
+                                        labelText: l10n.translate('password'),
+                                        labelStyle: AppTypography.bodyMedium.copyWith(
+                                          color: AppColors.primary,
+                                        ),
+                                        hintText: l10n.translate('password_placeholder'),
+                                        hintStyle: AppTypography.bodyMedium.copyWith(
+                                          color: AppColors.textTertiary,
+                                        ),
                                         enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color(0xFFE0E0E0),
+                                          borderSide: const BorderSide(
+                                            color: AppColors.border,
                                             width: 1.0,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
+                                          borderRadius: AppBorders.borderMD,
                                         ),
                                         focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color(0xFF005BAA),
+                                          borderSide: const BorderSide(
+                                            color: AppColors.primary,
                                             width: 1.0,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
+                                          borderRadius: AppBorders.borderMD,
                                         ),
                                         errorBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color(0xFFFF4444),
+                                          borderSide: const BorderSide(
+                                            color: AppColors.error,
                                             width: 1.0,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
+                                          borderRadius: AppBorders.borderMD,
                                         ),
                                         focusedErrorBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color(0xFFFF4444),
+                                          borderSide: const BorderSide(
+                                            color: AppColors.error,
                                             width: 1.0,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
+                                          borderRadius: AppBorders.borderMD,
                                         ),
                                         filled: true,
-                                        fillColor: Color(0xFFFAFAFA),
-                                        contentPadding:
-                                            EdgeInsetsDirectional.fromSTEB(
-                                                16.0, 16.0, 16.0, 16.0),
+                                        fillColor: AppColors.surfaceVariant,
+                                        contentPadding: AppInputSizes.padding,
                                         suffixIcon: InkWell(
                                           onTap: () => safeSetState(
                                             () => _model.passwordVisibility =
@@ -462,37 +290,15 @@ class _LoginWidgetState extends State<LoginWidget> {
                                             _model.passwordVisibility
                                                 ? Icons.visibility_outlined
                                                 : Icons.visibility_off_outlined,
-                                            color: Color(0xFF999999),
-                                            size: 20.0,
+                                            color: AppColors.textTertiary,
+                                            size: AppIconSizes.md,
                                           ),
                                         ),
                                       ),
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            font: GoogleFonts.inter(
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                            color: Color(0xFF000000),
-                                            fontSize: 16.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                      cursorColor: Color(0xFF005BAA),
+                                      style: AppTypography.bodyMedium.copyWith(
+                                        color: AppColors.textPrimary,
+                                      ),
+                                      cursorColor: AppColors.primary,
                                       validator: _model.textController2Validator
                                           .asValidator(context),
                                     ),
@@ -507,17 +313,17 @@ class _LoginWidgetState extends State<LoginWidget> {
                                             final result = await showDialog<bool>(
                                               context: context,
                                               builder: (context) => AlertDialog(
-                                                title: Text('Mot de passe oublié'),
+                                                title: Text(l10n.translate('forgot_password_title')),
                                                 content: Column(
                                                   mainAxisSize: MainAxisSize.min,
                                                   children: [
-                                                    Text('Entrez votre adresse e-mail pour recevoir un lien de réinitialisation.'),
-                                                    SizedBox(height: 16),
+                                                    Text(l10n.translate('forgot_password_message')),
+                                                    AppSpacing.verticalMD,
                                                     TextFormField(
                                                       controller: emailController,
                                                       decoration: InputDecoration(
-                                                        labelText: 'Adresse e-mail',
-                                                        border: OutlineInputBorder(),
+                                                        labelText: l10n.translate('email'),
+                                                        border: const OutlineInputBorder(),
                                                       ),
                                                       keyboardType: TextInputType.emailAddress,
                                                     ),
@@ -526,7 +332,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                                                 actions: [
                                                   TextButton(
                                                     onPressed: () => Navigator.of(context).pop(false),
-                                                    child: Text('Annuler'),
+                                                    child: Text(l10n.cancel),
                                                   ),
                                                   ElevatedButton(
                                                     onPressed: () async {
@@ -537,12 +343,12 @@ class _LoginWidgetState extends State<LoginWidget> {
                                                         ScaffoldMessenger.of(context).showSnackBar(
                                                           SnackBar(
                                                             content: Text(e.toString().replaceFirst('Exception: ', '')),
-                                                            backgroundColor: Colors.red,
+                                                            backgroundColor: AppColors.error,
                                                           ),
                                                         );
                                                       }
                                                     },
-                                                    child: Text('Envoyer'),
+                                                    child: Text(l10n.translate('send')),
                                                   ),
                                                 ],
                                               ),
@@ -551,39 +357,23 @@ class _LoginWidgetState extends State<LoginWidget> {
                                             if (result == true && mounted) {
                                               ScaffoldMessenger.of(context).showSnackBar(
                                                 SnackBar(
-                                                  content: Text('E-mail de réinitialisation envoyé ! Vérifiez votre boîte de réception.'),
-                                                  backgroundColor: Color(0xFF4CAF50),
+                                                  content: Text(l10n.translate('reset_email_sent')),
+                                                  backgroundColor: AppColors.success,
                                                 ),
                                               );
                                             }
                                           },
                                           child: Text(
-                                            'Mot de passe oublié ?',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  font: GoogleFonts.inter(
-                                                    fontWeight: FontWeight.w500,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontStyle,
-                                                  ),
-                                                  color: Color(0xFF00A4E4),
-                                                  fontSize: 14.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.w500,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
+                                            l10n.translate('forgot_password'),
+                                            style: AppTypography.bodyMedium.copyWith(
+                                              color: AppColors.secondary,
+                                              fontWeight: AppTypography.medium,
+                                            ),
                                           ),
                                         ),
                                       ],
                                     ),
-                                  ].divide(SizedBox(height: 16.0)),
+                                  ].divide(AppSpacing.verticalMD),
                                 ),
                               ),
                               FFButtonWidget(
@@ -617,15 +407,15 @@ class _LoginWidgetState extends State<LoginWidget> {
                                       switch (userRole) {
                                         case UserRole.admin:
                                           targetRoute = 'admin_dashboard';
-                                          welcomeMessage = 'Bienvenue, Administrateur !';
+                                          welcomeMessage = l10n.translate('greeting', params: {'name': 'Administrateur'});
                                           break;
                                         case UserRole.staff:
                                           targetRoute = 'StaffHome';
-                                          welcomeMessage = 'Bienvenue, Personnel !';
+                                          welcomeMessage = l10n.translate('greeting', params: {'name': 'Personnel'});
                                           break;
                                         case UserRole.student:
                                           targetRoute = 'home';
-                                          welcomeMessage = 'Bienvenue, Étudiant !';
+                                          welcomeMessage = l10n.translate('greeting', params: {'name': 'Étudiant'});
                                           break;
                                         case null:
                                           // Handle unknown role - this should not happen but we need to be safe
@@ -643,10 +433,12 @@ class _LoginWidgetState extends State<LoginWidget> {
                                         SnackBar(
                                           content: Text(
                                             welcomeMessage,
-                                            style: TextStyle(color: Colors.white),
+                                            style: AppTypography.bodyMedium.copyWith(
+                                              color: AppColors.textOnPrimary,
+                                            ),
                                           ),
-                                          backgroundColor: Color(0xFF4CAF50),
-                                          duration: Duration(seconds: 2),
+                                          backgroundColor: AppColors.success,
+                                          duration: const Duration(seconds: 2),
                                         ),
                                       );
                                     }
@@ -659,13 +451,15 @@ class _LoginWidgetState extends State<LoginWidget> {
                                         SnackBar(
                                           content: Text(
                                             errorMessage,
-                                            style: TextStyle(color: Colors.white),
+                                            style: AppTypography.bodyMedium.copyWith(
+                                              color: AppColors.textOnPrimary,
+                                            ),
                                           ),
-                                          backgroundColor: Color(0xFFFF4444),
-                                          duration: Duration(seconds: 4),
+                                          backgroundColor: AppColors.error,
+                                          duration: const Duration(seconds: 4),
                                           action: SnackBarAction(
-                                            label: 'Réessayer',
-                                            textColor: Colors.white,
+                                            label: l10n.retry,
+                                            textColor: AppColors.textOnPrimary,
                                             onPressed: () {
                                               // Clear password field and allow retry
                                               _model.textController2?.clear();
@@ -683,84 +477,53 @@ class _LoginWidgetState extends State<LoginWidget> {
                                     }
                                   }
                                 },
-                                text: _model.isLoading ? 'Connexion en cours...' : 'Se connecter',
+                                text: _model.isLoading ? l10n.translate('signing_in') : l10n.translate('sign_in'),
                                 icon: _model.isLoading 
                                   ? SizedBox(
-                                      width: 20,
-                                      height: 20,
+                                      width: AppIconSizes.md,
+                                      height: AppIconSizes.md,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.textOnPrimary),
                                       ),
                                     )
                                   : null,
                                 options: FFButtonOptions(
                                   width: double.infinity,
-                                  height: 50.0,
-                                  padding: EdgeInsets.all(8.0),
+                                  height: AppButtonSizes.heightLarge,
+                                  padding: AppButtonSizes.paddingLarge,
                                   iconPadding: EdgeInsetsDirectional.fromSTEB(
                                       0.0, 0.0, 0.0, 0.0),
-                                  color: Color(0xFF005BAA),
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .titleMedium
-                                      .override(
-                                        font: GoogleFonts.interTight(
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleMedium
-                                                  .fontStyle,
-                                        ),
-                                        color: Colors.white,
-                                        fontSize: 16.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.w600,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .titleMedium
-                                            .fontStyle,
-                                      ),
+                                  color: AppColors.primary,
+                                  textStyle: AppTypography.button.copyWith(
+                                    color: AppColors.textOnPrimary,
+                                  ),
                                   elevation: 2.0,
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: Colors.transparent,
                                     width: 1.0,
                                   ),
-                                  borderRadius: BorderRadius.circular(12.0),
+                                  borderRadius: AppBorders.borderMD,
                                 ),
                               ),
-                            ].divide(SizedBox(height: 24.0)),
+                            ].divide(AppSpacing.verticalLG),
                           ),
                         ),
                       ),
                     ),
-                  ].divide(SizedBox(height: 32.0)),
+                  ].divide(AppSpacing.verticalXL),
                 ),
                 Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Text(
-                      '© 2025 ISETCOM - Tous droits réservés',
+                      l10n.translate('copyright'),
                       textAlign: TextAlign.center,
-                      style: FlutterFlowTheme.of(context).bodySmall.override(
-                            font: GoogleFonts.inter(
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .bodySmall
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodySmall
-                                  .fontStyle,
-                            ),
-                            color: Color(0xFF999999),
-                            fontSize: 12.0,
-                            letterSpacing: 0.0,
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .bodySmall
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodySmall
-                                .fontStyle,
-                          ),
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
                     ),
-                  ].divide(SizedBox(height: 16.0)),
+                  ].divide(AppSpacing.verticalMD),
                 ),
               ],
             ),

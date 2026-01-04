@@ -7,6 +7,9 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/auth/firebase_auth/auth_util.dart';
 import '/utils/app_logger.dart';
+import '/l10n/app_localizations.dart';
+import '/design_system/app_theme.dart';
+import '/config/app_config.dart';
 
 /// Widget for managing user reservations with cancellation and modification
 /// Implements Requirements 5.5, 5.7 for reservation management
@@ -276,7 +279,7 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
     );
   }
 
-  Widget _buildReservationCard(ReservationRecord reservation) {
+  Widget _buildReservationCard(ReservationRecord reservation, AppLocalizations l10n) {
     final now = DateTime.now();
     final hoursUntilMeal = reservation.creneaux?.difference(now).inHours ?? 0;
     final canModifyOrCancel = hoursUntilMeal >= 2 && 
@@ -284,9 +287,9 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
                               (reservation.status == 'confirmed' || reservation.status == 'pending');
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: AppSpacing.marginMD.copyWith(top: AppSpacing.sm, bottom: AppSpacing.sm),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppSpacing.paddingMD,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -295,77 +298,81 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
               children: [
                 Text(
                   DateFormat('MMM dd, yyyy').format(reservation.creneaux!),
-                  style: FlutterFlowTheme.of(context).headlineSmall,
+                  style: AppTypography.h5.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: AppSpacing.paddingSM,
                   decoration: BoxDecoration(
                     color: _getStatusColor(reservation.status),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: AppBorders.borderMD,
                   ),
                   child: Text(
-                    reservation.status.toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                    l10n.translate('status_${reservation.status.toLowerCase()}'),
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textOnPrimary,
+                      fontWeight: AppTypography.bold,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            AppSpacing.verticalSM,
             Text(
-              'Time: ${DateFormat('HH:mm').format(reservation.creneaux!)}',
-              style: FlutterFlowTheme.of(context).bodyLarge,
+              '${l10n.translate('time_label')}: ${DateFormat('HH:mm').format(reservation.creneaux!)}',
+              style: AppTypography.bodyLarge.copyWith(
+                color: AppColors.textPrimary,
+              ),
             ),
             Text(
-              'Price: ${reservation.prix} TND',
-              style: FlutterFlowTheme.of(context).bodyLarge,
+              '${l10n.translate('price_label')}: ${AppConfig.formatPrice(reservation.prix)}',
+              style: AppTypography.bodyLarge.copyWith(
+                color: AppColors.textPrimary,
+              ),
             ),
             if (reservation.capacity > 1)
               Text(
-                'Capacity: ${reservation.capacity} person(s)',
-                style: FlutterFlowTheme.of(context).bodyMedium,
+                '${l10n.translate('capacity_label')}: ${reservation.capacity} ${l10n.translate('person_s')}',
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
-            const SizedBox(height: 12),
+            AppSpacing.verticalMD,
             Text(
-              'Hours until meal: $hoursUntilMeal',
-              style: FlutterFlowTheme.of(context).bodySmall.override(
-                fontFamily: 'Readex Pro',
-                color: hoursUntilMeal < 2 ? Colors.red : Colors.grey,
+              '${l10n.translate('hours_until_meal')}: $hoursUntilMeal',
+              style: AppTypography.bodySmall.copyWith(
+                color: hoursUntilMeal < 2 ? AppColors.error : AppColors.textSecondary,
               ),
             ),
             if (canModifyOrCancel) ...[
-              const SizedBox(height: 16),
+              AppSpacing.verticalMD,
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Expanded(
                     child: FFButtonWidget(
                       onPressed: _isProcessing ? null : () => _modifyReservation(reservation),
-                      text: 'Modify',
-                      icon: const Icon(Icons.edit, size: 16),
+                      text: l10n.translate('modify'),
+                      icon: Icon(Icons.edit, size: AppIconSizes.sm),
                       options: FFButtonOptions(
-                        color: FlutterFlowTheme.of(context).primary,
-                        textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                          fontFamily: 'Readex Pro',
-                          color: Colors.white,
+                        color: AppColors.primary,
+                        textStyle: AppTypography.buttonSmall.copyWith(
+                          color: AppColors.textOnPrimary,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  AppSpacing.horizontalMD,
                   Expanded(
                     child: FFButtonWidget(
                       onPressed: _isProcessing ? null : () => _cancelReservation(reservation),
-                      text: 'Cancel',
-                      icon: const Icon(Icons.cancel, size: 16),
+                      text: l10n.cancel,
+                      icon: Icon(Icons.cancel, size: AppIconSizes.sm),
                       options: FFButtonOptions(
-                        color: FlutterFlowTheme.of(context).error,
-                        textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                          fontFamily: 'Readex Pro',
-                          color: Colors.white,
+                        color: AppColors.error,
+                        textStyle: AppTypography.buttonSmall.copyWith(
+                          color: AppColors.textOnPrimary,
                         ),
                       ),
                     ),
@@ -373,18 +380,17 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
                 ],
               ),
             ] else ...[
-              const SizedBox(height: 16),
+              AppSpacing.verticalMD,
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: AppSpacing.paddingSM,
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
+                  color: AppColors.surfaceVariant,
+                  borderRadius: AppBorders.borderMD,
                 ),
                 child: Text(
-                  _getRestrictionMessage(reservation, hoursUntilMeal),
-                  style: FlutterFlowTheme.of(context).bodySmall.override(
-                    fontFamily: 'Readex Pro',
-                    color: Colors.grey[600],
+                  _getRestrictionMessage(reservation, hoursUntilMeal, l10n),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -410,37 +416,38 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
     }
   }
 
-  String _getRestrictionMessage(ReservationRecord reservation, int hoursUntilMeal) {
+  String _getRestrictionMessage(ReservationRecord reservation, int hoursUntilMeal, AppLocalizations l10n) {
     if (reservation.status == 'cancelled') {
-      return 'This reservation has been cancelled';
+      return l10n.translate('reservation_cancelled_status');
     }
     if (reservation.status == 'used') {
-      return 'This reservation has been used';
+      return l10n.translate('reservation_used_status');
     }
     if (reservation.creneaux!.isBefore(DateTime.now())) {
-      return 'Past reservations cannot be modified or cancelled';
+      return l10n.translate('past_reservations_message');
     }
     if (hoursUntilMeal < 2) {
-      return 'Cannot modify or cancel less than 2 hours before meal time';
+      return l10n.translate('two_hour_restriction');
     }
-    return 'Modification and cancellation not available';
+    return l10n.translate('modification_not_available');
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: FlutterFlowTheme.of(context).primary,
+        backgroundColor: AppColors.primary,
         title: Text(
-          'My Reservations',
-          style: FlutterFlowTheme.of(context).headlineMedium.override(
-            fontFamily: 'Outfit',
-            color: Colors.white,
+          l10n.translate('my_reservations'),
+          style: AppTypography.h4.copyWith(
+            color: AppColors.textOnPrimary,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
+            icon: Icon(Icons.refresh, color: AppColors.textOnPrimary),
             onPressed: _isLoading ? null : _loadUserReservations,
           ),
         ],
@@ -450,20 +457,22 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
           if (_errorMessage != null)
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              color: Colors.red[100],
+              padding: AppSpacing.paddingMD,
+              color: AppColors.errorLight.withValues(alpha: 0.1),
               child: Row(
                 children: [
-                  const Icon(Icons.error, color: Colors.red),
-                  const SizedBox(width: 8),
+                  Icon(Icons.error, color: AppColors.error),
+                  AppSpacing.horizontalSM,
                   Expanded(
                     child: Text(
                       _errorMessage!,
-                      style: const TextStyle(color: Colors.red),
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.error,
+                      ),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.red),
+                    icon: Icon(Icons.close, color: AppColors.error),
                     onPressed: () => setState(() => _errorMessage = null),
                   ),
                 ],
@@ -472,20 +481,22 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
           if (_successMessage != null)
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              color: Colors.green[100],
+              padding: AppSpacing.paddingMD,
+              color: AppColors.successLight.withValues(alpha: 0.1),
               child: Row(
                 children: [
-                  const Icon(Icons.check_circle, color: Colors.green),
-                  const SizedBox(width: 8),
+                  Icon(Icons.check_circle, color: AppColors.success),
+                  AppSpacing.horizontalSM,
                   Expanded(
                     child: Text(
                       _successMessage!,
-                      style: const TextStyle(color: Colors.green),
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.success,
+                      ),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.green),
+                    icon: Icon(Icons.close, color: AppColors.success),
                     onPressed: () => setState(() => _successMessage = null),
                   ),
                 ],
@@ -494,17 +505,22 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
           if (_isProcessing)
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              color: Colors.blue[100],
-              child: const Row(
+              padding: AppSpacing.paddingMD,
+              color: AppColors.infoLight.withValues(alpha: 0.1),
+              child: Row(
                 children: [
                   SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    width: AppIconSizes.md,
+                    height: AppIconSizes.md,
+                    child: const CircularProgressIndicator(strokeWidth: 2),
                   ),
-                  SizedBox(width: 12),
-                  Text('Processing...'),
+                  AppSpacing.horizontalMD,
+                  Text(
+                    'Processing...',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.info,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -518,23 +534,21 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
                           children: [
                             Icon(
                               Icons.event_busy,
-                              size: 64,
-                              color: Colors.grey[400],
+                              size: AppIconSizes.xxxl,
+                              color: AppColors.textTertiary,
                             ),
-                            const SizedBox(height: 16),
+                            AppSpacing.verticalMD,
                             Text(
-                              'No upcoming reservations',
-                              style: FlutterFlowTheme.of(context).headlineSmall.override(
-                                fontFamily: 'Outfit',
-                                color: Colors.grey[600],
+                              l10n.translate('no_upcoming_reservations'),
+                              style: AppTypography.h5.copyWith(
+                                color: AppColors.textSecondary,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            AppSpacing.verticalSM,
                             Text(
-                              'Make a reservation to see it here',
-                              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                fontFamily: 'Readex Pro',
-                                color: Colors.grey[500],
+                              l10n.translate('make_reservation_prompt'),
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: AppColors.textTertiary,
                               ),
                             ),
                           ],
@@ -543,7 +557,7 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
                     : ListView.builder(
                         itemCount: _userReservations.length,
                         itemBuilder: (context, index) {
-                          return _buildReservationCard(_userReservations[index]);
+                          return _buildReservationCard(_userReservations[index], l10n);
                         },
                       ),
           ),

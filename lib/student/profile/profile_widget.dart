@@ -3,6 +3,9 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
+import '/l10n/app_localizations.dart';
+import '/design_system/app_theme.dart';
+import '/config/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '/flutter_flow/app_state.dart';
@@ -81,16 +84,16 @@ class _ProfileWidgetState extends State<ProfileWidget> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Profile updated successfully'),
-            backgroundColor: FlutterFlowTheme.of(context).success,
+            content: Text(l10n.translate('profile_updated')),
+            backgroundColor: AppColors.success,
           ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error updating profile: ${e.toString()}'),
-          backgroundColor: FlutterFlowTheme.of(context).error,
+          content: Text('${l10n.translate('profile_update_error')}: ${e.toString()}'),
+          backgroundColor: AppColors.error,
         ),
       );
     } finally {
@@ -102,18 +105,18 @@ class _ProfileWidgetState extends State<ProfileWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
-      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: FlutterFlowTheme.of(context).primary,
+        backgroundColor: AppColors.primary,
         automaticallyImplyLeading: true,
         title: Text(
-          'Profile Settings',
-          style: FlutterFlowTheme.of(context).headlineMedium.override(
-                fontFamily: 'Outfit',
-                color: Colors.white,
-                fontSize: 22.0,
-              ),
+          l10n.translate('profile_settings'),
+          style: AppTypography.h4.copyWith(
+            color: AppColors.textOnPrimary,
+          ),
         ),
         centerTitle: false,
         elevation: 2.0,
@@ -131,35 +134,36 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                   children: [
                     Icon(
                       Icons.person_off,
-                      size: 64.0,
-                      color: FlutterFlowTheme.of(context).secondaryText,
+                      size: AppIconSizes.xxxl,
+                      color: AppColors.textSecondary,
                     ),
-                    SizedBox(height: 16.0),
+                    AppSpacing.verticalMD,
                     Text(
-                      'Please log in to view your profile',
-                      style: FlutterFlowTheme.of(context).headlineSmall,
+                      l10n.translate('login_to_view_profile'),
+                      style: AppTypography.h5.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
                     ),
-                    SizedBox(height: 16.0),
+                    AppSpacing.verticalMD,
                     FFButtonWidget(
                       onPressed: () {
                         context.pushNamed('Login');
                       },
-                      text: 'Go to Login',
+                      text: l10n.translate('go_to_login'),
                       options: FFButtonOptions(
-                        height: 40.0,
-                        padding: EdgeInsetsDirectional.fromSTEB(24.0, 0.0, 24.0, 0.0),
+                        height: AppButtonSizes.heightLarge,
+                        padding: AppButtonSizes.paddingLarge,
                         iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                        color: FlutterFlowTheme.of(context).primary,
-                        textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                              fontFamily: 'Readex Pro',
-                              color: Colors.white,
-                            ),
+                        color: AppColors.primary,
+                        textStyle: AppTypography.button.copyWith(
+                          color: AppColors.textOnPrimary,
+                        ),
                         elevation: 3.0,
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Colors.transparent,
                           width: 1.0,
                         ),
-                        borderRadius: BorderRadius.circular(8.0),
+                        borderRadius: AppBorders.borderMD,
                       ),
                     ),
                   ],
@@ -170,7 +174,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
             return Form(
               key: _formKey,
               child: SingleChildScrollView(
-                padding: EdgeInsets.all(16.0),
+                padding: AppSpacing.paddingMD,
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,18 +183,12 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                     Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                        boxShadow: [
-                          BoxShadow(
-                            blurRadius: 3.0,
-                            color: Color(0x33000000),
-                            offset: Offset(0.0, 1.0),
-                          )
-                        ],
-                        borderRadius: BorderRadius.circular(12.0),
+                        color: AppColors.surface,
+                        boxShadow: AppShadows.medium,
+                        borderRadius: AppBorders.borderMD,
                       ),
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: AppSpacing.paddingMD,
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
                           children: [
@@ -198,16 +196,16 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                               width: 60.0,
                               height: 60.0,
                               decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).primary,
+                                color: AppColors.primary,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
                                 Icons.person,
-                                color: Colors.white,
-                                size: 30.0,
+                                color: AppColors.textOnPrimary,
+                                size: AppIconSizes.xl,
                               ),
                             ),
-                            SizedBox(width: 16.0),
+                            AppSpacing.horizontalMD,
                             Expanded(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -215,21 +213,21 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                 children: [
                                   Text(
                                     user.displayName.isNotEmpty ? user.displayName : user.nom,
-                                    style: FlutterFlowTheme.of(context).headlineSmall,
+                                    style: AppTypography.h5.copyWith(
+                                      color: AppColors.textPrimary,
+                                    ),
                                   ),
                                   Text(
                                     user.email,
-                                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                      fontFamily: 'Readex Pro',
-                                      color: FlutterFlowTheme.of(context).secondaryText,
+                                    style: AppTypography.bodyMedium.copyWith(
+                                      color: AppColors.textSecondary,
                                     ),
                                   ),
                                   if (user.classe.isNotEmpty)
                                     Text(
-                                      'Class: ${user.classe}',
-                                      style: FlutterFlowTheme.of(context).bodySmall.override(
-                                        fontFamily: 'Readex Pro',
-                                        color: FlutterFlowTheme.of(context).primary,
+                                      l10n.translate('class_label', params: {'class': user.classe}),
+                                      style: AppTypography.bodySmall.copyWith(
+                                        color: AppColors.primary,
                                       ),
                                     ),
                                 ],
@@ -240,63 +238,48 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       ),
                     ),
 
-                    SizedBox(height: 24.0),
+                    AppSpacing.verticalLG,
 
                     // Balance Card Section
                     Container(
                       width: double.infinity,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFF4B39EF), Color(0xFF6366F1)],
-                          stops: [0.0, 1.0],
-                          begin: AlignmentDirectional(0.0, -1.0),
-                          end: AlignmentDirectional(0, 1.0),
-                        ),
-                        borderRadius: BorderRadius.circular(16.0),
+                      decoration: const BoxDecoration(
+                        gradient: AppColors.balanceGradient,
+                        borderRadius: AppBorders.borderLG,
                       ),
                       child: Padding(
-                        padding: EdgeInsets.all(20.0),
+                        padding: AppSpacing.paddingLG,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Solde Actuel',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    color: Colors.white70,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                              l10n.translate('current_balance'),
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: AppColors.textOnPrimary.withValues(alpha: 0.7),
+                                fontWeight: AppTypography.semiBold,
+                              ),
                             ),
-                            SizedBox(height: 8.0),
+                            AppSpacing.verticalSM,
                             Text(
                               user != null 
-                                ? '${user.pocket.toStringAsFixed(2)} DT'
-                                : '0.00 DT',
-                              style: FlutterFlowTheme.of(context)
-                                  .headlineMedium
-                                  .override(
-                                    fontFamily: 'Inter Tight',
-                                    color: Colors.white,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                ? AppConfig.formatPrice(user.pocket)
+                                : AppConfig.formatPrice(0.0),
+                              style: AppTypography.h3.copyWith(
+                                color: AppColors.textOnPrimary,
+                                fontWeight: AppTypography.bold,
+                              ),
                             ),
                             if (user != null)
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 0.0),
+                                padding: const EdgeInsets.only(top: AppSpacing.xs),
                                 child: Text(
-                                  '${user.tickets} ticket${user.tickets != 1 ? 's' : ''} disponible${user.tickets != 1 ? 's' : ''}',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        color: Colors.white70,
-                                        letterSpacing: 0.0,
-                                      ),
+                                  l10n.translate('tickets_available', params: {
+                                    'count': user.tickets.toString()
+                                  }),
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: AppColors.textOnPrimary.withValues(alpha: 0.7),
+                                  ),
                                 ),
                               ),
                           ],
@@ -304,209 +287,244 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       ),
                     ),
 
-                    SizedBox(height: 24.0),
+                    AppSpacing.verticalLG,
 
                     // Account Information Section
                     Text(
-                      'Account Information',
-                      style: FlutterFlowTheme.of(context).headlineSmall,
+                      l10n.translate('account_information'),
+                      style: AppTypography.h5.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
                     ),
-                    SizedBox(height: 16.0),
+                    AppSpacing.verticalMD,
 
                     // Name Field
                     TextFormField(
                       controller: _nameController,
                       decoration: InputDecoration(
-                        labelText: 'Full Name',
-                        labelStyle: FlutterFlowTheme.of(context).labelMedium,
-                        hintText: 'Enter your full name',
-                        hintStyle: FlutterFlowTheme.of(context).labelMedium,
+                        labelText: l10n.translate('full_name'),
+                        labelStyle: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        hintText: l10n.translate('enter_full_name'),
+                        hintStyle: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).alternate,
+                          borderSide: const BorderSide(
+                            color: AppColors.border,
                             width: 2.0,
                           ),
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: AppBorders.borderMD,
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).primary,
+                          borderSide: const BorderSide(
+                            color: AppColors.primary,
                             width: 2.0,
                           ),
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: AppBorders.borderMD,
                         ),
                         errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).error,
+                          borderSide: const BorderSide(
+                            color: AppColors.error,
                             width: 2.0,
                           ),
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: AppBorders.borderMD,
                         ),
                         focusedErrorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).error,
+                          borderSide: const BorderSide(
+                            color: AppColors.error,
                             width: 2.0,
                           ),
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: AppBorders.borderMD,
                         ),
-                        prefixIcon: Icon(Icons.person),
+                        prefixIcon: const Icon(Icons.person),
+                        contentPadding: AppInputSizes.padding,
                       ),
-                      style: FlutterFlowTheme.of(context).bodyMedium,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your name';
+                          return l10n.translate('please_enter_name');
                         }
                         return null;
                       },
                     ),
 
-                    SizedBox(height: 16.0),
+                    AppSpacing.verticalMD,
 
                     // Email Field
                     TextFormField(
                       controller: _emailController,
                       decoration: InputDecoration(
-                        labelText: 'Email',
-                        labelStyle: FlutterFlowTheme.of(context).labelMedium,
-                        hintText: 'Enter your email',
-                        hintStyle: FlutterFlowTheme.of(context).labelMedium,
+                        labelText: l10n.translate('email'),
+                        labelStyle: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        hintText: l10n.translate('enter_email'),
+                        hintStyle: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).alternate,
+                          borderSide: const BorderSide(
+                            color: AppColors.border,
                             width: 2.0,
                           ),
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: AppBorders.borderMD,
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).primary,
+                          borderSide: const BorderSide(
+                            color: AppColors.primary,
                             width: 2.0,
                           ),
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: AppBorders.borderMD,
                         ),
                         errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).error,
+                          borderSide: const BorderSide(
+                            color: AppColors.error,
                             width: 2.0,
                           ),
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: AppBorders.borderMD,
                         ),
                         focusedErrorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).error,
+                          borderSide: const BorderSide(
+                            color: AppColors.error,
                             width: 2.0,
                           ),
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: AppBorders.borderMD,
                         ),
-                        prefixIcon: Icon(Icons.email),
+                        prefixIcon: const Icon(Icons.email),
+                        contentPadding: AppInputSizes.padding,
                       ),
-                      style: FlutterFlowTheme.of(context).bodyMedium,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
+                          return l10n.translate('please_enter_email');
                         }
                         if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                          return 'Please enter a valid email';
+                          return l10n.translate('invalid_email');
                         }
                         return null;
                       },
                     ),
 
-                    SizedBox(height: 16.0),
+                    AppSpacing.verticalMD,
 
                     // Phone Field
                     TextFormField(
                       controller: _phoneController,
                       decoration: InputDecoration(
-                        labelText: 'Phone Number',
-                        labelStyle: FlutterFlowTheme.of(context).labelMedium,
-                        hintText: 'Enter your phone number',
-                        hintStyle: FlutterFlowTheme.of(context).labelMedium,
+                        labelText: l10n.translate('phone_number'),
+                        labelStyle: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        hintText: l10n.translate('enter_phone'),
+                        hintStyle: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).alternate,
+                          borderSide: const BorderSide(
+                            color: AppColors.border,
                             width: 2.0,
                           ),
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: AppBorders.borderMD,
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).primary,
+                          borderSide: const BorderSide(
+                            color: AppColors.primary,
                             width: 2.0,
                           ),
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: AppBorders.borderMD,
                         ),
-                        prefixIcon: Icon(Icons.phone),
+                        prefixIcon: const Icon(Icons.phone),
+                        contentPadding: AppInputSizes.padding,
                       ),
-                      style: FlutterFlowTheme.of(context).bodyMedium,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
                       keyboardType: TextInputType.phone,
                     ),
 
-                    SizedBox(height: 16.0),
+                    AppSpacing.verticalMD,
 
                     // Class Field
                     TextFormField(
                       controller: _classController,
                       decoration: InputDecoration(
-                        labelText: 'Class',
-                        labelStyle: FlutterFlowTheme.of(context).labelMedium,
-                        hintText: 'Enter your class (e.g., L3 INFO)',
-                        hintStyle: FlutterFlowTheme.of(context).labelMedium,
+                        labelText: l10n.translate('class'),
+                        labelStyle: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        hintText: l10n.translate('enter_class'),
+                        hintStyle: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).alternate,
+                          borderSide: const BorderSide(
+                            color: AppColors.border,
                             width: 2.0,
                           ),
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: AppBorders.borderMD,
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).primary,
+                          borderSide: const BorderSide(
+                            color: AppColors.primary,
                             width: 2.0,
                           ),
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: AppBorders.borderMD,
                         ),
-                        prefixIcon: Icon(Icons.school),
+                        prefixIcon: const Icon(Icons.school),
+                        contentPadding: AppInputSizes.padding,
                       ),
-                      style: FlutterFlowTheme.of(context).bodyMedium,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
                     ),
 
-                    SizedBox(height: 24.0),
+                    AppSpacing.verticalLG,
 
                     // Preferences Section
                     Text(
-                      'Preferences',
-                      style: FlutterFlowTheme.of(context).headlineSmall,
+                      l10n.translate('preferences'),
+                      style: AppTypography.h5.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
                     ),
-                    SizedBox(height: 16.0),
+                    AppSpacing.verticalMD,
 
                     // Language Dropdown
                     DropdownButtonFormField<String>(
                       value: _selectedLanguage,
                       decoration: InputDecoration(
-                        labelText: 'Language',
-                        labelStyle: FlutterFlowTheme.of(context).labelMedium,
+                        labelText: l10n.translate('language'),
+                        labelStyle: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).alternate,
+                          borderSide: const BorderSide(
+                            color: AppColors.border,
                             width: 2.0,
                           ),
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: AppBorders.borderMD,
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).primary,
+                          borderSide: const BorderSide(
+                            color: AppColors.primary,
                             width: 2.0,
                           ),
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: AppBorders.borderMD,
                         ),
-                        prefixIcon: Icon(Icons.language),
+                        prefixIcon: const Icon(Icons.language),
+                        contentPadding: AppInputSizes.padding,
                       ),
                       items: [
-                        DropdownMenuItem(value: 'en', child: Text('English')),
-                        DropdownMenuItem(value: 'fr', child: Text('Français')),
-                        DropdownMenuItem(value: 'ar', child: Text('العربية')),
+                        DropdownMenuItem(value: 'en', child: Text(l10n.translate('english'))),
+                        DropdownMenuItem(value: 'fr', child: Text(l10n.translate('french'))),
+                        DropdownMenuItem(value: 'ar', child: Text(l10n.translate('arabic'))),
                       ],
                       onChanged: (value) {
                         setState(() {
@@ -515,26 +533,30 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       },
                     ),
 
-                    SizedBox(height: 16.0),
+                    AppSpacing.verticalMD,
 
                     // Notifications Toggle
                     Container(
                       decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                        borderRadius: BorderRadius.circular(8.0),
+                        color: AppColors.surface,
+                        borderRadius: AppBorders.borderMD,
                         border: Border.all(
-                          color: FlutterFlowTheme.of(context).alternate,
+                          color: AppColors.border,
                           width: 2.0,
                         ),
                       ),
                       child: SwitchListTile(
                         title: Text(
-                          'Push Notifications',
-                          style: FlutterFlowTheme.of(context).titleLarge,
+                          l10n.translate('push_notifications'),
+                          style: AppTypography.h6.copyWith(
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                         subtitle: Text(
-                          'Receive reminders about your reservations',
-                          style: FlutterFlowTheme.of(context).labelMedium,
+                          l10n.translate('notification_subtitle'),
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                         value: _notificationsEnabled,
                         onChanged: (value) {
@@ -542,36 +564,35 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                             _notificationsEnabled = value;
                           });
                         },
-                        activeColor: FlutterFlowTheme.of(context).primary,
+                        activeColor: AppColors.primary,
                       ),
                     ),
 
-                    SizedBox(height: 32.0),
+                    AppSpacing.verticalXL,
 
                     // Update Button
                     FFButtonWidget(
                       onPressed: _isLoading ? null : _updateProfile,
-                      text: _isLoading ? 'Updating...' : 'Update Profile',
+                      text: _isLoading ? l10n.translate('updating') : l10n.translate('update_profile'),
                       options: FFButtonOptions(
                         width: double.infinity,
-                        height: 50.0,
+                        height: AppButtonSizes.heightLarge,
                         padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                         iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                        color: FlutterFlowTheme.of(context).primary,
-                        textStyle: FlutterFlowTheme.of(context).titleMedium.override(
-                              fontFamily: 'Readex Pro',
-                              color: Colors.white,
-                            ),
+                        color: AppColors.primary,
+                        textStyle: AppTypography.button.copyWith(
+                          color: AppColors.textOnPrimary,
+                        ),
                         elevation: 3.0,
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Colors.transparent,
                           width: 1.0,
                         ),
-                        borderRadius: BorderRadius.circular(8.0),
+                        borderRadius: AppBorders.borderMD,
                       ),
                     ),
 
-                    SizedBox(height: 16.0),
+                    AppSpacing.verticalMD,
 
                     // Logout Button
                     FFButtonWidget(
@@ -579,23 +600,22 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                         context.read<FFAppState>().logout();
                         context.goNamed('Login');
                       },
-                      text: 'Logout',
+                      text: l10n.translate('logout'),
                       options: FFButtonOptions(
                         width: double.infinity,
-                        height: 50.0,
+                        height: AppButtonSizes.heightLarge,
                         padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                         iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                        textStyle: FlutterFlowTheme.of(context).titleMedium.override(
-                              fontFamily: 'Readex Pro',
-                              color: FlutterFlowTheme.of(context).error,
-                            ),
+                        color: AppColors.surface,
+                        textStyle: AppTypography.button.copyWith(
+                          color: AppColors.error,
+                        ),
                         elevation: 0.0,
-                        borderSide: BorderSide(
-                          color: FlutterFlowTheme.of(context).error,
+                        borderSide: const BorderSide(
+                          color: AppColors.error,
                           width: 2.0,
                         ),
-                        borderRadius: BorderRadius.circular(8.0),
+                        borderRadius: AppBorders.borderMD,
                       ),
                     ),
                   ],
