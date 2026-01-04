@@ -101,6 +101,34 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
           ),
           actions: [
             Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 8.0, 0.0),
+              child: FlutterFlowIconButton(
+                borderRadius: 20.0,
+                buttonSize: 40.0,
+                fillColor: Color(0xFF6B7280),
+                icon: Icon(
+                  Icons.refresh,
+                  color: Colors.white,
+                  size: 20.0,
+                ),
+                onPressed: () async {
+                  // Clear search and filters to refresh
+                  _model.searchController?.clear();
+                  _model.selectedRoleFilter = '';
+                  setState(() {});
+                  
+                  // Show refresh feedback
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Liste des utilisateurs actualisée'),
+                      backgroundColor: Color(0xFF4B986C),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Padding(
               padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 16.0, 0.0),
               child: FlutterFlowIconButton(
                 borderRadius: 20.0,
@@ -127,7 +155,7 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
             children: [
               // Search Bar
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 16.0),
+                padding: EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 0.0),
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
@@ -156,7 +184,7 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
                               focusNode: _model.searchFocusNode,
                               onChanged: (_) => setState(() {}),
                               decoration: InputDecoration(
-                                hintText: 'Rechercher par nom, email, classe...',
+                                hintText: 'Rechercher par nom, email, classe, rôle...',
                                 hintStyle: FlutterFlowTheme.of(context).bodyMedium.override(
                                   color: Color(0xFF6B7280),
                                 ),
@@ -187,6 +215,67 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
                   ),
                 ),
               ),
+
+              // Filter Chips
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 0.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Quick stats
+                    StreamBuilder<List<UserRecord>>(
+                      stream: queryUserRecord(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) return SizedBox.shrink();
+                        
+                        final allUsers = snapshot.data!;
+                        final studentCount = allUsers.where((u) => u.role.toLowerCase() == 'student').length;
+                        final staffCount = allUsers.where((u) => u.role.toLowerCase() == 'staff').length;
+                        final adminCount = allUsers.where((u) => u.role.toLowerCase() == 'admin').length;
+                        
+                        return Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFF8F9FA),
+                            borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(
+                              color: Color(0xFFE5E7EB),
+                              width: 1.0,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _buildStatItem('Total', allUsers.length, Color(0xFF6B7280)),
+                              _buildStatItem('Étudiants', studentCount, Color(0xFF4B986C)),
+                              _buildStatItem('Personnel', staffCount, Color(0xFF928163)),
+                              _buildStatItem('Admins', adminCount, Color(0xFFC4454D)),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(height: 16.0),
+                    
+                    // Filter chips
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildFilterChip('Tous', ''),
+                          SizedBox(width: 8.0),
+                          _buildFilterChip('Étudiants', 'student'),
+                          SizedBox(width: 8.0),
+                          _buildFilterChip('Personnel', 'staff'),
+                          SizedBox(width: 8.0),
+                          _buildFilterChip('Administrateurs', 'admin'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               
               // Users List
               Expanded(
@@ -195,17 +284,9 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
                   child: StreamBuilder<List<UserRecord>>(
                     stream: queryUserRecord(
                       queryBuilder: (userRecord) {
-                        Query query = userRecord;
-                        
-                        // Apply search filter if search text exists
-                        if (_model.searchController.text.isNotEmpty) {
-                          final searchText = _model.searchController.text.toLowerCase();
-                          // Note: Firestore doesn't support case-insensitive search
-                          // In production, you'd use Algolia or similar for better search
-                          query = query.where('nom', isGreaterThanOrEqualTo: searchText);
-                        }
-                        
-                        return query.orderBy('created_time', descending: true);
+                        // Load all users without Firestore-level filtering
+                        // We'll do client-side filtering for better search experience
+                        return userRecord.orderBy('created_time', descending: true);
                       },
                     ),
                     builder: (context, snapshot) {
@@ -226,14 +307,30 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
                       
                       List<UserRecord> users = snapshot.data!;
                       
-                      // Apply client-side filtering for better search experience
-                      if (_model.searchController.text.isNotEmpty) {
-                        final searchText = _model.searchController.text.toLowerCase();
+                      // Apply comprehensive client-side filtering
+                      if (_model.searchController.text.isNotEmpty || _model.selectedRoleFilter.isNotEmpty) {
+                        final searchText = _model.searchController.text.toLowerCase().trim();
                         users = users.where((user) {
-                          return user.nom.toLowerCase().contains(searchText) ||
-                                 user.email.toLowerCase().contains(searchText) ||
-                                 user.classe.toLowerCase().contains(searchText) ||
-                                 user.role.toLowerCase().contains(searchText);
+                          // Role filter
+                          bool matchesRole = _model.selectedRoleFilter.isEmpty || 
+                                           user.role.toLowerCase() == _model.selectedRoleFilter.toLowerCase();
+                          
+                          // Text search filter
+                          bool matchesSearch = true;
+                          if (searchText.isNotEmpty) {
+                            final name = (user.nom.isNotEmpty ? user.nom : user.displayName).toLowerCase();
+                            final email = user.email.toLowerCase();
+                            final classe = user.classe.toLowerCase();
+                            final role = user.role.toLowerCase();
+                            
+                            matchesSearch = name.contains(searchText) ||
+                                          email.contains(searchText) ||
+                                          classe.contains(searchText) ||
+                                          role.contains(searchText) ||
+                                          _getRoleDisplayName(user.role).toLowerCase().contains(searchText);
+                          }
+                          
+                          return matchesRole && matchesSearch;
                         }).toList();
                       }
                       
@@ -249,23 +346,57 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
                               ),
                               SizedBox(height: 16.0),
                               Text(
-                                'Aucun utilisateur trouvé',
+                                _model.searchController.text.isNotEmpty || _model.selectedRoleFilter.isNotEmpty
+                                    ? 'Aucun utilisateur trouvé pour les critères sélectionnés'
+                                    : 'Aucun utilisateur trouvé',
                                 style: FlutterFlowTheme.of(context).headlineSmall.override(
                                   color: Color(0xFF6B7280),
                                 ),
+                                textAlign: TextAlign.center,
                               ),
+                              if (_model.searchController.text.isNotEmpty || _model.selectedRoleFilter.isNotEmpty) ...[
+                                SizedBox(height: 8.0),
+                                Text(
+                                  'Essayez de modifier vos critères de recherche',
+                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                    color: Color(0xFF6B7280),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ],
                           ),
                         );
                       }
                       
-                      return ListView.builder(
-                        padding: EdgeInsets.zero,
-                        itemCount: users.length,
-                        itemBuilder: (context, index) {
-                          final user = users[index];
-                          return _buildUserCard(user);
-                        },
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Results counter
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 16.0),
+                            child: Text(
+                              _model.searchController.text.isNotEmpty || _model.selectedRoleFilter.isNotEmpty
+                                  ? '${users.length} utilisateur${users.length > 1 ? 's' : ''} trouvé${users.length > 1 ? 's' : ''}'
+                                  : '${users.length} utilisateur${users.length > 1 ? 's' : ''} au total',
+                              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                color: Color(0xFF6B7280),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          // Users list
+                          Expanded(
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              itemCount: users.length,
+                              itemBuilder: (context, index) {
+                                final user = users[index];
+                                return _buildUserCard(user);
+                              },
+                            ),
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -435,6 +566,61 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
       default:
         return 'Étudiant';
     }
+  }
+
+  Widget _buildFilterChip(String label, String roleFilter) {
+    final isSelected = _model.selectedRoleFilter == roleFilter;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _model.selectedRoleFilter = isSelected ? '' : roleFilter;
+        });
+      },
+      child: Container(
+        padding: EdgeInsetsDirectional.fromSTEB(12.0, 8.0, 12.0, 8.0),
+        decoration: BoxDecoration(
+          color: isSelected ? Color(0xFF4B986C) : Colors.white,
+          borderRadius: BorderRadius.circular(20.0),
+          border: Border.all(
+            color: isSelected ? Color(0xFF4B986C) : Color(0xFFC8D7E4),
+            width: 1.0,
+          ),
+        ),
+        child: Text(
+          label,
+          style: FlutterFlowTheme.of(context).bodySmall.override(
+            color: isSelected ? Colors.white : Color(0xFF384E58),
+            fontSize: 12.0,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, int count, Color color) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          count.toString(),
+          style: FlutterFlowTheme.of(context).headlineSmall.override(
+            color: color,
+            fontSize: 20.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 4.0),
+        Text(
+          label,
+          style: FlutterFlowTheme.of(context).bodySmall.override(
+            color: Color(0xFF6B7280),
+            fontSize: 11.0,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
   }
 
   Future<void> _showEditUserDialog(UserRecord user) async {

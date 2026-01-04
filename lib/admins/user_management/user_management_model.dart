@@ -10,6 +10,9 @@ class UserManagementModel extends FlutterFlowModel<UserManagementWidget> {
   TextEditingController? searchController;
   String? Function(BuildContext, String?)? searchControllerValidator;
 
+  // State field for role filter
+  String selectedRoleFilter = '';
+
   @override
   void initState(BuildContext context) {}
 
