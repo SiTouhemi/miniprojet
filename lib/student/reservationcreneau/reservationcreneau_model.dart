@@ -21,6 +21,10 @@ class ReservationcreneauModel
   bool isProcessingReservation = false;
   String? errorMessage;
   String? successMessage;
+  
+  /// Additional state management for button interactions
+  DateTime? _lastReservationAttempt;
+  static const Duration _reservationCooldown = Duration(seconds: 2);
 
   /// State fields for user balance
   double userBalance = 0.0;
@@ -28,6 +32,20 @@ class ReservationcreneauModel
 
   /// Callback for state updates
   VoidCallback? onStateChanged;
+
+  /// Check if reservation can be attempted (prevents rapid submissions)
+  bool canAttemptReservation() {
+    if (isProcessingReservation) return false;
+    
+    if (_lastReservationAttempt != null) {
+      final timeSinceLastAttempt = DateTime.now().difference(_lastReservationAttempt!);
+      if (timeSinceLastAttempt < _reservationCooldown) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
 
   /// Load user balance
   Future<void> loadUserBalance() async {
@@ -101,9 +119,19 @@ class ReservationcreneauModel
 
   /// Create reservation
   Future<Map<String, dynamic>> createReservation() async {
-    if (isProcessingReservation)
-      return {'success': false, 'error': 'Already processing'};
+    // Check if reservation can be attempted
+    if (!canAttemptReservation()) {
+      return {
+        'success': false, 
+        'error': isProcessingReservation 
+            ? 'Already processing' 
+            : 'Please wait before trying again'
+      };
+    }
 
+    // Record attempt timestamp
+    _lastReservationAttempt = DateTime.now();
+    
     isProcessingReservation = true;
     errorMessage = null;
     successMessage = null;
@@ -152,6 +180,9 @@ class ReservationcreneauModel
         // Reload user balance
         await loadUserBalance();
 
+        // Clear selected time slot to prevent accidental re-submission
+        selectedTimeSlot = null;
+
         return {
           'success': true,
           'reservationId': reservationResult['reservationId'],
@@ -187,6 +218,15 @@ class ReservationcreneauModel
     onStateChanged?.call();
   }
 
+  /// Reset reservation state (useful for cleanup)
+  void resetReservationState() {
+    isProcessingReservation = false;
+    errorMessage = null;
+    successMessage = null;
+    _lastReservationAttempt = null;
+    onStateChanged?.call();
+  }
+
   /// Check if user can afford the selected time slot
   bool canAffordSelectedSlot() {
     if (selectedTimeSlot == null) return false;
@@ -202,5 +242,9 @@ class ReservationcreneauModel
   }
 
   @override
-  void dispose() {}
+  void dispose() {
+    // Clean up any ongoing operations
+    resetReservationState();
+    onStateChanged = null;
+  }
 }

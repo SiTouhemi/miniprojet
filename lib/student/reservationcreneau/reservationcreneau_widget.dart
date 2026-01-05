@@ -60,7 +60,7 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
     super.dispose();
   }
 
-  /// Show reservation confirmation dialog
+  /// Show reservation confirmation dialog with simple layout
   Future<bool> _showReservationConfirmationDialog(BuildContext context) async {
     if (_model.selectedTimeSlot == null) return false;
 
@@ -70,34 +70,16 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16.0),
             ),
-            title: Row(
-              children: [
-                Container(
-                  width: 40.0,
-                  height: 40.0,
-                  decoration: BoxDecoration(
+            title: Text(
+              'Confirmation de réservation',
+              style: FlutterFlowTheme.of(context).titleLarge.override(
+                    font: GoogleFonts.interTight(
+                      fontWeight: FontWeight.w600,
+                    ),
                     color: Color(0xFF005BAA),
-                    shape: BoxShape.circle,
+                    letterSpacing: 0.0,
+                    fontWeight: FontWeight.w600,
                   ),
-                  child: Icon(
-                    Icons.restaurant_menu,
-                    color: Colors.white,
-                    size: 20.0,
-                  ),
-                ),
-                SizedBox(width: 12.0),
-                Text(
-                  'Choose a Time Slot',
-                  style: FlutterFlowTheme.of(context).titleLarge.override(
-                        font: GoogleFonts.interTight(
-                          fontWeight: FontWeight.w600,
-                        ),
-                        color: Color(0xFF005BAA),
-                        letterSpacing: 0.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ],
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -115,16 +97,20 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                       ),
                 ),
                 SizedBox(height: 12.0),
-                _buildConfirmationRow(
-                    'Date:',
-                    DateFormat('dd MMMM yyyy')
-                        .format(_model.selectedTimeSlot!.date!)),
-                _buildConfirmationRow('Heure:',
-                    '${DateFormat('HH:mm').format(_model.selectedTimeSlot!.startTime!)} - ${DateFormat('HH:mm').format(_model.selectedTimeSlot!.endTime!)}'),
-                _buildConfirmationRow(
-                    'Type:', _model.selectedTimeSlot!.mealType.toUpperCase()),
-                _buildConfirmationRow('Prix:',
-                    '${_model.selectedTimeSlot!.price.toStringAsFixed(2)} TND'),
+
+                // Simple text layout instead of complex Rows
+                Text(
+                    'Date: ${DateFormat('dd MMMM yyyy').format(_model.selectedTimeSlot!.date!)}'),
+                SizedBox(height: 4.0),
+                Text(
+                    'Heure: ${DateFormat('HH:mm').format(_model.selectedTimeSlot!.startTime!)} - ${DateFormat('HH:mm').format(_model.selectedTimeSlot!.endTime!)}'),
+                SizedBox(height: 4.0),
+                Text(
+                    'Type: ${_model.selectedTimeSlot!.mealType.toUpperCase()}'),
+                SizedBox(height: 4.0),
+                Text(
+                    'Prix: ${_model.selectedTimeSlot!.price.toStringAsFixed(2)} TND'),
+
                 SizedBox(height: 16.0),
                 Container(
                   width: double.infinity,
@@ -157,66 +143,18 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                   ),
                 ),
               ),
-              FFButtonWidget(
+              ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                text: 'Confirmer',
-                options: FFButtonOptions(
-                  height: 40.0,
-                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                  iconPadding:
-                      EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                  color: Color(0xFF005BAA),
-                  textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                        font: GoogleFonts.interTight(
-                          fontWeight: FontWeight.w600,
-                        ),
-                        color: Colors.white,
-                        letterSpacing: 0.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                  elevation: 2.0,
-                  borderSide: BorderSide(
-                    color: Colors.transparent,
-                    width: 1.0,
-                  ),
-                  borderRadius: BorderRadius.circular(8.0),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF005BAA),
+                  foregroundColor: Colors.white,
                 ),
+                child: Text('Confirmer'),
               ),
             ],
           ),
         ) ??
         false;
-  }
-
-  /// Build confirmation dialog row
-  Widget _buildConfirmationRow(String label, String value) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  font: GoogleFonts.inter(),
-                  color: Colors.grey.shade600,
-                  letterSpacing: 0.0,
-                ),
-          ),
-          Text(
-            value,
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  font: GoogleFonts.inter(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  color: Color(0xFF005BAA),
-                  letterSpacing: 0.0,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
