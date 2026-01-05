@@ -21,90 +21,6 @@ class ProfileWidget extends StatefulWidget {
 }
 
 class _ProfileWidgetState extends State<ProfileWidget> {
-  final _formKey = GlobalKey<FormState>();
-  
-  late TextEditingController _nameController;
-  late TextEditingController _emailController;
-  late TextEditingController _phoneController;
-  late TextEditingController _classController;
-  
-  String? _selectedLanguage;
-  bool _notificationsEnabled = true;
-  bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeControllers();
-  }
-
-  void _initializeControllers() {
-    final user = context.read<FFAppState>().currentUser;
-    
-    _nameController = TextEditingController(text: user?.displayName ?? user?.nom ?? '');
-    _emailController = TextEditingController(text: user?.email ?? '');
-    _phoneController = TextEditingController(text: user?.phoneNumber ?? '');
-    _classController = TextEditingController(text: user?.classe ?? '');
-    _selectedLanguage = user?.language ?? 'en';
-    _notificationsEnabled = user?.notificationsEnabled ?? true;
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _classController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _updateProfile() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final l10n = AppLocalizations.of(context)!;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final user = context.read<FFAppState>().currentUser;
-      if (user != null) {
-        await user.reference.update({
-          'display_name': _nameController.text.trim(),
-          'nom': _nameController.text.trim(),
-          'email': _emailController.text.trim(),
-          'phone_number': _phoneController.text.trim(),
-          'classe': _classController.text.trim(),
-          'language': _selectedLanguage,
-          'notifications_enabled': _notificationsEnabled,
-          'last_login': FieldValue.serverTimestamp(),
-        });
-
-        // Update app state language
-        context.read<FFAppState>().setLanguage(_selectedLanguage!);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.translate('profile_updated')),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${l10n.translate('profile_update_error')}: ${e.toString()}'),
-          backgroundColor: AppColors.error,
-        ),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -173,460 +89,367 @@ class _ProfileWidgetState extends State<ProfileWidget> {
               );
             }
 
-            return Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                padding: AppSpacing.paddingMD,
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Profile Header
-                    Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        boxShadow: AppShadows.medium,
-                        borderRadius: AppBorders.borderMD,
-                      ),
-                      child: Padding(
-                        padding: AppSpacing.paddingMD,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Container(
-                              width: 60.0,
-                              height: 60.0,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.person,
-                                color: AppColors.textOnPrimary,
-                                size: AppIconSizes.xl,
-                              ),
-                            ),
-                            AppSpacing.horizontalMD,
-                            Expanded(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    user.displayName.isNotEmpty ? user.displayName : user.nom,
-                                    style: AppTypography.h5.copyWith(
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                  Text(
-                                    user.email,
-                                    style: AppTypography.bodyMedium.copyWith(
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                  if (user.classe.isNotEmpty)
-                                    Text(
-                                      l10n.translate('class_label', params: {'class': user.classe}),
-                                      style: AppTypography.bodySmall.copyWith(
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+            return SingleChildScrollView(
+              padding: AppSpacing.paddingMD,
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Profile Header
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      boxShadow: AppShadows.medium,
+                      borderRadius: AppBorders.borderMD,
                     ),
-
-                    AppSpacing.verticalLG,
-
-                    // Balance Card Section
-                    Container(
-                      width: double.infinity,
-                      decoration: const BoxDecoration(
-                        gradient: AppColors.balanceGradient,
-                        borderRadius: AppBorders.borderLG,
-                      ),
-                      child: Padding(
-                        padding: AppSpacing.paddingLG,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.translate('current_balance'),
-                              style: AppTypography.bodyMedium.copyWith(
-                                color: AppColors.textOnPrimary.withValues(alpha: 0.7),
-                                fontWeight: AppTypography.semiBold,
-                              ),
+                    child: Padding(
+                      padding: AppSpacing.paddingMD,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Container(
+                            width: 60.0,
+                            height: 60.0,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
                             ),
-                            AppSpacing.verticalSM,
-                            Text(
-                              user != null 
-                                ? AppConfig.formatPrice(user.pocket)
-                                : AppConfig.formatPrice(0.0),
-                              style: AppTypography.h3.copyWith(
-                                color: AppColors.textOnPrimary,
-                                fontWeight: AppTypography.bold,
-                              ),
+                            child: Icon(
+                              Icons.person,
+                              color: AppColors.textOnPrimary,
+                              size: AppIconSizes.xl,
                             ),
-                            if (user != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: AppSpacing.xs),
-                                child: Text(
-                                  l10n.translate('tickets_available', params: {
-                                    'count': user.tickets.toString()
-                                  }),
-                                  style: AppTypography.bodySmall.copyWith(
-                                    color: AppColors.textOnPrimary.withValues(alpha: 0.7),
+                          ),
+                          AppSpacing.horizontalMD,
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user.displayName.isNotEmpty ? user.displayName : user.nom,
+                                  style: AppTypography.h5.copyWith(
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
+                                Text(
+                                  user.email,
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                if (user.classe.isNotEmpty)
+                                  Text(
+                                    l10n.translate('class_label', params: {'class': user.classe}),
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          // Read-only indicator
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                            decoration: BoxDecoration(
+                              color: AppColors.warning.withValues(alpha: 0.1),
+                              borderRadius: AppBorders.borderSM,
+                              border: Border.all(
+                                color: AppColors.warning,
+                                width: 1.0,
                               ),
-                          ],
-                        ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.lock_outline,
+                                  size: 16.0,
+                                  color: AppColors.warning,
+                                ),
+                                SizedBox(width: 4.0),
+                                Text(
+                                  'Read Only',
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: AppColors.warning,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                  ),
 
-                    AppSpacing.verticalLG,
+                  AppSpacing.verticalLG,
 
-                    // Account Information Section
-                    Text(
-                      l10n.translate('account_information'),
-                      style: AppTypography.h5.copyWith(
-                        color: AppColors.textPrimary,
+                  // Balance Card Section
+                  Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      gradient: AppColors.balanceGradient,
+                      borderRadius: AppBorders.borderLG,
+                    ),
+                    child: Padding(
+                      padding: AppSpacing.paddingLG,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.translate('current_balance'),
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: AppColors.textOnPrimary.withValues(alpha: 0.7),
+                              fontWeight: AppTypography.semiBold,
+                            ),
+                          ),
+                          AppSpacing.verticalSM,
+                          Text(
+                            user != null 
+                              ? AppConfig.formatPrice(user.pocket)
+                              : AppConfig.formatPrice(0.0),
+                            style: AppTypography.h3.copyWith(
+                              color: AppColors.textOnPrimary,
+                              fontWeight: AppTypography.bold,
+                            ),
+                          ),
+                          if (user != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: AppSpacing.xs),
+                              child: Text(
+                                l10n.translate('tickets_available', params: {
+                                  'count': user.tickets.toString()
+                                }),
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.textOnPrimary.withValues(alpha: 0.7),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                    AppSpacing.verticalMD,
+                  ),
 
-                    // Name Field
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                        labelText: l10n.translate('full_name'),
-                        labelStyle: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                        hintText: l10n.translate('enter_full_name'),
-                        hintStyle: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.textTertiary,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.border,
-                            width: 2.0,
-                          ),
-                          borderRadius: AppBorders.borderMD,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.primary,
-                            width: 2.0,
-                          ),
-                          borderRadius: AppBorders.borderMD,
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.error,
-                            width: 2.0,
-                          ),
-                          borderRadius: AppBorders.borderMD,
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.error,
-                            width: 2.0,
-                          ),
-                          borderRadius: AppBorders.borderMD,
-                        ),
-                        prefixIcon: const Icon(Icons.person),
-                        contentPadding: AppInputSizes.padding,
-                      ),
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return l10n.translate('please_enter_name');
-                        }
-                        return null;
-                      },
-                    ),
+                  AppSpacing.verticalLG,
 
-                    AppSpacing.verticalMD,
-
-                    // Email Field
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: InputDecoration(
-                        labelText: l10n.translate('email'),
-                        labelStyle: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                        hintText: l10n.translate('enter_email'),
-                        hintStyle: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.textTertiary,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.border,
-                            width: 2.0,
-                          ),
-                          borderRadius: AppBorders.borderMD,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.primary,
-                            width: 2.0,
-                          ),
-                          borderRadius: AppBorders.borderMD,
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.error,
-                            width: 2.0,
-                          ),
-                          borderRadius: AppBorders.borderMD,
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.error,
-                            width: 2.0,
-                          ),
-                          borderRadius: AppBorders.borderMD,
-                        ),
-                        prefixIcon: const Icon(Icons.email),
-                        contentPadding: AppInputSizes.padding,
-                      ),
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return l10n.translate('please_enter_email');
-                        }
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                          return l10n.translate('invalid_email');
-                        }
-                        return null;
-                      },
-                    ),
-
-                    AppSpacing.verticalMD,
-
-                    // Phone Field
-                    TextFormField(
-                      controller: _phoneController,
-                      decoration: InputDecoration(
-                        labelText: l10n.translate('phone_number'),
-                        labelStyle: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                        hintText: l10n.translate('enter_phone'),
-                        hintStyle: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.textTertiary,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.border,
-                            width: 2.0,
-                          ),
-                          borderRadius: AppBorders.borderMD,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.primary,
-                            width: 2.0,
-                          ),
-                          borderRadius: AppBorders.borderMD,
-                        ),
-                        prefixIcon: const Icon(Icons.phone),
-                        contentPadding: AppInputSizes.padding,
-                      ),
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                      keyboardType: TextInputType.phone,
-                    ),
-
-                    AppSpacing.verticalMD,
-
-                    // Class Field
-                    TextFormField(
-                      controller: _classController,
-                      decoration: InputDecoration(
-                        labelText: l10n.translate('class'),
-                        labelStyle: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                        hintText: l10n.translate('enter_class'),
-                        hintStyle: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.textTertiary,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.border,
-                            width: 2.0,
-                          ),
-                          borderRadius: AppBorders.borderMD,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.primary,
-                            width: 2.0,
-                          ),
-                          borderRadius: AppBorders.borderMD,
-                        ),
-                        prefixIcon: const Icon(Icons.school),
-                        contentPadding: AppInputSizes.padding,
-                      ),
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.textPrimary,
+                  // Read-only notice
+                  Container(
+                    width: double.infinity,
+                    padding: AppSpacing.paddingMD,
+                    decoration: BoxDecoration(
+                      color: AppColors.info.withValues(alpha: 0.1),
+                      borderRadius: AppBorders.borderMD,
+                      border: Border.all(
+                        color: AppColors.info,
+                        width: 1.0,
                       ),
                     ),
-
-                    AppSpacing.verticalLG,
-
-                    // Preferences Section
-                    Text(
-                      l10n.translate('preferences'),
-                      style: AppTypography.h5.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    AppSpacing.verticalMD,
-
-                    // Language Dropdown
-                    DropdownButtonFormField<String>(
-                      value: _selectedLanguage,
-                      decoration: InputDecoration(
-                        labelText: l10n.translate('language'),
-                        labelStyle: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: AppColors.info,
+                          size: 20.0,
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.border,
-                            width: 2.0,
+                        SizedBox(width: 12.0),
+                        Expanded(
+                          child: Text(
+                            'Your profile information is managed by the administration and cannot be modified. Please contact support if you need to update your details.',
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: AppColors.info,
+                            ),
                           ),
-                          borderRadius: AppBorders.borderMD,
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.primary,
-                            width: 2.0,
-                          ),
-                          borderRadius: AppBorders.borderMD,
-                        ),
-                        prefixIcon: const Icon(Icons.language),
-                        contentPadding: AppInputSizes.padding,
-                      ),
-                      items: [
-                        DropdownMenuItem(value: 'en', child: Text(l10n.translate('english'))),
-                        DropdownMenuItem(value: 'fr', child: Text(l10n.translate('french'))),
-                        DropdownMenuItem(value: 'ar', child: Text(l10n.translate('arabic'))),
                       ],
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedLanguage = value;
-                        });
-                      },
                     ),
+                  ),
 
-                    AppSpacing.verticalMD,
+                  AppSpacing.verticalLG,
 
-                    // Notifications Toggle
-                    Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: AppBorders.borderMD,
-                        border: Border.all(
-                          color: AppColors.border,
-                          width: 2.0,
-                        ),
-                      ),
-                      child: SwitchListTile(
-                        title: Text(
-                          l10n.translate('push_notifications'),
-                          style: AppTypography.h6.copyWith(
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        subtitle: Text(
-                          l10n.translate('notification_subtitle'),
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        value: _notificationsEnabled,
-                        onChanged: (value) {
-                          setState(() {
-                            _notificationsEnabled = value;
-                          });
-                        },
-                        activeColor: AppColors.primary,
-                      ),
+                  // Account Information Section (Read-only)
+                  Text(
+                    l10n.translate('account_information'),
+                    style: AppTypography.h5.copyWith(
+                      color: AppColors.textPrimary,
                     ),
+                  ),
+                  AppSpacing.verticalMD,
 
-                    AppSpacing.verticalXL,
+                  // Read-only information cards
+                  _buildReadOnlyInfoCard(
+                    context,
+                    icon: Icons.person,
+                    label: l10n.translate('full_name'),
+                    value: user.displayName.isNotEmpty ? user.displayName : user.nom,
+                  ),
 
-                    // Update Button
-                    FFButtonWidget(
-                      onPressed: _isLoading ? null : _updateProfile,
-                      text: _isLoading ? l10n.translate('updating') : l10n.translate('update_profile'),
-                      options: FFButtonOptions(
-                        width: double.infinity,
-                        height: AppButtonSizes.heightLarge,
-                        padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                        iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                        color: AppColors.primary,
-                        textStyle: AppTypography.button.copyWith(
-                          color: AppColors.textOnPrimary,
-                        ),
-                        elevation: 3.0,
-                        borderSide: const BorderSide(
-                          color: Colors.transparent,
-                          width: 1.0,
-                        ),
-                        borderRadius: AppBorders.borderMD,
-                      ),
+                  AppSpacing.verticalMD,
+
+                  _buildReadOnlyInfoCard(
+                    context,
+                    icon: Icons.email,
+                    label: l10n.translate('email'),
+                    value: user.email,
+                  ),
+
+                  AppSpacing.verticalMD,
+
+                  _buildReadOnlyInfoCard(
+                    context,
+                    icon: Icons.phone,
+                    label: l10n.translate('phone_number'),
+                    value: user.phoneNumber.isNotEmpty ? user.phoneNumber : 'Not provided',
+                  ),
+
+                  AppSpacing.verticalMD,
+
+                  _buildReadOnlyInfoCard(
+                    context,
+                    icon: Icons.school,
+                    label: l10n.translate('class'),
+                    value: user.classe.isNotEmpty ? user.classe : 'Not assigned',
+                  ),
+
+                  AppSpacing.verticalLG,
+
+                  // Preferences Section (Read-only)
+                  Text(
+                    l10n.translate('preferences'),
+                    style: AppTypography.h5.copyWith(
+                      color: AppColors.textPrimary,
                     ),
+                  ),
+                  AppSpacing.verticalMD,
 
-                    AppSpacing.verticalMD,
+                  _buildReadOnlyInfoCard(
+                    context,
+                    icon: Icons.language,
+                    label: l10n.translate('language'),
+                    value: _getLanguageDisplayName(user.language ?? 'en', l10n),
+                  ),
 
-                    // Logout Button
-                    FFButtonWidget(
-                      onPressed: () {
-                        context.read<FFAppState>().logout();
-                        context.goNamed('Login');
-                      },
-                      text: l10n.translate('logout'),
-                      options: FFButtonOptions(
-                        width: double.infinity,
-                        height: AppButtonSizes.heightLarge,
-                        padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                        iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                        color: AppColors.surface,
-                        textStyle: AppTypography.button.copyWith(
-                          color: AppColors.error,
-                        ),
-                        elevation: 0.0,
-                        borderSide: const BorderSide(
-                          color: AppColors.error,
-                          width: 2.0,
-                        ),
-                        borderRadius: AppBorders.borderMD,
+                  AppSpacing.verticalMD,
+
+                  _buildReadOnlyInfoCard(
+                    context,
+                    icon: Icons.notifications,
+                    label: l10n.translate('push_notifications'),
+                    value: (user.notificationsEnabled ?? true) ? 'Enabled' : 'Disabled',
+                  ),
+
+                  AppSpacing.verticalXL,
+
+                  // Logout Button (only action allowed)
+                  FFButtonWidget(
+                    onPressed: () {
+                      context.read<FFAppState>().logout();
+                      context.goNamed('Login');
+                    },
+                    text: l10n.translate('logout'),
+                    options: FFButtonOptions(
+                      width: double.infinity,
+                      height: AppButtonSizes.heightLarge,
+                      padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                      iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                      color: AppColors.surface,
+                      textStyle: AppTypography.button.copyWith(
+                        color: AppColors.error,
                       ),
+                      elevation: 0.0,
+                      borderSide: const BorderSide(
+                        color: AppColors.error,
+                        width: 2.0,
+                      ),
+                      borderRadius: AppBorders.borderMD,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           },
         ),
       ),
     );
+  }
+
+  Widget _buildReadOnlyInfoCard(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: AppSpacing.paddingMD,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: AppBorders.borderMD,
+        border: Border.all(
+          color: AppColors.border,
+          width: 1.0,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40.0,
+            height: 40.0,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: AppBorders.borderSM,
+            ),
+            child: Icon(
+              icon,
+              color: AppColors.primary,
+              size: 20.0,
+            ),
+          ),
+          SizedBox(width: 16.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 4.0),
+                Text(
+                  value,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.lock_outline,
+            color: AppColors.textTertiary,
+            size: 16.0,
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getLanguageDisplayName(String languageCode, AppLocalizations l10n) {
+    switch (languageCode) {
+      case 'en':
+        return l10n.translate('english');
+      case 'fr':
+        return l10n.translate('french');
+      case 'ar':
+        return l10n.translate('arabic');
+      default:
+        return 'English';
+    }
   }
 }

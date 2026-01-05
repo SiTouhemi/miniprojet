@@ -10,20 +10,10 @@ import 'package:provider/provider.dart';
 import 'reservationcreneau_model.dart';
 export 'reservationcreneau_model.dart';
 
-/// Design a clean, modern Reservation page for the “ISETCOM Restaurant
-/// Reservation System.” Use a minimalist university-style UI with the
-/// palette: primary #005BAA, accent #00A4E4, white background, rounded
-/// corners, and soft shadows.
-///
-/// The screen should show the student’s current balance, followed by a
-/// section titled “Choisir un Créneau.” Display available time slots as
-/// rounded cards with time range, remaining seats, and a small icon. Selected
-/// slot highlights in blue. Below, show the meal of the day with name,
-/// ingredients, price, and availability badge. Add a full-width “Réserver”
-/// button at the bottom. Include a confirmation popup summarizing: date,
-/// slot, meal, and price. Layout must be mobile-first, intuitive, and
-/// accessible. Avoid clutter and keep spacing generous. The design should
-/// feel academic, calm, and trustworthy.
+/// Updated reservation widget with time-based locking logic
+/// Time slots become grey and locked when their time has passed
+/// The next day they return to being available for reservation
+/// Restaurant is closed on Sundays
 class ReservationcreneauWidget extends StatefulWidget {
   const ReservationcreneauWidget({super.key});
 
@@ -56,8 +46,24 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
+  }
+
+  /// Check if a time slot is locked (past time or Sunday)
+  bool _isTimeSlotLocked(TimeSlotRecord timeSlot) {
+    final now = DateTime.now();
+    
+    // Check if it's Sunday (restaurant closed)
+    if (timeSlot.date?.weekday == DateTime.sunday) {
+      return true;
+    }
+    
+    // If the time slot is in the past (end time has passed), it's locked
+    if (timeSlot.endTime != null && timeSlot.endTime!.isBefore(now)) {
+      return true;
+    }
+    
+    return false;
   }
 
   /// Show reservation confirmation dialog with simple layout
@@ -202,15 +208,10 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                     style: FlutterFlowTheme.of(context).titleLarge.override(
                           font: GoogleFonts.interTight(
                             fontWeight: FontWeight.w600,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .titleLarge
-                                .fontStyle,
                           ),
                           color: Color(0xFF005BAA),
                           letterSpacing: 0.0,
                           fontWeight: FontWeight.w600,
-                          fontStyle:
-                              FlutterFlowTheme.of(context).titleLarge.fontStyle,
                         ),
                   ),
                   Text(
@@ -218,15 +219,10 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                     style: FlutterFlowTheme.of(context).bodySmall.override(
                           font: GoogleFonts.inter(
                             fontWeight: FontWeight.w500,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodySmall
-                                .fontStyle,
                           ),
                           color: Color(0xFF666666),
                           letterSpacing: 0.0,
                           fontWeight: FontWeight.w500,
-                          fontStyle:
-                              FlutterFlowTheme.of(context).bodySmall.fontStyle,
                         ),
                   ),
                 ],
@@ -271,16 +267,10 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                     .override(
                                       font: GoogleFonts.interTight(
                                         fontWeight: FontWeight.w600,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .titleMedium
-                                            .fontStyle,
                                       ),
                                       color: Color(0xFF005BAA),
                                       letterSpacing: 0.0,
                                       fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .titleMedium
-                                          .fontStyle,
                                     ),
                               ),
                               Row(
@@ -298,18 +288,10 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                         .override(
                                           font: GoogleFonts.interTight(
                                             fontWeight: FontWeight.bold,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .headlineMedium
-                                                    .fontStyle,
                                           ),
                                           color: Color(0xFF005BAA),
                                           letterSpacing: 0.0,
                                           fontWeight: FontWeight.bold,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .headlineMedium
-                                                  .fontStyle,
                                         ),
                                   ),
                                   Container(
@@ -336,14 +318,14 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                       ),
                     ),
 
-                    // Time slots section
+                    // Time slots section with locking logic
                     Column(
                       mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
                           padding: EdgeInsetsDirectional.fromSTEB(
-                              4.0, 0.0, 4.0, 0.0),
+                              20.0, 0.0, 20.0, 0.0),
                           child: Text(
                             'Choisir un Créneau',
                             style: FlutterFlowTheme.of(context)
@@ -351,21 +333,15 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                 .override(
                                   font: GoogleFonts.interTight(
                                     fontWeight: FontWeight.w600,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .headlineSmall
-                                        .fontStyle,
                                   ),
                                   color: Color(0xFF005BAA),
                                   letterSpacing: 0.0,
                                   fontWeight: FontWeight.w600,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .headlineSmall
-                                      .fontStyle,
                                 ),
                           ),
                         ),
 
-                        // Time slot cards - Dynamic from database
+                        // Time slot cards with locking logic
                         StreamBuilder<List<TimeSlotRecord>>(
                           stream: queryTimeSlotRecord(
                             queryBuilder: (timeSlotRecord) => timeSlotRecord
@@ -375,17 +351,6 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                 .limit(20),
                           ),
                           builder: (context, snapshot) {
-                            // Debug information
-                            print(
-                                '🔍 Time slots query state: ${snapshot.connectionState}');
-                            if (snapshot.hasError) {
-                              print('❌ Time slots error: ${snapshot.error}');
-                            }
-                            if (snapshot.hasData) {
-                              print(
-                                  '📊 Found ${snapshot.data?.length ?? 0} time slots');
-                            }
-
                             if (snapshot.hasError) {
                               return Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
@@ -439,9 +404,9 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                               );
                             }
 
-                            final timeSlots = snapshot.data ?? [];
+                            final allTimeSlots = snapshot.data ?? [];
 
-                            if (timeSlots.isEmpty) {
+                            if (allTimeSlots.isEmpty) {
                               return Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     16.0, 0.0, 16.0, 0.0),
@@ -488,7 +453,7 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
 
                             return Column(
                               mainAxisSize: MainAxisSize.max,
-                              children: timeSlots.map((timeSlot) {
+                              children: allTimeSlots.map((timeSlot) {
                                 final startTime = timeSlot.startTime!;
                                 final endTime = timeSlot.endTime!;
                                 final availableSpots = timeSlot.maxCapacity -
@@ -497,13 +462,20 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                     _model.selectedTimeSlot?.reference ==
                                         timeSlot.reference;
 
+                                // Check if time slot is locked (past time or Sunday)
+                                final isLocked = _isTimeSlotLocked(timeSlot);
+                                final isSunday = timeSlot.date?.weekday == DateTime.sunday;
+                                
+                                // Determine if slot is selectable
+                                final isSelectable = !isLocked && !isSunday && availableSpots > 0;
+
                                 return Padding(
                                   padding: EdgeInsetsDirectional.fromSTEB(
                                       16.0, 0.0, 16.0, 8.0),
                                   child: IgnorePointer(
-                                    ignoring: availableSpots == 0,
+                                    ignoring: !isSelectable,
                                     child: InkWell(
-                                      onTap: availableSpots > 0
+                                      onTap: isSelectable
                                           ? () {
                                               if (mounted) {
                                                 setState(() {
@@ -521,10 +493,12 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                           minHeight: 80.0,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: availableSpots > 0
-                                              ? Colors.white
-                                              : Color(0xFFF5F5F5),
-                                          boxShadow: availableSpots > 0
+                                          color: isLocked || isSunday
+                                              ? Color(0xFFF5F5F5) // Grey for locked slots
+                                              : availableSpots > 0
+                                                  ? Colors.white
+                                                  : Color(0xFFF5F5F5),
+                                          boxShadow: isSelectable
                                               ? [
                                                   BoxShadow(
                                                     blurRadius: 4.0,
@@ -538,13 +512,14 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                           borderRadius:
                                               BorderRadius.circular(12.0),
                                           border: Border.all(
-                                            color: availableSpots == 0
-                                                ? Color(0xFFE74C3C)
-                                                : isSelected
-                                                    ? Color(0xFF00A4E4)
-                                                    : Color(0xFFE0E0E0),
-                                            width: availableSpots == 0 ||
-                                                    isSelected
+                                            color: isLocked || isSunday
+                                                ? Color(0xFFBDBDBD) // Grey border for locked
+                                                : availableSpots == 0
+                                                    ? Color(0xFFE74C3C)
+                                                    : isSelected
+                                                        ? Color(0xFF00A4E4)
+                                                        : Color(0xFFE0E0E0),
+                                            width: (isLocked || isSunday || availableSpots == 0 || isSelected)
                                                 ? 2.0
                                                 : 1.0,
                                           ),
@@ -565,9 +540,11 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                                     width: 36.0,
                                                     height: 36.0,
                                                     decoration: BoxDecoration(
-                                                      color: isSelected
-                                                          ? Color(0xFF00A4E4)
-                                                          : Color(0xFF005BAA),
+                                                      color: isLocked || isSunday
+                                                          ? Color(0xFFBDBDBD) // Grey icon for locked
+                                                          : isSelected
+                                                              ? Color(0xFF00A4E4)
+                                                              : Color(0xFF005BAA),
                                                       shape: BoxShape.circle,
                                                     ),
                                                     child: Align(
@@ -575,7 +552,9 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                                           AlignmentDirectional(
                                                               0.0, 0.0),
                                                       child: Icon(
-                                                        Icons.schedule,
+                                                        isLocked || isSunday
+                                                            ? Icons.lock // Lock icon for locked slots
+                                                            : Icons.schedule,
                                                         color: Colors.white,
                                                         size: 18.0,
                                                       ),
@@ -600,8 +579,9 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                                                     FontWeight
                                                                         .w600,
                                                               ),
-                                                              color: Color(
-                                                                  0xFF005BAA),
+                                                              color: isLocked || isSunday
+                                                                  ? Color(0xFF9E9E9E) // Grey text for locked
+                                                                  : Color(0xFF005BAA),
                                                               fontSize: 16.0,
                                                               letterSpacing:
                                                                   0.0,
@@ -611,35 +591,33 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                                             ),
                                                       ),
                                                       Text(
-                                                        availableSpots > 0
-                                                            ? '${availableSpots} places available'
-                                                            : 'Full',
+                                                        isLocked
+                                                            ? 'Expired'
+                                                            : isSunday
+                                                                ? 'Closed (Sunday)'
+                                                                : availableSpots > 0
+                                                                    ? '${availableSpots} places available'
+                                                                    : 'Full',
                                                         style: FlutterFlowTheme
                                                                 .of(context)
                                                             .bodySmall
                                                             .override(
                                                               font: GoogleFonts
                                                                   .inter(),
-                                                              color: availableSpots >
-                                                                      5
-                                                                  ? Color(
-                                                                      0xFF00A855)
-                                                                  : availableSpots >
-                                                                          0
-                                                                      ? Color(
-                                                                          0xFFFF6B35)
-                                                                      : Color(
-                                                                          0xFFE74C3C),
+                                                              color: isLocked || isSunday
+                                                                  ? Color(0xFF9E9E9E) // Grey text for locked
+                                                                  : availableSpots > 5
+                                                                      ? Color(0xFF00A855)
+                                                                      : availableSpots > 0
+                                                                          ? Color(0xFFFF6B35)
+                                                                          : Color(0xFFE74C3C),
                                                               fontSize: 12.0,
                                                               letterSpacing:
                                                                   0.0,
                                                               fontWeight:
-                                                                  availableSpots ==
-                                                                          0
-                                                                      ? FontWeight
-                                                                          .bold
-                                                                      : FontWeight
-                                                                          .normal,
+                                                                  (isLocked || isSunday || availableSpots == 0)
+                                                                      ? FontWeight.bold
+                                                                      : FontWeight.normal,
                                                             ),
                                                       ),
                                                     ],
@@ -662,15 +640,16 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                                             fontWeight:
                                                                 FontWeight.w600,
                                                           ),
-                                                          color:
-                                                              Color(0xFF005BAA),
+                                                          color: isLocked || isSunday
+                                                              ? Color(0xFF9E9E9E) // Grey text for locked
+                                                              : Color(0xFF005BAA),
                                                           fontSize: 14.0,
                                                           letterSpacing: 0.0,
                                                           fontWeight:
                                                               FontWeight.w600,
                                                         ),
                                                   ),
-                                                  if (isSelected)
+                                                  if (isSelected && isSelectable)
                                                     Container(
                                                       padding:
                                                           EdgeInsets.symmetric(
@@ -709,300 +688,6 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                   ),
                                 );
                               }).toList(),
-                            );
-                          },
-                        ),
-                      ].divide(SizedBox(height: 16.0)),
-                    ),
-
-                    // Daily menu section with real data
-                    Column(
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              20.0, 0.0, 20.0, 0.0),
-                          child: Text(
-                            'Plat du Jour',
-                            style: FlutterFlowTheme.of(context)
-                                .headlineSmall
-                                .override(
-                                  font: GoogleFonts.interTight(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  color: Color(0xFF005BAA),
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                        ),
-
-                        // Stream builder for daily menu
-                        StreamBuilder<List<DailyMenuRecord>>(
-                          stream: queryDailyMenuRecord(
-                            queryBuilder: (dailyMenuRecord) => dailyMenuRecord
-                                .where('day_of_week',
-                                    isEqualTo: DateTime.now().weekday)
-                                .where('available', isEqualTo: true)
-                                .orderBy('meal_type')
-                                .limit(1),
-                          ),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasError) {
-                              return Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    20.0, 0.0, 20.0, 0.0),
-                                child: Container(
-                                  padding: EdgeInsets.all(16.0),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red.shade50,
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  child: Text(
-                                    'Erreur lors du chargement du menu',
-                                    style:
-                                        TextStyle(color: Colors.red.shade700),
-                                  ),
-                                ),
-                              );
-                            }
-
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    20.0, 0.0, 20.0, 0.0),
-                                child: Container(
-                                  height: 150.0,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(16.0),
-                                  ),
-                                  child: Center(
-                                    child: CircularProgressIndicator(
-                                      color: Color(0xFF005BAA),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
-
-                            final menus = snapshot.data ?? [];
-
-                            if (menus.isEmpty) {
-                              return Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    20.0, 0.0, 20.0, 0.0),
-                                child: Container(
-                                  padding: EdgeInsets.all(16.0),
-                                  decoration: BoxDecoration(
-                                    color: Colors.orange.shade50,
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  child: Text(
-                                    'Aucun menu disponible pour aujourd\'hui',
-                                    style: TextStyle(
-                                        color: Colors.orange.shade700),
-                                  ),
-                                ),
-                              );
-                            }
-
-                            final menu = menus.first;
-
-                            return Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  20.0, 0.0, 20.0, 0.0),
-                              child: Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      blurRadius: 6.0,
-                                      color: Color(0x1A000000),
-                                      offset: Offset(0.0, 2.0),
-                                    )
-                                  ],
-                                  borderRadius: BorderRadius.circular(16.0),
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.max,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  menu.mainDish,
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .titleLarge
-                                                      .override(
-                                                        font: GoogleFonts
-                                                            .interTight(
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                                        color:
-                                                            Color(0xFF005BAA),
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                      ),
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          0.0, 4.0, 0.0, 0.0),
-                                                  child: Text(
-                                                    menu.accompaniments
-                                                            .isNotEmpty
-                                                        ? menu.accompaniments
-                                                            .join(', ')
-                                                        : menu.description,
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          color:
-                                                              Color(0xFF666666),
-                                                          letterSpacing: 0.0,
-                                                          lineHeight: 1.4,
-                                                        ),
-                                                  ),
-                                                ),
-                                                if (menu.description
-                                                        .isNotEmpty &&
-                                                    menu.accompaniments
-                                                        .isNotEmpty)
-                                                  Padding(
-                                                    padding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 8.0,
-                                                                0.0, 0.0),
-                                                    child: Text(
-                                                      menu.description,
-                                                      style: FlutterFlowTheme
-                                                              .of(context)
-                                                          .bodySmall
-                                                          .override(
-                                                            color: Color(
-                                                                0xFF888888),
-                                                            letterSpacing: 0.0,
-                                                            fontStyle: FontStyle
-                                                                .italic,
-                                                          ),
-                                                    ),
-                                                  ),
-                                              ],
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    12.0, 6.0, 12.0, 6.0),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: menu.available
-                                                    ? Colors.green
-                                                    : Colors.red,
-                                                borderRadius:
-                                                    BorderRadius.circular(20.0),
-                                              ),
-                                              child: Padding(
-                                                padding: EdgeInsets.all(8.0),
-                                                child: Text(
-                                                  menu.available
-                                                      ? 'Disponible'
-                                                      : 'Indisponible',
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodySmall
-                                                      .override(
-                                                        font: GoogleFonts.inter(
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                                        color: Colors.white,
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                      ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            children: [
-                                              Icon(
-                                                Icons.restaurant,
-                                                color: Color(0xFF00A4E4),
-                                                size: 20.0,
-                                              ),
-                                              SizedBox(width: 8.0),
-                                              Text(
-                                                '${menu.price.toStringAsFixed(2)} DT',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .titleMedium
-                                                        .override(
-                                                          color:
-                                                              Color(0xFF005BAA),
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                              ),
-                                            ],
-                                          ),
-                                          Container(
-                                            width: 32.0,
-                                            height: 32.0,
-                                            decoration: BoxDecoration(
-                                              color: Color(0xFFF0F8FF),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, 0.0),
-                                              child: Icon(
-                                                Icons.info_outline,
-                                                color: Color(0xFF00A4E4),
-                                                size: 16.0,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ].divide(SizedBox(height: 12.0)),
-                                  ),
-                                ),
-                              ),
                             );
                           },
                         ),
@@ -1078,89 +763,6 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                       ),
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-
-                          // Balance and validation info
-                          if (_model.selectedTimeSlot != null)
-                            Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.all(12.0),
-                              margin: EdgeInsets.only(bottom: 16.0),
-                              decoration: BoxDecoration(
-                                color: _model.canAffordSelectedSlot()
-                                    ? Colors.green.shade50
-                                    : Colors.orange.shade50,
-                                borderRadius: BorderRadius.circular(8.0),
-                                border: Border.all(
-                                  color: _model.canAffordSelectedSlot()
-                                      ? Colors.green.shade200
-                                      : Colors.orange.shade200,
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Prix du créneau:',
-                                        style: TextStyle(
-                                          color: Colors.grey.shade700,
-                                          fontSize: 14.0,
-                                        ),
-                                      ),
-                                      Text(
-                                        '${_model.selectedTimeSlot!.price.toStringAsFixed(2)} TND',
-                                        style: TextStyle(
-                                          color: Color(0xFF005BAA),
-                                          fontSize: 16.0,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 4.0),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Votre solde:',
-                                        style: TextStyle(
-                                          color: Colors.grey.shade700,
-                                          fontSize: 14.0,
-                                        ),
-                                      ),
-                                      Text(
-                                        _model.isLoadingBalance
-                                            ? 'Chargement...'
-                                            : '${_model.userBalance.toStringAsFixed(2)} TND',
-                                        style: TextStyle(
-                                          color: _model.canAffordSelectedSlot()
-                                              ? Colors.green.shade700
-                                              : Colors.orange.shade700,
-                                          fontSize: 16.0,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  if (!_model.canAffordSelectedSlot() &&
-                                      !_model.isLoadingBalance) ...[
-                                    SizedBox(height: 8.0),
-                                    Text(
-                                      'Solde insuffisant pour cette réservation',
-                                      style: TextStyle(
-                                        color: Colors.orange.shade700,
-                                        fontSize: 12.0,
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                    ),
-                                  ],
                                 ],
                               ),
                             ),

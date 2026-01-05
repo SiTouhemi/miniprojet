@@ -282,8 +282,80 @@ class TimeSlotService {
     return timeSlot.endTime!.isBefore(DateTime.now());
   }
 
+  /// Check if a time slot is locked (past time but can be unlocked next day)
+  /// Time slots become grey/locked when their time has passed
+  /// They return to available the next day (except Sundays - restaurant closed)
+  bool isTimeSlotLocked(TimeSlotRecord timeSlot) {
+    final now = DateTime.now();
+    
+    // Check if it's Sunday (restaurant closed)
+    if (timeSlot.date?.weekday == DateTime.sunday) {
+      return true;
+    }
+    
+    // If the time slot is in the past (end time has passed), it's locked
+    if (timeSlot.endTime != null && timeSlot.endTime!.isBefore(now)) {
+      return true;
+    }
+    
+    return false;
+  }
+
+  /// Check if restaurant is open on a given date
+  /// Restaurant is closed on Sundays
+  bool isRestaurantOpen(DateTime date) {
+    return date.weekday != DateTime.sunday;
+  }
+
+  /// Get available time slots with proper locking logic
+  /// Filters out locked slots and Sunday slots
+  Future<List<TimeSlotRecord>> getAvailableTimeSlotsWithLocking(DateTime date) async {
+    try {
+      // Check if restaurant is open on this date
+      if (!isRestaurantOpen(date)) {
+        AppLogger.i('Restaurant is closed on ${date.toString().split(' ')[0]} (Sunday)', 
+            tag: 'TimeSlotService');
+        return [];
+      }
+
+      final now = DateTime.now();
+      final startOfDay = DateTime(date.year, date.month, date.day);
+      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection('time_slots')
+          .where('is_active', isEqualTo: true)
+          .where('date', isGreaterThanOrEqualTo: startOfDay)
+          .where('date', isLessThanOrEqualTo: endOfDay)
+          .orderBy('date')
+          .orderBy('start_time')
+          .get();
+
+      AppLogger.i(
+          'Found ${snapshot.docs.length} time slots for ${date.toString().split(' ')[0]}',
+          tag: 'TimeSlotService');
+
+      return snapshot.docs
+          .map((doc) => TimeSlotRecord.fromSnapshot(doc))
+          .where((slot) {
+            // Has available capacity
+            final hasCapacity = slot.currentReservations < slot.maxCapacity;
+            
+            // Not locked (not in the past)
+            final notLocked = !isTimeSlotLocked(slot);
+            
+            return hasCapacity && notLocked;
+          })
+          .toList();
+    } catch (e) {
+      AppLogger.e('Error fetching available time slots with locking',
+          error: e, tag: 'TimeSlotService');
+      return [];
+    }
+  }
+
   /// Validate time slot for reservation
-  /// Combines multiple validation checks
+  /// Combines multiple validation checks including locking logic
   Future<TimeSlotValidationResult> validateTimeSlotForReservation(
     String timeSlotId,
   ) async {
@@ -302,6 +374,22 @@ class TimeSlotService {
         return TimeSlotValidationResult(
           isValid: false,
           errorMessage: 'Time slot is not active',
+        );
+      }
+
+      // Check if restaurant is closed (Sunday)
+      if (timeSlot.date?.weekday == DateTime.sunday) {
+        return TimeSlotValidationResult(
+          isValid: false,
+          errorMessage: 'Restaurant is closed on Sundays',
+        );
+      }
+
+      // Check if time slot is locked (past time)
+      if (isTimeSlotLocked(timeSlot)) {
+        return TimeSlotValidationResult(
+          isValid: false,
+          errorMessage: 'Time slot is no longer available (time has passed)',
         );
       }
 
