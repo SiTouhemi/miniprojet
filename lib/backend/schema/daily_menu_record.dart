@@ -17,10 +17,10 @@ class DailyMenuRecord extends FirestoreRecord {
     _initializeFields();
   }
 
-  // "date" field.
-  DateTime? _date;
-  DateTime? get date => _date;
-  bool hasDate() => _date != null;
+  // "day_of_week" field (1=Monday, 2=Tuesday, ..., 6=Saturday, 7=Sunday)
+  int? _dayOfWeek;
+  int get dayOfWeek => _dayOfWeek ?? 1;
+  bool hasDayOfWeek() => _dayOfWeek != null;
 
   // "meal_type" field.
   String? _mealType;
@@ -31,6 +31,21 @@ class DailyMenuRecord extends FirestoreRecord {
   String? _mainDish;
   String get mainDish => _mainDish ?? '';
   bool hasMainDish() => _mainDish != null;
+
+  // "salad" field.
+  String? _salad;
+  String get salad => _salad ?? '';
+  bool hasSalad() => _salad != null;
+
+  // "dessert" field.
+  String? _dessert;
+  String get dessert => _dessert ?? '';
+  bool hasDessert() => _dessert != null;
+
+  // "accompaniment" field.
+  String? _accompaniment;
+  String get accompaniment => _accompaniment ?? '';
+  bool hasAccompaniment() => _accompaniment != null;
 
   // "accompaniments" field.
   List<String>? _accompaniments;
@@ -68,9 +83,12 @@ class DailyMenuRecord extends FirestoreRecord {
   bool hasCreatedAt() => _createdAt != null;
 
   void _initializeFields() {
-    _date = snapshotData['date'] as DateTime?;
+    _dayOfWeek = castToType<int>(snapshotData['day_of_week']);
     _mealType = snapshotData['meal_type'] as String?;
     _mainDish = snapshotData['main_dish'] as String?;
+    _salad = snapshotData['salad'] as String?;
+    _dessert = snapshotData['dessert'] as String?;
+    _accompaniment = snapshotData['accompaniment'] as String?;
     _accompaniments = getDataList(snapshotData['accompaniments']);
     _description = snapshotData['description'] as String?;
     _price = castToType<double>(snapshotData['price']);
@@ -115,7 +133,7 @@ class DailyMenuRecord extends FirestoreRecord {
 }
 
 Map<String, dynamic> createDailyMenuRecordData({
-  DateTime? date,
+  int? dayOfWeek,
   String? mealType,
   String? mainDish,
   String? description,
@@ -127,7 +145,7 @@ Map<String, dynamic> createDailyMenuRecordData({
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
-      'date': date,
+      'day_of_week': dayOfWeek,
       'meal_type': mealType,
       'main_dish': mainDish,
       'description': description,
@@ -148,7 +166,7 @@ class DailyMenuRecordDocumentEquality implements Equality<DailyMenuRecord> {
   @override
   bool equals(DailyMenuRecord? e1, DailyMenuRecord? e2) {
     const listEquality = ListEquality();
-    return e1?.date == e2?.date &&
+    return e1?.dayOfWeek == e2?.dayOfWeek &&
         e1?.mealType == e2?.mealType &&
         e1?.mainDish == e2?.mainDish &&
         listEquality.equals(e1?.accompaniments, e2?.accompaniments) &&
@@ -162,7 +180,7 @@ class DailyMenuRecordDocumentEquality implements Equality<DailyMenuRecord> {
 
   @override
   int hash(DailyMenuRecord? e) => const ListEquality().hash([
-        e?.date,
+        e?.dayOfWeek,
         e?.mealType,
         e?.mainDish,
         e?.accompaniments,

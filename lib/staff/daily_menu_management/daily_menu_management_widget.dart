@@ -17,7 +17,8 @@ class DailyMenuManagementWidget extends StatefulWidget {
   static String routePath = '/dailyMenuManagement';
 
   @override
-  State<DailyMenuManagementWidget> createState() => _DailyMenuManagementWidgetState();
+  State<DailyMenuManagementWidget> createState() =>
+      _DailyMenuManagementWidgetState();
 }
 
 class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
@@ -45,7 +46,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFFF8F9FA), // Light grey-white background
         appBar: AppBar(
           backgroundColor: Color(0xFF1C1284),
           automaticallyImplyLeading: false,
@@ -57,7 +58,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
             onPressed: () => context.pop(),
           ),
           title: Text(
-            'Menus de la Semaine',
+            'Weekly Menus',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
                   fontFamily: 'Inter Tight',
                   color: Colors.white,
@@ -108,26 +109,32 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.chevron_left, color: Color(0xFF1C1284)),
+                            icon: Icon(Icons.chevron_left,
+                                color: Color(0xFF1C1284)),
                             onPressed: () {
                               setState(() {
-                                _model.selectedDate = _model.selectedDate.subtract(Duration(days: 7));
+                                _model.selectedDate = _model.selectedDate
+                                    .subtract(Duration(days: 7));
                               });
                             },
                           ),
                           Text(
-                            'Semaine du ${DateFormat('dd/MM').format(_getWeekStart(_model.selectedDate))}',
-                            style: FlutterFlowTheme.of(context).titleMedium.override(
+                            'Week of ${DateFormat('dd/MM').format(_getWeekStart(_model.selectedDate))}',
+                            style: FlutterFlowTheme.of(context)
+                                .titleMedium
+                                .override(
                                   fontFamily: 'Inter Tight',
                                   letterSpacing: 0.0,
                                   fontWeight: FontWeight.w600,
                                 ),
                           ),
                           IconButton(
-                            icon: Icon(Icons.chevron_right, color: Color(0xFF1C1284)),
+                            icon: Icon(Icons.chevron_right,
+                                color: Color(0xFF1C1284)),
                             onPressed: () {
                               setState(() {
-                                _model.selectedDate = _model.selectedDate.add(Duration(days: 7));
+                                _model.selectedDate =
+                                    _model.selectedDate.add(Duration(days: 7));
                               });
                             },
                           ),
@@ -139,7 +146,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           children: [
-                            _buildMealTypeChip('Tous'),
+                            _buildMealTypeChip('All'),
                             SizedBox(width: 8.0),
                             _buildMealTypeChip('lunch'),
                             SizedBox(width: 8.0),
@@ -151,19 +158,10 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                   ),
                 ),
               ),
-              // Daily menus list
+              // Daily menus list - Weekly Grid View
               Expanded(
                 child: StreamBuilder<List<DailyMenuRecord>>(
-                  stream: queryDailyMenuRecord(
-                    queryBuilder: (query) {
-                      final weekStart = _getWeekStart(_model.selectedDate);
-                      // Get all weekly menus (Monday to Saturday)
-                      return query
-                          .where('available', isEqualTo: true)
-                          .orderBy('day_of_week')
-                          .orderBy('meal_type');
-                    },
-                  ),
+                  stream: queryDailyMenuRecord(),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
                       return Center(child: Text('Erreur: ${snapshot.error}'));
@@ -171,37 +169,82 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(
                         child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1C1284)),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Color(0xFF1C1284)),
                         ),
                       );
                     }
-                    final menus = snapshot.data ?? [];
-                    final filteredMenus = menus.where((menu) {
-                      return _model.selectedMealType == 'Tous' ||
-                          menu.mealType == _model.selectedMealType;
-                    }).toList();
+                    final allMenus = snapshot.data ?? [];
 
-                    if (filteredMenus.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.calendar_today, size: 64.0, color: Colors.grey),
-                            SizedBox(height: 16.0),
-                            Text('Aucun menu pour cette semaine',
-                                style: FlutterFlowTheme.of(context).titleMedium.override(
-                                      fontFamily: 'Inter Tight',
-                                      color: Colors.grey,
-                                      letterSpacing: 0.0,
-                                    )),
-                          ],
-                        ),
-                      );
+                    // Sort menus by day and meal type in code
+                    allMenus.sort((a, b) {
+                      final dayComparison = a.dayOfWeek.compareTo(b.dayOfWeek);
+                      if (dayComparison != 0) return dayComparison;
+                      return a.mealType.compareTo(b.mealType);
+                    });
+
+                    // Group menus by day and meal type
+                    final menusByDay = <int, Map<String, DailyMenuRecord>>{};
+                    for (final menu in allMenus) {
+                      if (!menusByDay.containsKey(menu.dayOfWeek)) {
+                        menusByDay[menu.dayOfWeek] = {};
+                      }
+                      menusByDay[menu.dayOfWeek]![menu.mealType] = menu;
                     }
-                    return ListView.builder(
+
+                    return SingleChildScrollView(
                       padding: EdgeInsets.all(16.0),
-                      itemCount: filteredMenus.length,
-                      itemBuilder: (context, index) => _buildMenuCard(context, filteredMenus[index]),
+                      child: Column(
+                        children: [
+                          // Weekly Overview Header
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(16.0),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Color(0xFF1C1284), Color(0xFF00A4E4)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            child: Text(
+                              'Weekly Menu Overview',
+                              style: FlutterFlowTheme.of(context)
+                                  .headlineSmall
+                                  .override(
+                                    fontFamily: 'Inter Tight',
+                                    color: Colors.white,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          SizedBox(height: 20.0),
+                          // Days of the week (Monday to Saturday)
+                          ...List.generate(6, (index) {
+                            final dayOfWeek = index + 1; // 1=Monday, 6=Saturday
+                            final dayMenus = menusByDay[dayOfWeek] ?? {};
+                            final lunchMenu = dayMenus['lunch'];
+                            final dinnerMenu = dayMenus['dinner'];
+
+                            // Apply meal type filter
+                            final showLunch =
+                                _model.selectedMealType == 'All' ||
+                                    _model.selectedMealType == 'lunch';
+                            final showDinner =
+                                _model.selectedMealType == 'All' ||
+                                    _model.selectedMealType == 'dinner';
+
+                            if (!showLunch && !showDinner)
+                              return SizedBox.shrink();
+
+                            return _buildDayCard(context, dayOfWeek, lunchMenu,
+                                dinnerMenu, showLunch, showDinner);
+                          }),
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -219,8 +262,11 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
 
   Widget _buildMealTypeChip(String mealType) {
     final isSelected = _model.selectedMealType == mealType;
-    final displayName = mealType == 'Tous' ? 'Tous' : 
-                       mealType == 'lunch' ? 'Déjeuner' : 'Dîner';
+    final displayName = mealType == 'All'
+        ? 'All'
+        : mealType == 'lunch'
+            ? 'Lunch'
+            : 'Dinner';
     return FilterChip(
       label: Text(displayName),
       selected: isSelected,
@@ -239,10 +285,444 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
     );
   }
 
+  Widget _buildDayCard(
+      BuildContext context,
+      int dayOfWeek,
+      DailyMenuRecord? lunchMenu,
+      DailyMenuRecord? dinnerMenu,
+      bool showLunch,
+      bool showDinner) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 20.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.0),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 8.0,
+            color: Color(0x1A000000),
+            offset: Offset(0.0, 4.0),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Day Header
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF1C1284), Color(0xFF2E3192)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16.0),
+                topRight: Radius.circular(16.0),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _getDayName(dayOfWeek),
+                  style: FlutterFlowTheme.of(context).headlineSmall.override(
+                        fontFamily: 'Inter Tight',
+                        color: Colors.white,
+                        letterSpacing: 0.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  child: Text(
+                    'Day ${dayOfWeek}',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12.0,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Meals Content
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                // Lunch Section
+                if (showLunch) ...[
+                  _buildMealSection(context, 'Lunch', lunchMenu, Icons.wb_sunny,
+                      Color(0xFF00A4E4)),
+                  if (showDinner && dinnerMenu != null) SizedBox(height: 20.0),
+                ],
+                // Dinner Section
+                if (showDinner) ...[
+                  _buildMealSection(context, 'Dinner', dinnerMenu,
+                      Icons.nights_stay, Color(0xFFFF9800)),
+                ],
+                // No meals message
+                if ((!showLunch || lunchMenu == null) &&
+                    (!showDinner || dinnerMenu == null)) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(20.0),
+                    decoration: BoxDecoration(
+                      color: Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(12.0),
+                      border: Border.all(color: Color(0xFFE0E0E0)),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(Icons.restaurant_menu,
+                            size: 48.0, color: Colors.grey),
+                        SizedBox(height: 8.0),
+                        Text(
+                          'No menus available for this day',
+                          style:
+                              FlutterFlowTheme.of(context).bodyLarge.override(
+                                    fontFamily: 'Inter',
+                                    color: Colors.grey[600],
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 8.0),
+                        ElevatedButton.icon(
+                          onPressed: () => _showAddDailyMenuDialog(context,
+                              preselectedDay: dayOfWeek,
+                              preselectedMealType: 'lunch'),
+                          icon: Icon(Icons.add, size: 18.0),
+                          label: Text('Add Menu'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF1C1284),
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMealSection(BuildContext context, String mealType,
+      DailyMenuRecord? menu, IconData icon, Color accentColor) {
+    if (menu == null) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: accentColor.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(color: accentColor.withOpacity(0.2)),
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: accentColor, size: 24.0),
+                SizedBox(width: 12.0),
+                Text(
+                  mealType,
+                  style: FlutterFlowTheme.of(context).titleMedium.override(
+                        fontFamily: 'Inter Tight',
+                        color: accentColor,
+                        letterSpacing: 0.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12.0),
+            Text(
+              'No ${mealType.toLowerCase()} menu available',
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    fontFamily: 'Inter',
+                    color: Colors.grey[600],
+                    letterSpacing: 0.0,
+                  ),
+            ),
+            SizedBox(height: 8.0),
+            ElevatedButton.icon(
+              onPressed: () => _showAddDailyMenuDialog(context,
+                  preselectedMealType: mealType.toLowerCase()),
+              icon: Icon(Icons.add, size: 16.0),
+              label: Text('Add ${mealType}'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: accentColor,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                textStyle: TextStyle(fontSize: 12.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6.0),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: accentColor.withOpacity(0.3), width: 2.0),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 4.0,
+            color: accentColor.withOpacity(0.1),
+            offset: Offset(0.0, 2.0),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Meal Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      color: accentColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Icon(icon, color: accentColor, size: 20.0),
+                  ),
+                  SizedBox(width: 12.0),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        mealType,
+                        style:
+                            FlutterFlowTheme.of(context).titleMedium.override(
+                                  fontFamily: 'Inter Tight',
+                                  color: accentColor,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 8.0, vertical: 2.0),
+                        decoration: BoxDecoration(
+                          color: menu.available
+                              ? Color(0xFFE8F5E9)
+                              : Color(0xFFFFEBEE),
+                          borderRadius: BorderRadius.circular(6.0),
+                        ),
+                        child: Text(
+                          menu.available ? 'Available' : 'Unavailable',
+                          style: TextStyle(
+                            color: menu.available
+                                ? Color(0xFF2E7D32)
+                                : Color(0xFFC62828),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 10.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.visibility,
+                        color: Color(0xFF1C1284), size: 20.0),
+                    onPressed: () => _showMenuDetailsDialog(context, menu),
+                    padding: EdgeInsets.all(4.0),
+                    constraints:
+                        BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+                  ),
+                  IconButton(
+                    icon:
+                        Icon(Icons.edit, color: Color(0xFF1C1284), size: 20.0),
+                    onPressed: () => _showEditMenuDialog(context, menu),
+                    padding: EdgeInsets.all(4.0),
+                    constraints:
+                        BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red, size: 20.0),
+                    onPressed: () => _showDeleteConfirmation(context, menu),
+                    padding: EdgeInsets.all(4.0),
+                    constraints:
+                        BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 12.0),
+          Divider(color: accentColor.withOpacity(0.2)),
+          SizedBox(height: 8.0),
+          // Debug info - remove this later
+          if (menu.mainDish.isEmpty &&
+              menu.salad.isEmpty &&
+              menu.dessert.isEmpty) ...[
+            Container(
+              padding: EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8.0),
+                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '⚠️ Debug Info:',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.orange[800]),
+                  ),
+                  Text('Main dish: "${menu.mainDish}"'),
+                  Text('Salad: "${menu.salad}"'),
+                  Text('Dessert: "${menu.dessert}"'),
+                  Text('Description: "${menu.description}"'),
+                  Text(
+                      'This menu was likely created with the old system. Please edit and re-save it.'),
+                ],
+              ),
+            ),
+            SizedBox(height: 8.0),
+          ],
+          // Menu Details
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Main Course
+              if (menu.mainDish.isNotEmpty) ...[
+                Row(
+                  children: [
+                    Icon(Icons.restaurant,
+                        size: 16.0, color: Color(0xFF1C1284)),
+                    SizedBox(width: 8.0),
+                    Expanded(
+                      child: Text(
+                        menu.mainDish,
+                        style: FlutterFlowTheme.of(context).bodyLarge.override(
+                              fontFamily: 'Inter',
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8.0),
+              ],
+              // Salad
+              if (menu.salad.isNotEmpty) ...[
+                Row(
+                  children: [
+                    Icon(Icons.eco, size: 16.0, color: Color(0xFF4CAF50)),
+                    SizedBox(width: 8.0),
+                    Expanded(
+                      child: Text(
+                        menu.salad,
+                        style: FlutterFlowTheme.of(context).bodyLarge.override(
+                              fontFamily: 'Inter',
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8.0),
+              ],
+              // Dessert
+              if (menu.dessert.isNotEmpty) ...[
+                Row(
+                  children: [
+                    Icon(Icons.cake, size: 16.0, color: Color(0xFFFF9800)),
+                    SizedBox(width: 8.0),
+                    Expanded(
+                      child: Text(
+                        menu.dessert,
+                        style: FlutterFlowTheme.of(context).bodyLarge.override(
+                              fontFamily: 'Inter',
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8.0),
+              ],
+              // Price
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      accentColor.withOpacity(0.1),
+                      accentColor.withOpacity(0.05)
+                    ],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.attach_money, color: accentColor, size: 18.0),
+                    Text(
+                      '${menu.price.toStringAsFixed(2)} DT',
+                      style: FlutterFlowTheme.of(context).titleMedium.override(
+                            fontFamily: 'Inter Tight',
+                            color: accentColor,
+                            letterSpacing: 0.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMenuCard(BuildContext context, DailyMenuRecord menu) {
     return Card(
       margin: EdgeInsets.only(bottom: 16.0),
       elevation: 2.0,
+      color: Colors.white, // Force white background
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: InkWell(
         onTap: () => _showMenuDetailsDialog(context, menu),
@@ -260,28 +740,35 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          DateFormat('EEEE dd MMMM yyyy', 'fr_FR').format(menu.date!),
-                          style: FlutterFlowTheme.of(context).titleMedium.override(
-                                fontFamily: 'Inter Tight',
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          _getDayName(menu.dayOfWeek),
+                          style:
+                              FlutterFlowTheme.of(context).titleMedium.override(
+                                    fontFamily: 'Inter Tight',
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         SizedBox(height: 4.0),
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 2.0),
                           decoration: BoxDecoration(
-                            color: menu.mealType == 'lunch' ? Color(0xFFE3F2FD) : Color(0xFFFFF3E0),
+                            color: menu.mealType == 'lunch'
+                                ? Color(0xFFE3F2FD)
+                                : Color(0xFFFFF3E0),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                           child: Text(
-                            menu.mealType == 'lunch' ? 'Déjeuner' : 'Dîner',
-                            style: FlutterFlowTheme.of(context).bodySmall.override(
-                                  fontFamily: 'Inter',
-                                  color: menu.mealType == 'lunch' ? Color(0xFF1976D2) : Color(0xFFF57C00),
-                                  letterSpacing: 0.0,
-                                  fontSize: 11.0,
-                                ),
+                            menu.mealType == 'lunch' ? 'Lunch' : 'Dinner',
+                            style:
+                                FlutterFlowTheme.of(context).bodySmall.override(
+                                      fontFamily: 'Inter',
+                                      color: menu.mealType == 'lunch'
+                                          ? Color(0xFF1976D2)
+                                          : Color(0xFFF57C00),
+                                      letterSpacing: 0.0,
+                                      fontSize: 11.0,
+                                    ),
                           ),
                         ),
                       ],
@@ -302,13 +789,90 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                 ],
               ),
               Divider(height: 24.0),
-              Text(
-                menu.mainDish,
-                style: FlutterFlowTheme.of(context).titleSmall.override(
-                      fontFamily: 'Inter Tight',
-                      letterSpacing: 0.0,
-                      fontWeight: FontWeight.w600,
+              // Complete Menu Composition
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Main Course
+                  Row(
+                    children: [
+                      Icon(Icons.restaurant,
+                          size: 16.0, color: Color(0xFF1C1284)),
+                      SizedBox(width: 8.0),
+                      Expanded(
+                        child: Text(
+                          'Main: ${menu.mainDish}',
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    fontFamily: 'Inter',
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 6.0),
+                  // Salad
+                  if (menu.salad.isNotEmpty) ...[
+                    Row(
+                      children: [
+                        Icon(Icons.eco, size: 16.0, color: Color(0xFF4CAF50)),
+                        SizedBox(width: 8.0),
+                        Expanded(
+                          child: Text(
+                            'Salad: ${menu.salad}',
+                            style:
+                                FlutterFlowTheme.of(context).bodySmall.override(
+                                      fontFamily: 'Inter',
+                                      letterSpacing: 0.0,
+                                    ),
+                          ),
+                        ),
+                      ],
                     ),
+                    SizedBox(height: 6.0),
+                  ],
+                  // Dessert
+                  if (menu.dessert.isNotEmpty) ...[
+                    Row(
+                      children: [
+                        Icon(Icons.cake, size: 16.0, color: Color(0xFFFF9800)),
+                        SizedBox(width: 8.0),
+                        Expanded(
+                          child: Text(
+                            'Dessert: ${menu.dessert}',
+                            style:
+                                FlutterFlowTheme.of(context).bodySmall.override(
+                                      fontFamily: 'Inter',
+                                      letterSpacing: 0.0,
+                                    ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 6.0),
+                  ],
+                  // Accompaniment
+                  if (menu.accompaniment.isNotEmpty) ...[
+                    Row(
+                      children: [
+                        Icon(Icons.grain, size: 16.0, color: Color(0xFF795548)),
+                        SizedBox(width: 8.0),
+                        Expanded(
+                          child: Text(
+                            'Side: ${menu.accompaniment}',
+                            style:
+                                FlutterFlowTheme.of(context).bodySmall.override(
+                                      fontFamily: 'Inter',
+                                      letterSpacing: 0.0,
+                                    ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
               ),
               if (menu.accompaniments.isNotEmpty) ...[
                 SizedBox(height: 8.0),
@@ -318,7 +882,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                   children: menu.accompaniments
                       .map((acc) => Chip(
                             label: Text(acc, style: TextStyle(fontSize: 12.0)),
-                            backgroundColor: Color(0xFFF5F5F5),
+                            backgroundColor: Color(0xFFF8F9FA), // Light grey
                             padding: EdgeInsets.symmetric(horizontal: 4.0),
                           ))
                       .toList(),
@@ -349,15 +913,20 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                         ),
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
                     decoration: BoxDecoration(
-                      color: menu.available ? Color(0xFFE8F5E9) : Color(0xFFFFEBEE),
+                      color: menu.available
+                          ? Color(0xFFE8F5E9)
+                          : Color(0xFFFFEBEE),
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: Text(
                       menu.available ? 'Disponible' : 'Indisponible',
                       style: TextStyle(
-                        color: menu.available ? Color(0xFF2E7D32) : Color(0xFFC62828),
+                        color: menu.available
+                            ? Color(0xFF2E7D32)
+                            : Color(0xFFC62828),
                         fontWeight: FontWeight.w600,
                         fontSize: 12.0,
                       ),
@@ -372,14 +941,18 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
     );
   }
 
-  void _showAddDailyMenuDialog(BuildContext context) {
-    final mainDishController = TextEditingController();
+  void _showAddDailyMenuDialog(BuildContext context,
+      {int? preselectedDay, String? preselectedMealType}) {
     final descriptionController = TextEditingController();
-    final priceController = TextEditingController(text: '0.2');
-    final accompanimentController = TextEditingController();
-    final List<String> accompaniments = [];
-    DateTime selectedDate = DateTime.now();
-    String selectedMealType = 'lunch';
+    String? selectedMainDishId;
+    String? selectedSaladId;
+    String? selectedDessertId;
+    final List<String> selectedAccompanimentIds = [];
+    double totalPrice = 0.0;
+    DateTime selectedDate = preselectedDay != null
+        ? _getDateFromDayOfWeek(preselectedDay)
+        : DateTime.now();
+    String selectedMealType = preselectedMealType ?? 'lunch';
     bool isAvailable = true;
 
     showDialog(
@@ -394,7 +967,8 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     ListTile(
-                      title: Text('Date: ${DateFormat('dd/MM/yyyy').format(selectedDate)}'),
+                      title: Text(
+                          'Date: ${DateFormat('dd/MM/yyyy').format(selectedDate)}'),
                       trailing: Icon(Icons.calendar_today),
                       onTap: () async {
                         final picked = await showDatePicker(
@@ -418,8 +992,9 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                         border: OutlineInputBorder(),
                       ),
                       items: [
-                        DropdownMenuItem(value: 'lunch', child: Text('Déjeuner')),
-                        DropdownMenuItem(value: 'dinner', child: Text('Dîner')),
+                        DropdownMenuItem(value: 'lunch', child: Text('Lunch')),
+                        DropdownMenuItem(
+                            value: 'dinner', child: Text('Dinner')),
                       ],
                       onChanged: (value) {
                         setDialogState(() {
@@ -428,12 +1003,117 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                       },
                     ),
                     SizedBox(height: 12.0),
-                    TextField(
-                      controller: mainDishController,
-                      decoration: InputDecoration(
-                        labelText: 'Plat principal *',
-                        border: OutlineInputBorder(),
+                    // Main Dish Dropdown
+                    StreamBuilder<List<PlatRecord>>(
+                      stream: queryPlatRecord(
+                        queryBuilder: (query) =>
+                            query.where('categorie', isEqualTo: 'Main Course'),
                       ),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return CircularProgressIndicator();
+                        }
+                        final mainDishes = snapshot.data ?? [];
+                        return DropdownButtonFormField<String>(
+                          value: selectedMainDishId,
+                          decoration: InputDecoration(
+                            labelText: 'Plat principal *',
+                            border: OutlineInputBorder(),
+                            helperText: 'Select from available dishes',
+                          ),
+                          items: mainDishes.map((dish) {
+                            return DropdownMenuItem(
+                              value: dish.reference.id,
+                              child: Text(
+                                  '${dish.nom} - ${dish.prix.toStringAsFixed(2)} DT'),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setDialogState(() {
+                              selectedMainDishId = value;
+                              // Recalculate total price
+                              totalPrice = 0.0;
+                              if (selectedMainDishId != null) {
+                                final dish = mainDishes.firstWhere((d) =>
+                                    d.reference.id == selectedMainDishId);
+                                totalPrice += dish.prix;
+                              }
+                            });
+                          },
+                        );
+                      },
+                    ),
+                    SizedBox(height: 12.0),
+                    // Salad Dropdown
+                    StreamBuilder<List<PlatRecord>>(
+                      stream: queryPlatRecord(
+                        queryBuilder: (query) =>
+                            query.where('categorie', isEqualTo: 'Appetizer'),
+                      ),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return SizedBox.shrink();
+                        }
+                        final salads = snapshot.data ?? [];
+                        return DropdownButtonFormField<String>(
+                          value: selectedSaladId,
+                          decoration: InputDecoration(
+                            labelText: 'Salad (Optional)',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: [
+                            DropdownMenuItem(value: null, child: Text('None')),
+                            ...salads.map((dish) {
+                              return DropdownMenuItem(
+                                value: dish.reference.id,
+                                child: Text(
+                                    '${dish.nom} - ${dish.prix.toStringAsFixed(2)} DT'),
+                              );
+                            }).toList(),
+                          ],
+                          onChanged: (value) {
+                            setDialogState(() {
+                              selectedSaladId = value;
+                            });
+                          },
+                        );
+                      },
+                    ),
+                    SizedBox(height: 12.0),
+                    // Dessert Dropdown
+                    StreamBuilder<List<PlatRecord>>(
+                      stream: queryPlatRecord(
+                        queryBuilder: (query) =>
+                            query.where('categorie', isEqualTo: 'Dessert'),
+                      ),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return SizedBox.shrink();
+                        }
+                        final desserts = snapshot.data ?? [];
+                        return DropdownButtonFormField<String>(
+                          value: selectedDessertId,
+                          decoration: InputDecoration(
+                            labelText: 'Dessert (Optional)',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: [
+                            DropdownMenuItem(value: null, child: Text('None')),
+                            ...desserts.map((dish) {
+                              return DropdownMenuItem(
+                                value: dish.reference.id,
+                                child: Text(
+                                    '${dish.nom} - ${dish.prix.toStringAsFixed(2)} DT'),
+                              );
+                            }).toList(),
+                          ],
+                          onChanged: (value) {
+                            setDialogState(() {
+                              selectedDessertId = value;
+                            });
+                          },
+                        );
+                      },
                     ),
                     SizedBox(height: 12.0),
                     TextField(
@@ -441,58 +1121,36 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                       decoration: InputDecoration(
                         labelText: 'Description',
                         border: OutlineInputBorder(),
+                        helperText: 'Additional notes about today\'s menu',
                       ),
                       maxLines: 2,
                     ),
                     SizedBox(height: 12.0),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: accompanimentController,
-                            decoration: InputDecoration(
-                              labelText: 'Accompagnement',
-                              border: OutlineInputBorder(),
+                    // Display calculated price
+                    Container(
+                      padding: EdgeInsets.all(12.0),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFF0F8FF),
+                        borderRadius: BorderRadius.circular(8.0),
+                        border: Border.all(color: Color(0xFF1C1284)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Menu Price:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            '${totalPrice.toStringAsFixed(2)} DT',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.0,
+                              color: Color(0xFF1C1284),
                             ),
                           ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.add_circle, color: Color(0xFF1C1284)),
-                          onPressed: () {
-                            if (accompanimentController.text.isNotEmpty) {
-                              setDialogState(() {
-                                accompaniments.add(accompanimentController.text);
-                                accompanimentController.clear();
-                              });
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                    if (accompaniments.isNotEmpty) ...[
-                      SizedBox(height: 8.0),
-                      Wrap(
-                        spacing: 8.0,
-                        children: accompaniments
-                            .map((acc) => Chip(
-                                  label: Text(acc),
-                                  onDeleted: () {
-                                    setDialogState(() {
-                                      accompaniments.remove(acc);
-                                    });
-                                  },
-                                ))
-                            .toList(),
+                        ],
                       ),
-                    ],
-                    SizedBox(height: 12.0),
-                    TextField(
-                      controller: priceController,
-                      decoration: InputDecoration(
-                        labelText: 'Prix (DT) *',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.numberWithOptions(decimal: true),
                     ),
                     SizedBox(height: 12.0),
                     SwitchListTile(
@@ -514,24 +1172,69 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    if (mainDishController.text.isEmpty) {
+                    if (selectedMainDishId == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Le plat principal est obligatoire'),
+                          content:
+                              Text('Veuillez sélectionner un plat principal'),
                           backgroundColor: Colors.red,
                         ),
                       );
                       return;
                     }
                     try {
-                      final price = double.tryParse(priceController.text) ?? 0.2;
+                      // Fetch the selected dishes to get their names
+                      final mainDishDoc = await PlatRecord.collection
+                          .doc(selectedMainDishId)
+                          .get();
+                      final mainDish = PlatRecord.fromSnapshot(mainDishDoc);
+
+                      String saladName = '';
+                      if (selectedSaladId != null) {
+                        final saladDoc = await PlatRecord.collection
+                            .doc(selectedSaladId)
+                            .get();
+                        final salad = PlatRecord.fromSnapshot(saladDoc);
+                        saladName = salad.nom;
+                      }
+
+                      String dessertName = '';
+                      if (selectedDessertId != null) {
+                        final dessertDoc = await PlatRecord.collection
+                            .doc(selectedDessertId)
+                            .get();
+                        final dessert = PlatRecord.fromSnapshot(dessertDoc);
+                        dessertName = dessert.nom;
+                      }
+
+                      // Calculate total price
+                      double menuPrice = mainDish.prix;
+                      if (selectedSaladId != null) {
+                        final saladDoc = await PlatRecord.collection
+                            .doc(selectedSaladId)
+                            .get();
+                        menuPrice += PlatRecord.fromSnapshot(saladDoc).prix;
+                      }
+                      if (selectedDessertId != null) {
+                        final dessertDoc = await PlatRecord.collection
+                            .doc(selectedDessertId)
+                            .get();
+                        menuPrice += PlatRecord.fromSnapshot(dessertDoc).prix;
+                      }
+
                       await DailyMenuRecord.collection.add({
-                        'date': selectedDate,
+                        'day_of_week': selectedDate.weekday,
                         'meal_type': selectedMealType,
-                        'main_dish': mainDishController.text,
-                        'accompaniments': accompaniments,
+                        'main_dish': mainDish.nom,
+                        'main_dish_ref': selectedMainDishId,
+                        'salad': saladName,
+                        'salad_ref': selectedSaladId ?? '',
+                        'dessert': dessertName,
+                        'dessert_ref': selectedDessertId ?? '',
+                        'accompaniment': '',
+                        'accompaniments': [],
                         'description': descriptionController.text,
-                        'price': price,
+                        'price': menuPrice,
                         'available': isAvailable,
                         'created_by': currentUser?.uid ?? '',
                         'created_at': DateTime.now(),
@@ -556,7 +1259,8 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                       }
                     }
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF1C1284)),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF1C1284)),
                   child: Text('Ajouter', style: TextStyle(color: Colors.white)),
                 ),
               ],
@@ -568,191 +1272,333 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
   }
 
   void _showEditMenuDialog(BuildContext context, DailyMenuRecord menu) {
-    final mainDishController = TextEditingController(text: menu.mainDish);
     final descriptionController = TextEditingController(text: menu.description);
-    final priceController = TextEditingController(text: menu.price.toString());
-    final List<String> accompaniments = List.from(menu.accompaniments);
-    final accompanimentController = TextEditingController();
-    DateTime selectedDate = menu.date!;
+    String? selectedMainDishId;
+    String? selectedSaladId;
+    String? selectedDessertId;
+    DateTime selectedDate = _getDateFromDayOfWeek(menu.dayOfWeek);
     String selectedMealType = menu.mealType;
     bool isAvailable = menu.available;
+
+    // Function to find dish ID by name
+    Future<String?> findDishIdByName(String dishName, String category) async {
+      if (dishName.isEmpty) return null;
+      try {
+        final querySnapshot = await PlatRecord.collection
+            .where('nom', isEqualTo: dishName)
+            .where('categorie', isEqualTo: category)
+            .limit(1)
+            .get();
+
+        if (querySnapshot.docs.isNotEmpty) {
+          return querySnapshot.docs.first.id;
+        }
+      } catch (e) {
+        print('Error finding dish ID: $e');
+      }
+      return null;
+    }
+
+    // Initialize selected IDs based on current menu
+    Future<void> initializeSelectedDishes() async {
+      if (menu.mainDish.isNotEmpty) {
+        selectedMainDishId =
+            await findDishIdByName(menu.mainDish, 'Main Course');
+      }
+      if (menu.salad.isNotEmpty) {
+        selectedSaladId = await findDishIdByName(menu.salad, 'Appetizer');
+      }
+      if (menu.dessert.isNotEmpty) {
+        selectedDessertId = await findDishIdByName(menu.dessert, 'Dessert');
+      }
+    }
 
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: Text('Modifier le Menu'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ListTile(
-                      title: Text('Date: ${DateFormat('dd/MM/yyyy').format(selectedDate)}'),
-                      trailing: Icon(Icons.calendar_today),
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: selectedDate,
-                          firstDate: DateTime.now().subtract(Duration(days: 365)),
-                          lastDate: DateTime.now().add(Duration(days: 365)),
-                        );
-                        if (picked != null) {
-                          setDialogState(() {
-                            selectedDate = picked;
-                          });
-                        }
-                      },
-                    ),
-                    SizedBox(height: 12.0),
-                    DropdownButtonFormField<String>(
-                      value: selectedMealType,
-                      decoration: InputDecoration(
-                        labelText: 'Type de repas *',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: [
-                        DropdownMenuItem(value: 'lunch', child: Text('Déjeuner')),
-                        DropdownMenuItem(value: 'dinner', child: Text('Dîner')),
-                      ],
-                      onChanged: (value) {
-                        setDialogState(() {
-                          selectedMealType = value!;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 12.0),
-                    TextField(
-                      controller: mainDishController,
-                      decoration: InputDecoration(
-                        labelText: 'Plat principal *',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    SizedBox(height: 12.0),
-                    TextField(
-                      controller: descriptionController,
-                      decoration: InputDecoration(
-                        labelText: 'Description',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 2,
-                    ),
-                    SizedBox(height: 12.0),
-                    Row(
+        return FutureBuilder<void>(
+          future: initializeSelectedDishes(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return AlertDialog(
+                title: Text('Loading...'),
+                content: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+
+            return StatefulBuilder(
+              builder: (context, setDialogState) {
+                return AlertDialog(
+                  title: Text('Modifier le Menu'),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Expanded(
-                          child: TextField(
-                            controller: accompanimentController,
-                            decoration: InputDecoration(
-                              labelText: 'Accompagnement',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.add_circle, color: Color(0xFF1C1284)),
-                          onPressed: () {
-                            if (accompanimentController.text.isNotEmpty) {
+                        ListTile(
+                          title: Text(
+                              'Date: ${DateFormat('dd/MM/yyyy').format(selectedDate)}'),
+                          trailing: Icon(Icons.calendar_today),
+                          onTap: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: selectedDate,
+                              firstDate:
+                                  DateTime.now().subtract(Duration(days: 365)),
+                              lastDate: DateTime.now().add(Duration(days: 365)),
+                            );
+                            if (picked != null) {
                               setDialogState(() {
-                                accompaniments.add(accompanimentController.text);
-                                accompanimentController.clear();
+                                selectedDate = picked;
                               });
                             }
                           },
                         ),
+                        SizedBox(height: 12.0),
+                        DropdownButtonFormField<String>(
+                          value: selectedMealType,
+                          decoration: InputDecoration(
+                            labelText: 'Type de repas *',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: [
+                            DropdownMenuItem(
+                                value: 'lunch', child: Text('Lunch')),
+                            DropdownMenuItem(
+                                value: 'dinner', child: Text('Dinner')),
+                          ],
+                          onChanged: (value) {
+                            setDialogState(() {
+                              selectedMealType = value!;
+                            });
+                          },
+                        ),
+                        SizedBox(height: 12.0),
+                        // Main Dish Dropdown
+                        StreamBuilder<List<PlatRecord>>(
+                          stream: queryPlatRecord(
+                            queryBuilder: (query) => query.where('categorie',
+                                isEqualTo: 'Main Course'),
+                          ),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return CircularProgressIndicator();
+                            }
+                            final mainDishes = snapshot.data ?? [];
+                            return DropdownButtonFormField<String>(
+                              value: selectedMainDishId,
+                              decoration: InputDecoration(
+                                labelText: 'Plat principal *',
+                                border: OutlineInputBorder(),
+                                helperText: 'Current: ${menu.mainDish}',
+                              ),
+                              items: mainDishes.map((dish) {
+                                return DropdownMenuItem(
+                                  value: dish.reference.id,
+                                  child: Text(
+                                      '${dish.nom} - ${dish.prix.toStringAsFixed(2)} DT'),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setDialogState(() {
+                                  selectedMainDishId = value;
+                                });
+                              },
+                            );
+                          },
+                        ),
+                        SizedBox(height: 12.0),
+                        // Salad Dropdown
+                        StreamBuilder<List<PlatRecord>>(
+                          stream: queryPlatRecord(
+                            queryBuilder: (query) => query.where('categorie',
+                                isEqualTo: 'Appetizer'),
+                          ),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return SizedBox.shrink();
+                            }
+                            final salads = snapshot.data ?? [];
+                            return DropdownButtonFormField<String>(
+                              value: selectedSaladId,
+                              decoration: InputDecoration(
+                                labelText: 'Salad (Optional)',
+                                border: OutlineInputBorder(),
+                                helperText: menu.salad.isNotEmpty
+                                    ? 'Current: ${menu.salad}'
+                                    : null,
+                              ),
+                              items: [
+                                DropdownMenuItem(
+                                    value: null, child: Text('None')),
+                                ...salads.map((dish) {
+                                  return DropdownMenuItem(
+                                    value: dish.reference.id,
+                                    child: Text(
+                                        '${dish.nom} - ${dish.prix.toStringAsFixed(2)} DT'),
+                                  );
+                                }).toList(),
+                              ],
+                              onChanged: (value) {
+                                setDialogState(() {
+                                  selectedSaladId = value;
+                                });
+                              },
+                            );
+                          },
+                        ),
+                        SizedBox(height: 12.0),
+                        // Dessert Dropdown
+                        StreamBuilder<List<PlatRecord>>(
+                          stream: queryPlatRecord(
+                            queryBuilder: (query) =>
+                                query.where('categorie', isEqualTo: 'Dessert'),
+                          ),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return SizedBox.shrink();
+                            }
+                            final desserts = snapshot.data ?? [];
+                            return DropdownButtonFormField<String>(
+                              value: selectedDessertId,
+                              decoration: InputDecoration(
+                                labelText: 'Dessert (Optional)',
+                                border: OutlineInputBorder(),
+                                helperText: menu.dessert.isNotEmpty
+                                    ? 'Current: ${menu.dessert}'
+                                    : null,
+                              ),
+                              items: [
+                                DropdownMenuItem(
+                                    value: null, child: Text('None')),
+                                ...desserts.map((dish) {
+                                  return DropdownMenuItem(
+                                    value: dish.reference.id,
+                                    child: Text(
+                                        '${dish.nom} - ${dish.prix.toStringAsFixed(2)} DT'),
+                                  );
+                                }).toList(),
+                              ],
+                              onChanged: (value) {
+                                setDialogState(() {
+                                  selectedDessertId = value;
+                                });
+                              },
+                            );
+                          },
+                        ),
+                        SizedBox(height: 12.0),
+                        TextField(
+                          controller: descriptionController,
+                          decoration: InputDecoration(
+                            labelText: 'Description',
+                            border: OutlineInputBorder(),
+                          ),
+                          maxLines: 2,
+                        ),
+                        SizedBox(height: 12.0),
+                        SwitchListTile(
+                          title: Text('Disponible'),
+                          value: isAvailable,
+                          onChanged: (value) {
+                            setDialogState(() {
+                              isAvailable = value;
+                            });
+                          },
+                        ),
                       ],
                     ),
-                    if (accompaniments.isNotEmpty) ...[
-                      SizedBox(height: 8.0),
-                      Wrap(
-                        spacing: 8.0,
-                        children: accompaniments
-                            .map((acc) => Chip(
-                                  label: Text(acc),
-                                  onDeleted: () {
-                                    setDialogState(() {
-                                      accompaniments.remove(acc);
-                                    });
-                                  },
-                                ))
-                            .toList(),
-                      ),
-                    ],
-                    SizedBox(height: 12.0),
-                    TextField(
-                      controller: priceController,
-                      decoration: InputDecoration(
-                        labelText: 'Prix (DT) *',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                      child: Text('Annuler'),
                     ),
-                    SizedBox(height: 12.0),
-                    SwitchListTile(
-                      title: Text('Disponible'),
-                      value: isAvailable,
-                      onChanged: (value) {
-                        setDialogState(() {
-                          isAvailable = value;
-                        });
+                    ElevatedButton(
+                      onPressed: () async {
+                        try {
+                          // Prepare update data
+                          Map<String, dynamic> updateData = {
+                            'day_of_week': selectedDate.weekday,
+                            'meal_type': selectedMealType,
+                            'description': descriptionController.text,
+                            'available': isAvailable,
+                          };
+
+                          // Update main dish if changed
+                          if (selectedMainDishId != null) {
+                            final mainDishDoc = await PlatRecord.collection
+                                .doc(selectedMainDishId)
+                                .get();
+                            final mainDish =
+                                PlatRecord.fromSnapshot(mainDishDoc);
+                            updateData['main_dish'] = mainDish.nom;
+                            updateData['main_dish_ref'] = selectedMainDishId;
+
+                            // Recalculate price
+                            double menuPrice = mainDish.prix;
+
+                            if (selectedSaladId != null) {
+                              final saladDoc = await PlatRecord.collection
+                                  .doc(selectedSaladId)
+                                  .get();
+                              final salad = PlatRecord.fromSnapshot(saladDoc);
+                              updateData['salad'] = salad.nom;
+                              updateData['salad_ref'] = selectedSaladId;
+                              menuPrice += salad.prix;
+                            } else {
+                              updateData['salad'] = '';
+                              updateData['salad_ref'] = '';
+                            }
+
+                            if (selectedDessertId != null) {
+                              final dessertDoc = await PlatRecord.collection
+                                  .doc(selectedDessertId)
+                                  .get();
+                              final dessert =
+                                  PlatRecord.fromSnapshot(dessertDoc);
+                              updateData['dessert'] = dessert.nom;
+                              updateData['dessert_ref'] = selectedDessertId;
+                              menuPrice += dessert.prix;
+                            } else {
+                              updateData['dessert'] = '';
+                              updateData['dessert_ref'] = '';
+                            }
+
+                            updateData['price'] = menuPrice;
+                          }
+
+                          await menu.reference.update(updateData);
+
+                          if (context.mounted) {
+                            Navigator.of(dialogContext).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Menu modifié avec succès'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Erreur: $e'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
                       },
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF1C1284)),
+                      child: Text('Modifier',
+                          style: TextStyle(color: Colors.white)),
                     ),
                   ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: Text('Annuler'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (mainDishController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Le plat principal est obligatoire'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                      return;
-                    }
-                    try {
-                      final price = double.tryParse(priceController.text) ?? 0.2;
-                      await menu.reference.update({
-                        'date': selectedDate,
-                        'meal_type': selectedMealType,
-                        'main_dish': mainDishController.text,
-                        'accompaniments': accompaniments,
-                        'description': descriptionController.text,
-                        'price': price,
-                        'available': isAvailable,
-                      });
-                      if (context.mounted) {
-                        Navigator.of(dialogContext).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Menu modifié avec succès'),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Erreur: $e'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF1C1284)),
-                  child: Text('Modifier', style: TextStyle(color: Colors.white)),
-                ),
-              ],
+                );
+              },
             );
           },
         );
@@ -765,40 +1611,131 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: Text(DateFormat('EEEE dd MMMM yyyy', 'fr_FR').format(menu.date!)),
+          title: Text(_getDayName(menu.dayOfWeek)),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Type', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(menu.mealType == 'lunch' ? 'Déjeuner' : 'Dîner'),
+                Text('Meal Type',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(menu.mealType == 'lunch' ? 'Lunch' : 'Dinner'),
                 SizedBox(height: 12.0),
-                Text('Plat Principal', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(menu.mainDish),
-                if (menu.accompaniments.isNotEmpty) ...[
-                  SizedBox(height: 12.0),
-                  Text('Accompagnements', style: TextStyle(fontWeight: FontWeight.bold)),
-                  ...menu.accompaniments.map((acc) => Text('• $acc')),
+                Text('Complete Menu Composition',
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0)),
+                SizedBox(height: 8.0),
+                // Main Course
+                Row(
+                  children: [
+                    Icon(Icons.restaurant,
+                        size: 18.0, color: Color(0xFF1C1284)),
+                    SizedBox(width: 8.0),
+                    Text('Main Course',
+                        style: TextStyle(fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                Text('${menu.mainDish}', style: TextStyle(fontSize: 14.0)),
+                SizedBox(height: 8.0),
+                // Salad
+                if (menu.salad.isNotEmpty) ...[
+                  Row(
+                    children: [
+                      Icon(Icons.eco, size: 18.0, color: Color(0xFF4CAF50)),
+                      SizedBox(width: 8.0),
+                      Text('Salad',
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  Text('${menu.salad}', style: TextStyle(fontSize: 14.0)),
+                  SizedBox(height: 8.0),
+                ],
+                // Dessert
+                if (menu.dessert.isNotEmpty) ...[
+                  Row(
+                    children: [
+                      Icon(Icons.cake, size: 18.0, color: Color(0xFFFF9800)),
+                      SizedBox(width: 8.0),
+                      Text('Dessert',
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  Text('${menu.dessert}', style: TextStyle(fontSize: 14.0)),
+                  SizedBox(height: 8.0),
+                ],
+                // Accompaniment
+                if (menu.accompaniment.isNotEmpty) ...[
+                  Row(
+                    children: [
+                      Icon(Icons.grain, size: 18.0, color: Color(0xFF795548)),
+                      SizedBox(width: 8.0),
+                      Text('Side Dish',
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  Text('${menu.accompaniment}',
+                      style: TextStyle(fontSize: 14.0)),
+                  SizedBox(height: 8.0),
                 ],
                 if (menu.description.isNotEmpty) ...[
-                  SizedBox(height: 12.0),
-                  Text('Description', style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text(menu.description),
+                  SizedBox(height: 4.0),
+                  Text('Description',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text(menu.description,
+                      style: TextStyle(
+                          fontSize: 14.0, fontStyle: FontStyle.italic)),
                 ],
                 SizedBox(height: 12.0),
-                Text('Prix', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text('${menu.price.toStringAsFixed(2)} DT'),
-                SizedBox(height: 12.0),
-                Text('Statut', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(menu.available ? 'Disponible' : 'Indisponible'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Price',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text('${menu.price.toStringAsFixed(2)} TND',
+                            style: TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF00A4E4))),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text('Status',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 4.0),
+                          decoration: BoxDecoration(
+                            color: menu.available
+                                ? Color(0xFFE8F5E9)
+                                : Color(0xFFFFEBEE),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Text(
+                            menu.available ? 'Available' : 'Unavailable',
+                            style: TextStyle(
+                              color: menu.available
+                                  ? Color(0xFF2E7D32)
+                                  : Color(0xFFC62828),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text('Fermer'),
+              child: Text('Close'),
             ),
           ],
         );
@@ -811,8 +1748,8 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: Text('Confirmer la suppression'),
-          content: Text('Êtes-vous sûr de vouloir supprimer ce menu ?'),
+          title: Text('Confirm Deletion'),
+          content: Text('Are you sure you want to delete this menu?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
@@ -849,5 +1786,25 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
         );
       },
     );
+  }
+
+  String _getDayName(int dayOfWeek) {
+    const days = [
+      'Lundi',
+      'Mardi',
+      'Mercredi',
+      'Jeudi',
+      'Vendredi',
+      'Samedi',
+      'Dimanche'
+    ];
+    return days[dayOfWeek - 1];
+  }
+
+  DateTime _getDateFromDayOfWeek(int dayOfWeek) {
+    final now = DateTime.now();
+    final currentWeekday = now.weekday;
+    final daysToAdd = dayOfWeek - currentWeekday;
+    return now.add(Duration(days: daysToAdd));
   }
 }

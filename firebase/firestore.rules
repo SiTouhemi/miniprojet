@@ -32,10 +32,10 @@ service cloud.firestore {
       allow write: if isAuthenticated() && getUserRole() == 'admin';
     }
 
-    // Daily menu - allow all users to read (including unauthenticated for menu display)
+    // Daily menu - allow all users to read, allow staff and admin to write
     match /daily_menu/{document} {
       allow read: if true; // Allow unauthenticated read for development
-      allow write: if isAuthenticated() && getUserRole() == 'admin';
+      allow write: if isAuthenticated() && getUserRole() in ['admin', 'staff'];
     }
 
     // Time slots - allow all users to read

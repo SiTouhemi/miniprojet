@@ -681,7 +681,7 @@ class _AjoutPlatWidgetState extends State<AjoutPlatWidget> {
                                         value: _model.switchValue!,
                                         onChanged: (newValue) async {
                                           safeSetState(() =>
-                                              _model.switchValue = newValue!);
+                                              _model.switchValue = newValue);
                                         },
                                         activeColor: Color(0xFF00A4E4),
                                         activeTrackColor: Color(0x4D00A4E4),

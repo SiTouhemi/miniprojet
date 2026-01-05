@@ -9,7 +9,7 @@ class MealManagementModel extends FlutterFlowModel<MealManagementWidget> {
   String? Function(BuildContext, String?)? searchControllerValidator;
 
   // State for selected category filter
-  String selectedCategory = 'Tous';
+  String selectedCategory = 'All';
 
   @override
   void initState(BuildContext context) {}

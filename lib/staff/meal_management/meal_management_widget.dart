@@ -45,7 +45,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFFF8F9FA), // Light grey-white background
         appBar: AppBar(
           backgroundColor: Color(0xFF1C1284),
           automaticallyImplyLeading: false,
@@ -63,7 +63,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
             },
           ),
           title: Text(
-            'Gestion des Repas',
+            'Meal Management',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
                   fontFamily: 'Inter Tight',
                   color: Colors.white,
@@ -104,9 +104,9 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      blurRadius: 4.0,
-                      color: Color(0x1A000000),
-                      offset: Offset(0.0, 2.0),
+                      blurRadius: 2.0,
+                      color: Color(0x0F000000),
+                      offset: Offset(0.0, 1.0),
                     )
                   ],
                 ),
@@ -145,15 +145,15 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           children: [
-                            _buildCategoryChip('Tous'),
+                            _buildCategoryChip('All'),
                             SizedBox(width: 8.0),
-                            _buildCategoryChip('Entrée'),
+                            _buildCategoryChip('Appetizer'),
                             SizedBox(width: 8.0),
-                            _buildCategoryChip('Plat Principal'),
+                            _buildCategoryChip('Main Course'),
                             SizedBox(width: 8.0),
                             _buildCategoryChip('Dessert'),
                             SizedBox(width: 8.0),
-                            _buildCategoryChip('Boisson'),
+                            _buildCategoryChip('Beverage'),
                           ],
                         ),
                       ),
@@ -183,17 +183,19 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                     }
 
                     final meals = snapshot.data ?? [];
-                    
+
                     // Filter meals based on search and category
                     final filteredMeals = meals.where((meal) {
-                      final searchQuery = _model.searchController?.text.toLowerCase() ?? '';
+                      final searchQuery =
+                          _model.searchController?.text.toLowerCase() ?? '';
                       final matchesSearch = searchQuery.isEmpty ||
                           meal.nom.toLowerCase().contains(searchQuery) ||
                           meal.ingredients.toLowerCase().contains(searchQuery);
-                      
-                      final matchesCategory = _model.selectedCategory == 'Tous' ||
-                          meal.categorie == _model.selectedCategory;
-                      
+
+                      final matchesCategory =
+                          _model.selectedCategory == 'All' ||
+                              meal.categorie == _model.selectedCategory;
+
                       return matchesSearch && matchesCategory;
                     }).toList();
 
@@ -209,7 +211,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                             ),
                             SizedBox(height: 16.0),
                             Text(
-                              'Aucun repas trouvé',
+                              'No meals found',
                               style: FlutterFlowTheme.of(context)
                                   .titleMedium
                                   .override(
@@ -220,7 +222,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                             ),
                             SizedBox(height: 8.0),
                             Text(
-                              'Ajoutez votre premier repas',
+                              'Add your first meal',
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
                                   .override(
@@ -279,6 +281,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
     return Card(
       margin: EdgeInsets.only(bottom: 16.0),
       elevation: 2.0,
+      color: Colors.white, // Force white background
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
@@ -297,8 +300,12 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                 width: 80.0,
                 height: 80.0,
                 decoration: BoxDecoration(
-                  color: Color(0xFFF5F5F5),
+                  color: Color(0xFFF8F9FA), // Very light grey
                   borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(
+                    color: Color(0xFFE9ECEF),
+                    width: 1.0,
+                  ),
                 ),
                 child: meal.image.isNotEmpty
                     ? ClipRRect(
@@ -308,6 +315,21 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                           width: 80.0,
                           height: 80.0,
                           fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes !=
+                                        null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                                strokeWidth: 2.0,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    Color(0xFF1C1284)),
+                              ),
+                            );
+                          },
                           errorBuilder: (context, error, stackTrace) {
                             return Icon(
                               Icons.restaurant,
@@ -355,14 +377,13 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                           ),
                           child: Text(
                             '${meal.prix.toStringAsFixed(2)} DT',
-                            style: FlutterFlowTheme.of(context)
-                                .bodySmall
-                                .override(
-                                  fontFamily: 'Inter',
-                                  color: Colors.white,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            style:
+                                FlutterFlowTheme.of(context).bodySmall.override(
+                                      fontFamily: 'Inter',
+                                      color: Colors.white,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                           ),
                         ),
                       ],
@@ -374,16 +395,21 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                         vertical: 2.0,
                       ),
                       decoration: BoxDecoration(
-                        color: Color(0xFFE8F5E9),
+                        color: Color(0xFFF0F8FF), // Very light blue
                         borderRadius: BorderRadius.circular(8.0),
+                        border: Border.all(
+                          color: Color(0xFFE3F2FD),
+                          width: 1.0,
+                        ),
                       ),
                       child: Text(
                         meal.categorie,
                         style: FlutterFlowTheme.of(context).bodySmall.override(
                               fontFamily: 'Inter',
-                              color: Color(0xFF2E7D32),
+                              color: Color(0xFF1976D2), // Matching blue
                               letterSpacing: 0.0,
                               fontSize: 11.0,
+                              fontWeight: FontWeight.w500,
                             ),
                       ),
                     ),
@@ -432,7 +458,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
     final ingredientsController = TextEditingController();
     final priceController = TextEditingController();
     final imageController = TextEditingController();
-    String selectedCategory = 'Plat Principal';
+    String selectedCategory = 'Main Course';
 
     showDialog(
       context: context,
@@ -440,7 +466,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: Text('Ajouter un Repas'),
+              title: Text('Add Meal'),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -448,7 +474,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                     TextField(
                       controller: nameController,
                       decoration: InputDecoration(
-                        labelText: 'Nom du repas *',
+                        labelText: 'Meal Name *',
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -456,10 +482,10 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                     DropdownButtonFormField<String>(
                       value: selectedCategory,
                       decoration: InputDecoration(
-                        labelText: 'Catégorie *',
+                        labelText: 'Category *',
                         border: OutlineInputBorder(),
                       ),
-                      items: ['Entrée', 'Plat Principal', 'Dessert', 'Boisson']
+                      items: ['Appetizer', 'Main Course', 'Dessert', 'Beverage']
                           .map((cat) => DropdownMenuItem(
                                 value: cat,
                                 child: Text(cat),
@@ -484,7 +510,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                     TextField(
                       controller: ingredientsController,
                       decoration: InputDecoration(
-                        labelText: 'Ingrédients',
+                        labelText: 'Ingredients',
                         border: OutlineInputBorder(),
                       ),
                       maxLines: 2,
@@ -493,10 +519,11 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                     TextField(
                       controller: priceController,
                       decoration: InputDecoration(
-                        labelText: 'Prix (DT) *',
+                        labelText: 'Price (DT) *',
                         border: OutlineInputBorder(),
                       ),
-                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                      keyboardType:
+                          TextInputType.numberWithOptions(decimal: true),
                     ),
                     SizedBox(height: 12.0),
                     TextField(
@@ -512,7 +539,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: Text('Annuler'),
+                  child: Text('Cancel'),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -520,7 +547,8 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                         priceController.text.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Veuillez remplir les champs obligatoires'),
+                          content:
+                              Text('Veuillez remplir les champs obligatoires'),
                           backgroundColor: Colors.red,
                         ),
                       );
@@ -528,8 +556,9 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                     }
 
                     try {
-                      final price = double.tryParse(priceController.text) ?? 0.0;
-                      
+                      final price =
+                          double.tryParse(priceController.text) ?? 0.0;
+
                       await PlatRecord.collection.add(
                         createPlatRecordData(
                           nom: nameController.text,
@@ -545,7 +574,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                         Navigator.of(dialogContext).pop();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Repas ajouté avec succès'),
+                            content: Text('Meal added successfully'),
                             backgroundColor: Colors.green,
                           ),
                         );
@@ -564,7 +593,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF1C1284),
                   ),
-                  child: Text('Ajouter', style: TextStyle(color: Colors.white)),
+                  child: Text('Add', style: TextStyle(color: Colors.white)),
                 ),
               ],
             );
@@ -588,7 +617,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: Text('Modifier le Repas'),
+              title: Text('Edit Meal'),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -596,7 +625,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                     TextField(
                       controller: nameController,
                       decoration: InputDecoration(
-                        labelText: 'Nom du repas *',
+                        labelText: 'Meal Name *',
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -604,10 +633,10 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                     DropdownButtonFormField<String>(
                       value: selectedCategory,
                       decoration: InputDecoration(
-                        labelText: 'Catégorie *',
+                        labelText: 'Category *',
                         border: OutlineInputBorder(),
                       ),
-                      items: ['Entrée', 'Plat Principal', 'Dessert', 'Boisson']
+                      items: ['Appetizer', 'Main Course', 'Dessert', 'Beverage']
                           .map((cat) => DropdownMenuItem(
                                 value: cat,
                                 child: Text(cat),
@@ -632,7 +661,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                     TextField(
                       controller: ingredientsController,
                       decoration: InputDecoration(
-                        labelText: 'Ingrédients',
+                        labelText: 'Ingredients',
                         border: OutlineInputBorder(),
                       ),
                       maxLines: 2,
@@ -641,10 +670,11 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                     TextField(
                       controller: priceController,
                       decoration: InputDecoration(
-                        labelText: 'Prix (DT) *',
+                        labelText: 'Price (DT) *',
                         border: OutlineInputBorder(),
                       ),
-                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                      keyboardType:
+                          TextInputType.numberWithOptions(decimal: true),
                     ),
                     SizedBox(height: 12.0),
                     TextField(
@@ -660,7 +690,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: Text('Annuler'),
+                  child: Text('Cancel'),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -668,7 +698,8 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                         priceController.text.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Veuillez remplir les champs obligatoires'),
+                          content:
+                              Text('Veuillez remplir les champs obligatoires'),
                           backgroundColor: Colors.red,
                         ),
                       );
@@ -676,8 +707,9 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                     }
 
                     try {
-                      final price = double.tryParse(priceController.text) ?? 0.0;
-                      
+                      final price =
+                          double.tryParse(priceController.text) ?? 0.0;
+
                       await meal.reference.update(
                         createPlatRecordData(
                           nom: nameController.text,
@@ -693,7 +725,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                         Navigator.of(dialogContext).pop();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Repas modifié avec succès'),
+                            content: Text('Meal updated successfully'),
                             backgroundColor: Colors.green,
                           ),
                         );
@@ -712,7 +744,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF1C1284),
                   ),
-                  child: Text('Modifier', style: TextStyle(color: Colors.white)),
+                  child: Text('Update', style: TextStyle(color: Colors.white)),
                 ),
               ],
             );
@@ -771,13 +803,17 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                   'Description',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                Text(meal.description.isNotEmpty ? meal.description : 'Aucune description'),
+                Text(meal.description.isNotEmpty
+                    ? meal.description
+                    : 'Aucune description'),
                 SizedBox(height: 12.0),
                 Text(
-                  'Ingrédients',
+                  'Ingredients',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                Text(meal.ingredients.isNotEmpty ? meal.ingredients : 'Non spécifié'),
+                Text(meal.ingredients.isNotEmpty
+                    ? meal.ingredients
+                    : 'Non spécifié'),
               ],
             ),
           ),
@@ -797,23 +833,23 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: Text('Confirmer la suppression'),
+          title: Text('Confirm Deletion'),
           content: Text('Êtes-vous sûr de vouloir supprimer "${meal.nom}" ?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text('Annuler'),
+              child: Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () async {
                 try {
                   await meal.reference.delete();
-                  
+
                   if (context.mounted) {
                     Navigator.of(dialogContext).pop();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Repas supprimé avec succès'),
+                        content: Text('Meal deleted successfully'),
                         backgroundColor: Colors.green,
                       ),
                     );
@@ -832,7 +868,7 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
               ),
-              child: Text('Supprimer', style: TextStyle(color: Colors.white)),
+              child: Text('Delete', style: TextStyle(color: Colors.white)),
             ),
           ],
         );

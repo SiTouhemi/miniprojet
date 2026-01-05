@@ -7,7 +7,7 @@ class DailyMenuManagementModel extends FlutterFlowModel<DailyMenuManagementWidge
   DateTime selectedDate = DateTime.now();
   
   // State for selected meal type filter
-  String selectedMealType = 'Tous';
+  String selectedMealType = 'All';
 
   @override
   void initState(BuildContext context) {}
