@@ -11,7 +11,8 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   static const List<Locale> supportedLocales = [
     Locale('en', ''),
@@ -38,7 +39,7 @@ class AppLocalizations {
       'delete': 'Delete',
       'edit': 'Edit',
       'close': 'Close',
-      
+
       // Authentication
       'login': 'Login',
       'logout': 'Logout',
@@ -50,11 +51,12 @@ class AppLocalizations {
       'email_placeholder': 'your.email@isetcom.tn',
       'password_placeholder': 'Your password',
       'forgot_password_title': 'Forgot Password',
-      'forgot_password_message': 'Enter your email address to receive a reset link.',
+      'forgot_password_message':
+          'Enter your email address to receive a reset link.',
       'send': 'Send',
       'reset_email_sent': 'Reset email sent! Check your inbox.',
       'copyright': '© 2025 ISETCOM - All rights reserved',
-      
+
       // Home
       'greeting': 'Hello, {name}',
       'greeting_default': 'Hello, User',
@@ -76,7 +78,49 @@ class AppLocalizations {
       'no_confirmed_reservations': 'No confirmed reservations found',
       'loading_user_data': 'Loading user data...',
       'unable_to_load_user_data': 'Unable to load user data',
-      
+
+      // Reservations
+      'choose_time_slot': 'Choose a Time Slot',
+      'time_slot': 'Time Slot',
+      'time_slots': 'Time Slots',
+      'lunch': 'Lunch',
+      'dinner': 'Dinner',
+      'breakfast': 'Breakfast',
+      'price': 'Price',
+      'capacity': 'Capacity',
+      'available_spots': 'Available Spots',
+      'reserve': 'Reserve',
+      'confirm_reservation': 'Confirm Reservation',
+      'reservation_confirmed': 'Reservation Confirmed',
+      'meal_type': 'Meal Type',
+      'time_range': 'Time Range',
+      'remaining_seats': '{count} seats remaining',
+      'fully_booked': 'Fully Booked',
+      'reservation_details': 'Reservation Details',
+      'arrive_on_time':
+          'Please arrive on time for your time slot to avoid cancellation',
+      'qr_code_entry': 'Show this QR code at restaurant entrance',
+
+      // Time Slot Management
+      'time_slot_management': 'Time Slot Management',
+      'generate_time_slots': 'Generate Time Slots',
+      'bulk_create': 'Bulk Create',
+      'create_slot': 'Create Slot',
+      'edit_slot': 'Edit Slot',
+      'delete_slot': 'Delete Slot',
+      'activate_slot': 'Activate Slot',
+      'deactivate_slot': 'Deactivate Slot',
+      'slot_active': 'Active',
+      'slot_inactive': 'Inactive',
+      'start_date': 'Start Date',
+      'number_of_days': 'Number of Days',
+      'slots_per_day': 'Slots per Day',
+      'generation_complete': 'Generation Complete',
+      'slots_created': 'Slots Created',
+      'slots_skipped': 'Slots Skipped (already exist)',
+      'cannot_delete_with_reservations':
+          'Cannot delete slot with existing reservations',
+
       // Profile
       'profile_settings': 'Profile Settings',
       'login_to_view_profile': 'Please log in to view your profile',
@@ -103,13 +147,14 @@ class AppLocalizations {
       'please_enter_name': 'Please enter your name',
       'please_enter_email': 'Please enter your email',
       'invalid_email': 'Please enter a valid email',
-      
+
       // Reservations
       'my_reservations': 'My Reservations',
       'no_upcoming_reservations': 'No upcoming reservations',
       'make_reservation_prompt': 'Make a reservation to see it here',
       'cancel_reservation': 'Cancel Reservation',
-      'cancel_reservation_confirm': 'Are you sure you want to cancel this reservation?',
+      'cancel_reservation_confirm':
+          'Are you sure you want to cancel this reservation?',
       'keep_reservation': 'Keep Reservation',
       'select_new_time_slot': 'Select New Time Slot',
       'modify': 'Modify',
@@ -122,7 +167,8 @@ class AppLocalizations {
       'cannot_cancel': 'Cannot Cancel',
       'cannot_modify': 'Cannot Modify',
       'no_available_slots': 'No Available Slots',
-      'no_alternative_slots': 'No alternative time slots are available for modification.',
+      'no_alternative_slots':
+          'No alternative time slots are available for modification.',
       'reservation_cancelled': 'Reservation cancelled successfully',
       'reservation_modified': 'Reservation modified successfully',
       'failed_to_cancel': 'Failed to cancel reservation',
@@ -134,18 +180,22 @@ class AppLocalizations {
       'user_requested_cancellation': 'User requested cancellation',
       'reservation_cancelled_status': 'This reservation has been cancelled',
       'reservation_used_status': 'This reservation has been used',
-      'past_reservations_message': 'Past reservations cannot be modified or cancelled',
-      'two_hour_restriction': 'Cannot modify or cancel less than 2 hours before meal time',
-      'modification_not_available': 'Modification and cancellation not available',
-      'cancellation_note': 'Note: Cancellations must be made at least 2 hours before the meal time.',
-      
+      'past_reservations_message':
+          'Past reservations cannot be modified or cancelled',
+      'two_hour_restriction':
+          'Cannot modify or cancel less than 2 hours before meal time',
+      'modification_not_available':
+          'Modification and cancellation not available',
+      'cancellation_note':
+          'Note: Cancellations must be made at least 2 hours before the meal time.',
+
       // Status labels
       'status_confirmed': 'Confirmed',
       'status_pending': 'Pending',
       'status_cancelled': 'Cancelled',
       'status_used': 'Used',
       'status_expired': 'Expired',
-      
+
       // QR Code Display
       'qr_code_title': 'Your Meal QR Code',
       'qr_instructions': 'Show this QR code to restaurant staff',
@@ -154,10 +204,7 @@ class AppLocalizations {
       'regenerate_qr': 'Generate New QR',
       'no_qr_code': 'No QR Code Available',
       'generate_qr': 'Generate QR Code',
-      'reservation_details': 'Reservation Details',
-      'meal_type': 'Meal Type',
-      'reservation_id': 'Reservation ID',
-      
+
       // Staff Scanner
       'scan_qr_title': 'Scan Student QR Code',
       'scan_instructions': 'Point camera at student\'s QR code',
@@ -174,12 +221,8 @@ class AppLocalizations {
       'validating': 'Validating...',
       'torch': 'Flash',
       'flip_camera': 'Flip',
-      'breakfast': 'Breakfast',
-      'lunch': 'Lunch',
-      'dinner': 'Dinner',
       'show_qr': 'Show QR Code',
     },
-    
     'fr': {
       // Common
       'app_name': 'ISETCOM Restaurant',
@@ -197,7 +240,7 @@ class AppLocalizations {
       'delete': 'Supprimer',
       'edit': 'Modifier',
       'close': 'Fermer',
-      
+
       // Authentication
       'login': 'Connexion',
       'logout': 'Déconnexion',
@@ -209,11 +252,13 @@ class AppLocalizations {
       'email_placeholder': 'votre.email@isetcom.tn',
       'password_placeholder': 'Votre mot de passe',
       'forgot_password_title': 'Mot de passe oublié',
-      'forgot_password_message': 'Entrez votre adresse e-mail pour recevoir un lien de réinitialisation.',
+      'forgot_password_message':
+          'Entrez votre adresse e-mail pour recevoir un lien de réinitialisation.',
       'send': 'Envoyer',
-      'reset_email_sent': 'E-mail de réinitialisation envoyé ! Vérifiez votre boîte de réception.',
+      'reset_email_sent':
+          'E-mail de réinitialisation envoyé ! Vérifiez votre boîte de réception.',
       'copyright': '© 2025 ISETCOM - Tous droits réservés',
-      
+
       // Home
       'greeting': 'Bonjour, {name}',
       'greeting_default': 'Bonjour, Utilisateur',
@@ -234,8 +279,9 @@ class AppLocalizations {
       'data_refreshed': 'Données actualisées avec succès',
       'no_confirmed_reservations': 'Aucune réservation confirmée trouvée',
       'loading_user_data': 'Chargement des données utilisateur...',
-      'unable_to_load_user_data': 'Impossible de charger les données utilisateur',
-      
+      'unable_to_load_user_data':
+          'Impossible de charger les données utilisateur',
+
       // Profile
       'profile_settings': 'Paramètres du Profil',
       'login_to_view_profile': 'Veuillez vous connecter pour voir votre profil',
@@ -262,13 +308,14 @@ class AppLocalizations {
       'please_enter_name': 'Veuillez entrer votre nom',
       'please_enter_email': 'Veuillez entrer votre e-mail',
       'invalid_email': 'Veuillez entrer un e-mail valide',
-      
+
       // Reservations
       'my_reservations': 'Mes Réservations',
       'no_upcoming_reservations': 'Aucune réservation à venir',
       'make_reservation_prompt': 'Faites une réservation pour la voir ici',
       'cancel_reservation': 'Annuler la Réservation',
-      'cancel_reservation_confirm': 'Êtes-vous sûr de vouloir annuler cette réservation ?',
+      'cancel_reservation_confirm':
+          'Êtes-vous sûr de vouloir annuler cette réservation ?',
       'keep_reservation': 'Garder la Réservation',
       'select_new_time_slot': 'Sélectionner un Nouveau Créneau',
       'modify': 'Modifier',
@@ -281,7 +328,8 @@ class AppLocalizations {
       'cannot_cancel': 'Impossible d\'Annuler',
       'cannot_modify': 'Impossible de Modifier',
       'no_available_slots': 'Aucun Créneau Disponible',
-      'no_alternative_slots': 'Aucun créneau alternatif disponible pour la modification.',
+      'no_alternative_slots':
+          'Aucun créneau alternatif disponible pour la modification.',
       'reservation_cancelled': 'Réservation annulée avec succès',
       'reservation_modified': 'Réservation modifiée avec succès',
       'failed_to_cancel': 'Échec de l\'annulation de la réservation',
@@ -293,18 +341,22 @@ class AppLocalizations {
       'user_requested_cancellation': 'Annulation demandée par l\'utilisateur',
       'reservation_cancelled_status': 'Cette réservation a été annulée',
       'reservation_used_status': 'Cette réservation a été utilisée',
-      'past_reservations_message': 'Les réservations passées ne peuvent pas être modifiées ou annulées',
-      'two_hour_restriction': 'Impossible de modifier ou d\'annuler moins de 2 heures avant l\'heure du repas',
-      'modification_not_available': 'Modification et annulation non disponibles',
-      'cancellation_note': 'Note: Les annulations doivent être faites au moins 2 heures avant l\'heure du repas.',
-      
+      'past_reservations_message':
+          'Les réservations passées ne peuvent pas être modifiées ou annulées',
+      'two_hour_restriction':
+          'Impossible de modifier ou d\'annuler moins de 2 heures avant l\'heure du repas',
+      'modification_not_available':
+          'Modification et annulation non disponibles',
+      'cancellation_note':
+          'Note: Les annulations doivent être faites au moins 2 heures avant l\'heure du repas.',
+
       // Status labels
       'status_confirmed': 'Confirmé',
       'status_pending': 'En attente',
       'status_cancelled': 'Annulé',
       'status_used': 'Utilisé',
       'status_expired': 'Expiré',
-      
+
       // QR Code Display
       'qr_code_title': 'Votre Code QR de Repas',
       'qr_instructions': 'Montrez ce code QR au personnel du restaurant',
@@ -316,7 +368,7 @@ class AppLocalizations {
       'reservation_details': 'Détails de la Réservation',
       'meal_type': 'Type de Repas',
       'reservation_id': 'ID de Réservation',
-      
+
       // Staff Scanner
       'scan_qr_title': 'Scanner le Code QR Étudiant',
       'scan_instructions': 'Pointez la caméra vers le code QR de l\'étudiant',
@@ -338,7 +390,6 @@ class AppLocalizations {
       'dinner': 'Dîner',
       'show_qr': 'Afficher le Code QR',
     },
-    
     'ar': {
       // Common
       'app_name': 'مطعم المعهد العالي للتكنولوجيا والاتصالات',
@@ -356,7 +407,7 @@ class AppLocalizations {
       'delete': 'حذف',
       'edit': 'تعديل',
       'close': 'إغلاق',
-      
+
       // Authentication
       'login': 'تسجيل الدخول',
       'logout': 'تسجيل الخروج',
@@ -368,11 +419,13 @@ class AppLocalizations {
       'email_placeholder': 'your.email@isetcom.tn',
       'password_placeholder': 'كلمة المرور الخاصة بك',
       'forgot_password_title': 'نسيت كلمة المرور',
-      'forgot_password_message': 'أدخل عنوان بريدك الإلكتروني لتلقي رابط إعادة التعيين.',
+      'forgot_password_message':
+          'أدخل عنوان بريدك الإلكتروني لتلقي رابط إعادة التعيين.',
       'send': 'إرسال',
       'reset_email_sent': 'تم إرسال بريد إعادة التعيين! تحقق من صندوق الوارد.',
-      'copyright': '© 2025 المعهد العالي للتكنولوجيا والاتصالات - جميع الحقوق محفوظة',
-      
+      'copyright':
+          '© 2025 المعهد العالي للتكنولوجيا والاتصالات - جميع الحقوق محفوظة',
+
       // Home
       'greeting': 'مرحبا، {name}',
       'greeting_default': 'مرحبا، المستخدم',
@@ -394,7 +447,7 @@ class AppLocalizations {
       'no_confirmed_reservations': 'لم يتم العثور على حجوزات مؤكدة',
       'loading_user_data': 'جاري تحميل بيانات المستخدم...',
       'unable_to_load_user_data': 'غير قادر على تحميل بيانات المستخدم',
-      
+
       // Profile
       'profile_settings': 'إعدادات الملف الشخصي',
       'login_to_view_profile': 'يرجى تسجيل الدخول لعرض ملفك الشخصي',
@@ -421,7 +474,7 @@ class AppLocalizations {
       'please_enter_name': 'يرجى إدخال اسمك',
       'please_enter_email': 'يرجى إدخال بريدك الإلكتروني',
       'invalid_email': 'يرجى إدخال بريد إلكتروني صحيح',
-      
+
       // Reservations
       'my_reservations': 'حجوزاتي',
       'no_upcoming_reservations': 'لا توجد حجوزات قادمة',
@@ -453,17 +506,19 @@ class AppLocalizations {
       'reservation_cancelled_status': 'تم إلغاء هذا الحجز',
       'reservation_used_status': 'تم استخدام هذا الحجز',
       'past_reservations_message': 'لا يمكن تعديل أو إلغاء الحجوزات السابقة',
-      'two_hour_restriction': 'لا يمكن التعديل أو الإلغاء قبل أقل من ساعتين من وقت الوجبة',
+      'two_hour_restriction':
+          'لا يمكن التعديل أو الإلغاء قبل أقل من ساعتين من وقت الوجبة',
       'modification_not_available': 'التعديل والإلغاء غير متاحين',
-      'cancellation_note': 'ملاحظة: يجب إجراء الإلغاءات قبل ساعتين على الأقل من وقت الوجبة.',
-      
+      'cancellation_note':
+          'ملاحظة: يجب إجراء الإلغاءات قبل ساعتين على الأقل من وقت الوجبة.',
+
       // Status labels
       'status_confirmed': 'مؤكد',
       'status_pending': 'في الانتظار',
       'status_cancelled': 'ملغى',
       'status_used': 'مستخدم',
       'status_expired': 'منتهي الصلاحية',
-      
+
       // QR Code Display
       'qr_code_title': 'رمز الاستجابة السريعة للوجبة',
       'qr_instructions': 'أظهر هذا الرمز لموظفي المطعم',
@@ -475,7 +530,7 @@ class AppLocalizations {
       'reservation_details': 'تفاصيل الحجز',
       'meal_type': 'نوع الوجبة',
       'reservation_id': 'معرف الحجز',
-      
+
       // Staff Scanner
       'scan_qr_title': 'مسح رمز الطالب',
       'scan_instructions': 'وجه الكاميرا نحو رمز الطالب',
@@ -501,16 +556,17 @@ class AppLocalizations {
 
   String translate(String key, {Map<String, String>? params}) {
     final languageCode = locale.languageCode;
-    final translations = _localizedValues[languageCode] ?? _localizedValues['en']!;
+    final translations =
+        _localizedValues[languageCode] ?? _localizedValues['en']!;
     String text = translations[key] ?? key;
-    
+
     // Replace parameters if provided
     if (params != null) {
       params.forEach((paramKey, paramValue) {
         text = text.replaceAll('{$paramKey}', paramValue);
       });
     }
-    
+
     return text;
   }
 
@@ -532,7 +588,8 @@ class AppLocalizations {
   String get close => translate('close');
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override

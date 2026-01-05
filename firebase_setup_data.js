@@ -14,10 +14,10 @@ const appSettings = {
         default_meal_price: 0.2,
         currency: 'TND',
         subsidy_rate: 0.95,
-        lunch_start_time: '12:00',
+        lunch_start_time: '11:40',
         lunch_end_time: '14:00',
-        dinner_start_time: '19:00',
-        dinner_end_time: '21:00',
+        dinner_start_time: '17:40',
+        dinner_end_time: '18:40',
         max_reservations_per_user: 2,
         reservation_deadline_hours: 1,
         notification_enabled: true,
@@ -110,17 +110,31 @@ const dailyMenus = [
     }
 ];
 
-// 3. TIME SLOTS - Standard University Meal Times
+// 3. TIME SLOTS - 20-minute intervals for restaurant operating hours
 const timeSlots = [
-    // Today's slots
+    // Today's lunch slots: 11:40 - 14:00 (7 slots of 20 minutes each)
+    {
+        collection: 'time_slots',
+        document: 'auto',
+        data: {
+            date: new Date(),
+            start_time: new Date(new Date().setHours(11, 40, 0, 0)),
+            end_time: new Date(new Date().setHours(12, 0, 0, 0)),
+            max_capacity: 25,
+            current_reservations: 0,
+            price: 0.2,
+            is_active: true,
+            meal_type: 'lunch'
+        }
+    },
     {
         collection: 'time_slots',
         document: 'auto',
         data: {
             date: new Date(),
             start_time: new Date(new Date().setHours(12, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(14, 0, 0, 0)),
-            max_capacity: 200,
+            end_time: new Date(new Date().setHours(12, 20, 0, 0)),
+            max_capacity: 25,
             current_reservations: 0,
             price: 0.2,
             is_active: true,
@@ -132,24 +146,9 @@ const timeSlots = [
         document: 'auto',
         data: {
             date: new Date(),
-            start_time: new Date(new Date().setHours(19, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(21, 0, 0, 0)),
-            max_capacity: 200,
-            current_reservations: 0,
-            price: 0.2,
-            is_active: true,
-            meal_type: 'dinner'
-        }
-    },
-    // Tomorrow's slots
-    {
-        collection: 'time_slots',
-        document: 'auto',
-        data: {
-            date: new Date(Date.now() + 24 * 60 * 60 * 1000),
-            start_time: new Date(Date.now() + 24 * 60 * 60 * 1000 + 12 * 60 * 60 * 1000),
-            end_time: new Date(Date.now() + 24 * 60 * 60 * 1000 + 14 * 60 * 60 * 1000),
-            max_capacity: 200,
+            start_time: new Date(new Date().setHours(12, 20, 0, 0)),
+            end_time: new Date(new Date().setHours(12, 40, 0, 0)),
+            max_capacity: 25,
             current_reservations: 0,
             price: 0.2,
             is_active: true,
@@ -160,10 +159,96 @@ const timeSlots = [
         collection: 'time_slots',
         document: 'auto',
         data: {
-            date: new Date(Date.now() + 24 * 60 * 60 * 1000),
-            start_time: new Date(Date.now() + 24 * 60 * 60 * 1000 + 19 * 60 * 60 * 1000),
-            end_time: new Date(Date.now() + 24 * 60 * 60 * 1000 + 21 * 60 * 60 * 1000),
-            max_capacity: 200,
+            date: new Date(),
+            start_time: new Date(new Date().setHours(12, 40, 0, 0)),
+            end_time: new Date(new Date().setHours(13, 0, 0, 0)),
+            max_capacity: 25,
+            current_reservations: 0,
+            price: 0.2,
+            is_active: true,
+            meal_type: 'lunch'
+        }
+    },
+    {
+        collection: 'time_slots',
+        document: 'auto',
+        data: {
+            date: new Date(),
+            start_time: new Date(new Date().setHours(13, 0, 0, 0)),
+            end_time: new Date(new Date().setHours(13, 20, 0, 0)),
+            max_capacity: 25,
+            current_reservations: 0,
+            price: 0.2,
+            is_active: true,
+            meal_type: 'lunch'
+        }
+    },
+    {
+        collection: 'time_slots',
+        document: 'auto',
+        data: {
+            date: new Date(),
+            start_time: new Date(new Date().setHours(13, 20, 0, 0)),
+            end_time: new Date(new Date().setHours(13, 40, 0, 0)),
+            max_capacity: 25,
+            current_reservations: 0,
+            price: 0.2,
+            is_active: true,
+            meal_type: 'lunch'
+        }
+    },
+    {
+        collection: 'time_slots',
+        document: 'auto',
+        data: {
+            date: new Date(),
+            start_time: new Date(new Date().setHours(13, 40, 0, 0)),
+            end_time: new Date(new Date().setHours(14, 0, 0, 0)),
+            max_capacity: 25,
+            current_reservations: 0,
+            price: 0.2,
+            is_active: true,
+            meal_type: 'lunch'
+        }
+    },
+
+    // Today's dinner slots: 17:40 - 18:40 (3 slots of 20 minutes each)
+    {
+        collection: 'time_slots',
+        document: 'auto',
+        data: {
+            date: new Date(),
+            start_time: new Date(new Date().setHours(17, 40, 0, 0)),
+            end_time: new Date(new Date().setHours(18, 0, 0, 0)),
+            max_capacity: 25,
+            current_reservations: 0,
+            price: 0.2,
+            is_active: true,
+            meal_type: 'dinner'
+        }
+    },
+    {
+        collection: 'time_slots',
+        document: 'auto',
+        data: {
+            date: new Date(),
+            start_time: new Date(new Date().setHours(18, 0, 0, 0)),
+            end_time: new Date(new Date().setHours(18, 20, 0, 0)),
+            max_capacity: 25,
+            current_reservations: 0,
+            price: 0.2,
+            is_active: true,
+            meal_type: 'dinner'
+        }
+    },
+    {
+        collection: 'time_slots',
+        document: 'auto',
+        data: {
+            date: new Date(),
+            start_time: new Date(new Date().setHours(18, 20, 0, 0)),
+            end_time: new Date(new Date().setHours(18, 40, 0, 0)),
+            max_capacity: 25,
             current_reservations: 0,
             price: 0.2,
             is_active: true,

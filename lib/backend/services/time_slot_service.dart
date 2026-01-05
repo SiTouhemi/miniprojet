@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '/backend/backend.dart';
 import '/utils/app_logger.dart';
+import '/config/app_config.dart';
 
 /// Service for managing time slots with real-time capacity updates
 /// Implements Requirements 4.1, 4.2, 4.3, 4.5, 4.6, 4.7
@@ -14,56 +15,62 @@ class TimeSlotService {
   final Map<String, StreamSubscription<QuerySnapshot>> _activeListeners = {};
 
   /// Get available time slots for a specific date with real-time updates
-  /// TEMPORARY: Show any available time slots for testing
   Stream<List<TimeSlotRecord>> getAvailableTimeSlotsStream(DateTime date) {
-    // TEMPORARY FIX: Get any available time slots for testing
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+
     return FirebaseFirestore.instance
         .collection('time_slots')
         .where('is_active', isEqualTo: true)
+        .where('date', isGreaterThanOrEqualTo: startOfDay)
+        .where('date', isLessThanOrEqualTo: endOfDay)
         .orderBy('date')
         .orderBy('start_time')
-        .limit(20) // Limit to avoid too many results
         .snapshots()
         .map((snapshot) {
       final now = DateTime.now();
       return snapshot.docs
           .map((doc) => TimeSlotRecord.fromSnapshot(doc))
-          .where((slot) => 
-            slot.currentReservations < slot.maxCapacity // Has available capacity
-            // TEMPORARY: Remove future time check for testing
-            // (slot.startTime?.isAfter(now) ?? false) // Is in the future
-          )
+          .where((slot) =>
+                  slot.currentReservations <
+                      slot.maxCapacity && // Has available capacity
+                  (slot.startTime?.isAfter(now) ?? false) // Is in the future
+              )
           .toList();
     });
   }
 
   /// Get time slots for a specific date (one-time query)
-  /// TEMPORARY: Show any available time slots for testing
   Future<List<TimeSlotRecord>> getAvailableTimeSlots(DateTime date) async {
     try {
       final now = DateTime.now();
+      final startOfDay = DateTime(date.year, date.month, date.day);
+      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
 
-      // TEMPORARY FIX: Get any available time slots for testing
       final snapshot = await FirebaseFirestore.instance
           .collection('time_slots')
           .where('is_active', isEqualTo: true)
+          .where('date', isGreaterThanOrEqualTo: startOfDay)
+          .where('date', isLessThanOrEqualTo: endOfDay)
           .orderBy('date')
           .orderBy('start_time')
-          .limit(20) // Limit to avoid too many results
           .get();
 
-      AppLogger.i('Found ${snapshot.docs.length} time slots', tag: 'TimeSlotService');
+      AppLogger.i(
+          'Found ${snapshot.docs.length} time slots for ${date.toString().split(' ')[0]}',
+          tag: 'TimeSlotService');
 
       return snapshot.docs
           .map((doc) => TimeSlotRecord.fromSnapshot(doc))
-          .where((slot) => 
-            slot.currentReservations < slot.maxCapacity // Has available capacity
-            // TEMPORARY: Remove future time check for testing
-            // (slot.startTime?.isAfter(now) ?? false) // Is in the future
-          )
+          .where((slot) =>
+                  slot.currentReservations <
+                      slot.maxCapacity && // Has available capacity
+                  (slot.startTime?.isAfter(now) ?? false) // Is in the future
+              )
           .toList();
     } catch (e) {
-      AppLogger.e('Error fetching time slots', error: e, tag: 'TimeSlotService');
+      AppLogger.e('Error fetching time slots',
+          error: e, tag: 'TimeSlotService');
       return [];
     }
   }
@@ -82,9 +89,160 @@ class TimeSlotService {
       final timeSlot = TimeSlotRecord.fromSnapshot(doc);
       return timeSlot.currentReservations < timeSlot.maxCapacity;
     } catch (e) {
-      AppLogger.e('Error checking time slot capacity', error: e, tag: 'TimeSlotService');
+      AppLogger.e('Error checking time slot capacity',
+          error: e, tag: 'TimeSlotService');
       return false;
     }
+  }
+
+  /// Generate 20-minute time slots for restaurant operating hours
+  /// Lunch: 11:40 - 14:00 (7 slots of 20 minutes each)
+  /// Dinner: 17:40 - 18:40 (3 slots of 20 minutes each)
+  Future<List<Map<String, dynamic>>> generateDailyTimeSlots(
+      DateTime date) async {
+    final List<Map<String, dynamic>> slots = [];
+
+    // Generate lunch slots: 11:40 - 14:00
+    final lunchSlots = _generateMealTimeSlots(
+      date: date,
+      mealType: 'lunch',
+      startHour: 11,
+      startMinute: 40,
+      endHour: 14,
+      endMinute: 0,
+    );
+    slots.addAll(lunchSlots);
+
+    // Generate dinner slots: 17:40 - 18:40
+    final dinnerSlots = _generateMealTimeSlots(
+      date: date,
+      mealType: 'dinner',
+      startHour: 17,
+      startMinute: 40,
+      endHour: 18,
+      endMinute: 40,
+    );
+    slots.addAll(dinnerSlots);
+
+    return slots;
+  }
+
+  /// Generate time slots for a specific meal period
+  List<Map<String, dynamic>> _generateMealTimeSlots({
+    required DateTime date,
+    required String mealType,
+    required int startHour,
+    required int startMinute,
+    required int endHour,
+    required int endMinute,
+  }) {
+    final List<Map<String, dynamic>> slots = [];
+
+    final startTime =
+        DateTime(date.year, date.month, date.day, startHour, startMinute);
+    final endTime =
+        DateTime(date.year, date.month, date.day, endHour, endMinute);
+
+    DateTime currentSlotStart = startTime;
+
+    while (currentSlotStart.isBefore(endTime)) {
+      final slotEnd = currentSlotStart
+          .add(Duration(minutes: AppConfig.timeSlotDurationMinutes));
+
+      // Don't create slot if it would exceed the meal period end time
+      if (slotEnd.isAfter(endTime)) {
+        break;
+      }
+
+      slots.add({
+        'date': DateTime(date.year, date.month, date.day),
+        'start_time': currentSlotStart,
+        'end_time': slotEnd,
+        'max_capacity': AppConfig.defaultSlotCapacity,
+        'current_reservations': 0,
+        'price': 0.2, // Standard meal price in TND
+        'is_active': true,
+        'meal_type': mealType,
+      });
+
+      currentSlotStart = slotEnd;
+    }
+
+    return slots;
+  }
+
+  /// Create time slots in Firestore for a specific date
+  Future<bool> createTimeSlotsForDate(DateTime date) async {
+    try {
+      final slots = await generateDailyTimeSlots(date);
+
+      // Check if slots already exist for this date
+      final existingSlots = await FirebaseFirestore.instance
+          .collection('time_slots')
+          .where('date', isEqualTo: DateTime(date.year, date.month, date.day))
+          .get();
+
+      if (existingSlots.docs.isNotEmpty) {
+        AppLogger.w(
+            'Time slots already exist for ${date.toString().split(' ')[0]}',
+            tag: 'TimeSlotService');
+        return false;
+      }
+
+      // Create slots in batch
+      final batch = FirebaseFirestore.instance.batch();
+
+      for (final slotData in slots) {
+        final docRef =
+            FirebaseFirestore.instance.collection('time_slots').doc();
+        batch.set(docRef, slotData);
+      }
+
+      await batch.commit();
+
+      AppLogger.i(
+          'Created ${slots.length} time slots for ${date.toString().split(' ')[0]}',
+          tag: 'TimeSlotService');
+      return true;
+    } catch (e) {
+      AppLogger.e('Error creating time slots',
+          error: e, tag: 'TimeSlotService');
+      return false;
+    }
+  }
+
+  /// Bulk create time slots for multiple days
+  Future<Map<String, dynamic>> bulkCreateTimeSlots({
+    required DateTime startDate,
+    required int numberOfDays,
+  }) async {
+    int successCount = 0;
+    int skipCount = 0;
+    final List<String> errors = [];
+
+    for (int i = 0; i < numberOfDays; i++) {
+      final date = startDate.add(Duration(days: i));
+
+      try {
+        final created = await createTimeSlotsForDate(date);
+        if (created) {
+          successCount++;
+        } else {
+          skipCount++;
+        }
+      } catch (e) {
+        errors.add('${date.toString().split(' ')[0]}: ${e.toString()}');
+      }
+    }
+
+    return {
+      'success': true,
+      'created': successCount,
+      'skipped': skipCount,
+      'errors': errors,
+      'message':
+          'Created time slots for $successCount days, skipped $skipCount days',
+    };
   }
 
   /// Get a specific time slot by ID
@@ -168,7 +326,8 @@ class TimeSlotService {
         timeSlot: timeSlot,
       );
     } catch (e) {
-      AppLogger.e('Error validating time slot', error: e, tag: 'TimeSlotService');
+      AppLogger.e('Error validating time slot',
+          error: e, tag: 'TimeSlotService');
       return TimeSlotValidationResult(
         isValid: false,
         errorMessage: 'Error validating time slot: $e',
@@ -194,7 +353,8 @@ class TimeSlotService {
           .map((doc) => TimeSlotRecord.fromSnapshot(doc))
           .toList();
     } catch (e) {
-      AppLogger.e('Error fetching time slots in range', error: e, tag: 'TimeSlotService');
+      AppLogger.e('Error fetching time slots in range',
+          error: e, tag: 'TimeSlotService');
       return [];
     }
   }
@@ -225,7 +385,8 @@ class TimeSlotService {
         startTime: startTime,
         endTime: endTime,
         maxCapacity: maxCapacity,
-        currentReservations: 0, // Requirement 11.3: Set current_reservations to 0
+        currentReservations:
+            0, // Requirement 11.3: Set current_reservations to 0
         price: price,
         mealType: mealType,
         isActive: true,
@@ -269,7 +430,8 @@ class TimeSlotService {
 
       return true;
     } catch (e) {
-      AppLogger.e('Error updating time slot capacity', error: e, tag: 'TimeSlotService');
+      AppLogger.e('Error updating time slot capacity',
+          error: e, tag: 'TimeSlotService');
       return false;
     }
   }
@@ -285,7 +447,8 @@ class TimeSlotService {
 
       return true;
     } catch (e) {
-      AppLogger.e('Error deactivating time slot', error: e, tag: 'TimeSlotService');
+      AppLogger.e('Error deactivating time slot',
+          error: e, tag: 'TimeSlotService');
       return false;
     }
   }
@@ -317,48 +480,6 @@ class TimeSlotService {
       AppLogger.e('Error deleting time slot', error: e, tag: 'TimeSlotService');
       return false;
     }
-  }
-
-  /// Bulk create time slots for multiple dates (admin only)
-  /// Requirement 11.7: Allow admins to bulk create time slots
-  Future<List<String>> bulkCreateTimeSlots({
-    required List<DateTime> dates,
-    required DateTime startTime,
-    required DateTime endTime,
-    required int maxCapacity,
-    required double price,
-    required String mealType,
-  }) async {
-    final createdIds = <String>[];
-
-    for (final date in dates) {
-      final timeSlotId = await createTimeSlot(
-        date: date,
-        startTime: DateTime(
-          date.year,
-          date.month,
-          date.day,
-          startTime.hour,
-          startTime.minute,
-        ),
-        endTime: DateTime(
-          date.year,
-          date.month,
-          date.day,
-          endTime.hour,
-          endTime.minute,
-        ),
-        maxCapacity: maxCapacity,
-        price: price,
-        mealType: mealType,
-      );
-
-      if (timeSlotId != null) {
-        createdIds.add(timeSlotId);
-      }
-    }
-
-    return createdIds;
   }
 
   /// Cleanup listeners

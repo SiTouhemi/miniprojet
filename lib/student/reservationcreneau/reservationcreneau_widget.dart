@@ -44,7 +44,7 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => ReservationcreneauModel());
-    
+
     // Set up state change callback
     _model.onStateChanged = () {
       if (mounted) {
@@ -63,121 +63,129 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
   /// Show reservation confirmation dialog
   Future<bool> _showReservationConfirmationDialog(BuildContext context) async {
     if (_model.selectedTimeSlot == null) return false;
-    
+
     return await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.0),
-        ),
-        title: Row(
-          children: [
-            Container(
-              width: 40.0,
-              height: 40.0,
-              decoration: BoxDecoration(
-                color: Color(0xFF005BAA),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.restaurant_menu,
-                color: Colors.white,
-                size: 20.0,
-              ),
+          context: context,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
             ),
-            SizedBox(width: 12.0),
-            Text(
-              'Confirmer la réservation',
-              style: FlutterFlowTheme.of(context).titleLarge.override(
-                font: GoogleFonts.interTight(
-                  fontWeight: FontWeight.w600,
+            title: Row(
+              children: [
+                Container(
+                  width: 40.0,
+                  height: 40.0,
+                  decoration: BoxDecoration(
+                    color: Color(0xFF005BAA),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.restaurant_menu,
+                    color: Colors.white,
+                    size: 20.0,
+                  ),
                 ),
-                color: Color(0xFF005BAA),
-                letterSpacing: 0.0,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Détails de la réservation:',
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                font: GoogleFonts.inter(
-                  fontWeight: FontWeight.w600,
+                SizedBox(width: 12.0),
+                Text(
+                  'Choose a Time Slot',
+                  style: FlutterFlowTheme.of(context).titleLarge.override(
+                        font: GoogleFonts.interTight(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        color: Color(0xFF005BAA),
+                        letterSpacing: 0.0,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
-                color: Color(0xFF005BAA),
-                letterSpacing: 0.0,
-                fontWeight: FontWeight.w600,
-              ),
+              ],
             ),
-            SizedBox(height: 12.0),
-            _buildConfirmationRow('Date:', DateFormat('dd MMMM yyyy').format(_model.selectedTimeSlot!.date!)),
-            _buildConfirmationRow('Heure:', '${DateFormat('HH:mm').format(_model.selectedTimeSlot!.startTime!)} - ${DateFormat('HH:mm').format(_model.selectedTimeSlot!.endTime!)}'),
-            _buildConfirmationRow('Type:', _model.selectedTimeSlot!.mealType.toUpperCase()),
-            _buildConfirmationRow('Prix:', '${_model.selectedTimeSlot!.price.toStringAsFixed(2)} TND'),
-            SizedBox(height: 16.0),
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(12.0),
-              decoration: BoxDecoration(
-                color: Color(0xFFF0F8FF),
-                borderRadius: BorderRadius.circular(8.0),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Détails de la réservation:',
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        font: GoogleFonts.inter(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        color: Color(0xFF005BAA),
+                        letterSpacing: 0.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                SizedBox(height: 12.0),
+                _buildConfirmationRow(
+                    'Date:',
+                    DateFormat('dd MMMM yyyy')
+                        .format(_model.selectedTimeSlot!.date!)),
+                _buildConfirmationRow('Heure:',
+                    '${DateFormat('HH:mm').format(_model.selectedTimeSlot!.startTime!)} - ${DateFormat('HH:mm').format(_model.selectedTimeSlot!.endTime!)}'),
+                _buildConfirmationRow(
+                    'Type:', _model.selectedTimeSlot!.mealType.toUpperCase()),
+                _buildConfirmationRow('Prix:',
+                    '${_model.selectedTimeSlot!.price.toStringAsFixed(2)} TND'),
+                SizedBox(height: 16.0),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(12.0),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFF0F8FF),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Text(
+                    'Le montant sera débité de votre compte D17. Cette action est irréversible.',
+                    style: FlutterFlowTheme.of(context).bodySmall.override(
+                          font: GoogleFonts.inter(),
+                          color: Color(0xFF005BAA),
+                          letterSpacing: 0.0,
+                          fontStyle: FontStyle.italic,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(
+                  'Annuler',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
-              child: Text(
-                'Le montant sera débité de votre compte D17. Cette action est irréversible.',
-                style: FlutterFlowTheme.of(context).bodySmall.override(
-                  font: GoogleFonts.inter(),
+              FFButtonWidget(
+                onPressed: () => Navigator.of(context).pop(true),
+                text: 'Confirmer',
+                options: FFButtonOptions(
+                  height: 40.0,
+                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                  iconPadding:
+                      EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                   color: Color(0xFF005BAA),
-                  letterSpacing: 0.0,
-                  fontStyle: FontStyle.italic,
+                  textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                        font: GoogleFonts.interTight(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        color: Colors.white,
+                        letterSpacing: 0.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                  elevation: 2.0,
+                  borderSide: BorderSide(
+                    color: Colors.transparent,
+                    width: 1.0,
+                  ),
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
-                textAlign: TextAlign.center,
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              'Annuler',
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            ],
           ),
-          FFButtonWidget(
-            onPressed: () => Navigator.of(context).pop(true),
-            text: 'Confirmer',
-            options: FFButtonOptions(
-              height: 40.0,
-              padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-              iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-              color: Color(0xFF005BAA),
-              textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                font: GoogleFonts.interTight(
-                  fontWeight: FontWeight.w600,
-                ),
-                color: Colors.white,
-                letterSpacing: 0.0,
-                fontWeight: FontWeight.w600,
-              ),
-              elevation: 2.0,
-              borderSide: BorderSide(
-                color: Colors.transparent,
-                width: 1.0,
-              ),
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-          ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
   }
 
   /// Build confirmation dialog row
@@ -190,21 +198,21 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
           Text(
             label,
             style: FlutterFlowTheme.of(context).bodyMedium.override(
-              font: GoogleFonts.inter(),
-              color: Colors.grey.shade600,
-              letterSpacing: 0.0,
-            ),
+                  font: GoogleFonts.inter(),
+                  color: Colors.grey.shade600,
+                  letterSpacing: 0.0,
+                ),
           ),
           Text(
             value,
             style: FlutterFlowTheme.of(context).bodyMedium.override(
-              font: GoogleFonts.inter(
-                fontWeight: FontWeight.w600,
-              ),
-              color: Color(0xFF005BAA),
-              letterSpacing: 0.0,
-              fontWeight: FontWeight.w600,
-            ),
+                  font: GoogleFonts.inter(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  color: Color(0xFF005BAA),
+                  letterSpacing: 0.0,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
         ],
       ),
@@ -239,7 +247,11 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                     size: 20.0,
                   ),
                   onPressed: () {
-                    context.pop();
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    } else {
+                      context.go('/');
+                    }
                   },
                 ),
               ),
@@ -252,8 +264,9 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                     style: FlutterFlowTheme.of(context).titleLarge.override(
                           font: GoogleFonts.interTight(
                             fontWeight: FontWeight.w600,
-                            fontStyle:
-                                FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                            fontStyle: FlutterFlowTheme.of(context)
+                                .titleLarge
+                                .fontStyle,
                           ),
                           color: Color(0xFF005BAA),
                           letterSpacing: 0.0,
@@ -267,8 +280,9 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                     style: FlutterFlowTheme.of(context).bodySmall.override(
                           font: GoogleFonts.inter(
                             fontWeight: FontWeight.w500,
-                            fontStyle:
-                                FlutterFlowTheme.of(context).bodySmall.fontStyle,
+                            fontStyle: FlutterFlowTheme.of(context)
+                                .bodySmall
+                                .fontStyle,
                           ),
                           color: Color(0xFF666666),
                           letterSpacing: 0.0,
@@ -291,7 +305,8 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                   children: [
                     // User balance card
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                      padding:
+                          EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
                       child: Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
@@ -332,7 +347,8 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                               ),
                               Row(
                                 mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
@@ -344,16 +360,18 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                         .override(
                                           font: GoogleFonts.interTight(
                                             fontWeight: FontWeight.bold,
-                                            fontStyle: FlutterFlowTheme.of(context)
-                                                .headlineMedium
-                                                .fontStyle,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .headlineMedium
+                                                    .fontStyle,
                                           ),
                                           color: Color(0xFF005BAA),
                                           letterSpacing: 0.0,
                                           fontWeight: FontWeight.bold,
-                                          fontStyle: FlutterFlowTheme.of(context)
-                                              .headlineMedium
-                                              .fontStyle,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .headlineMedium
+                                                  .fontStyle,
                                         ),
                                   ),
                                   Container(
@@ -379,17 +397,20 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                         ),
                       ),
                     ),
-                    
+
                     // Time slots section
                     Column(
                       mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(4.0, 0.0, 4.0, 0.0),
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              4.0, 0.0, 4.0, 0.0),
                           child: Text(
                             'Choisir un Créneau',
-                            style: FlutterFlowTheme.of(context).headlineSmall.override(
+                            style: FlutterFlowTheme.of(context)
+                                .headlineSmall
+                                .override(
                                   font: GoogleFonts.interTight(
                                     fontWeight: FontWeight.w600,
                                     fontStyle: FlutterFlowTheme.of(context)
@@ -405,38 +426,66 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                 ),
                           ),
                         ),
-                        
+
                         // Time slot cards - Dynamic from database
                         StreamBuilder<List<TimeSlotRecord>>(
                           stream: queryTimeSlotRecord(
                             queryBuilder: (timeSlotRecord) => timeSlotRecord
-                                .where('date', isGreaterThanOrEqualTo: DateTime.now().subtract(Duration(days: 1)))
                                 .where('is_active', isEqualTo: true)
                                 .orderBy('date')
                                 .orderBy('start_time')
-                                .limit(10),
+                                .limit(20),
                           ),
                           builder: (context, snapshot) {
+                            // Debug information
+                            print(
+                                '🔍 Time slots query state: ${snapshot.connectionState}');
+                            if (snapshot.hasError) {
+                              print('❌ Time slots error: ${snapshot.error}');
+                            }
+                            if (snapshot.hasData) {
+                              print(
+                                  '📊 Found ${snapshot.data?.length ?? 0} time slots');
+                            }
+
                             if (snapshot.hasError) {
                               return Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    16.0, 0.0, 16.0, 0.0),
                                 child: Container(
                                   padding: EdgeInsets.all(16.0),
                                   decoration: BoxDecoration(
                                     color: Colors.red.shade50,
                                     borderRadius: BorderRadius.circular(12.0),
                                   ),
-                                  child: Text(
-                                    'Erreur lors du chargement des créneaux',
-                                    style: TextStyle(color: Colors.red.shade700),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        'Error loading time slots',
+                                        style: TextStyle(
+                                          color: Colors.red.shade700,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        '${snapshot.error}',
+                                        style: TextStyle(
+                                          color: Colors.red.shade600,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               );
                             }
-                            
-                            if (snapshot.connectionState == ConnectionState.waiting) {
+
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
                               return Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    16.0, 0.0, 16.0, 0.0),
                                 child: Container(
                                   height: 100.0,
                                   decoration: BoxDecoration(
@@ -451,151 +500,271 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                 ),
                               );
                             }
-                            
+
                             final timeSlots = snapshot.data ?? [];
-                            
+
                             if (timeSlots.isEmpty) {
                               return Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    16.0, 0.0, 16.0, 0.0),
                                 child: Container(
-                                  padding: EdgeInsets.all(16.0),
+                                  padding: EdgeInsets.all(24.0),
                                   decoration: BoxDecoration(
-                                    color: Colors.orange.shade50,
+                                    color: Color(0xFFFFF8E1),
                                     borderRadius: BorderRadius.circular(12.0),
+                                    border: Border.all(
+                                      color: Color(0xFFFFB74D),
+                                      width: 1.0,
+                                    ),
                                   ),
-                                  child: Text(
-                                    'Aucun créneau disponible pour le moment',
-                                    style: TextStyle(color: Colors.orange.shade700),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.schedule,
+                                        size: 48,
+                                        color: Color(0xFFFF8F00),
+                                      ),
+                                      SizedBox(height: 16),
+                                      Text(
+                                        'No Time Slots Available',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFFE65100),
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'Time slots need to be created by an administrator.\n\nLunch: 11:40 - 14:00\nDinner: 17:40 - 18:40',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Color(0xFFBF360C),
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               );
                             }
-                            
+
                             return Column(
                               mainAxisSize: MainAxisSize.max,
                               children: timeSlots.map((timeSlot) {
                                 final startTime = timeSlot.startTime!;
                                 final endTime = timeSlot.endTime!;
-                                final availableSpots = timeSlot.maxCapacity - timeSlot.currentReservations;
-                                final isSelected = _model.selectedTimeSlot?.reference == timeSlot.reference;
-                                
+                                final availableSpots = timeSlot.maxCapacity -
+                                    timeSlot.currentReservations;
+                                final isSelected =
+                                    _model.selectedTimeSlot?.reference ==
+                                        timeSlot.reference;
+
                                 return Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 8.0),
-                                  child: InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        _model.selectedTimeSlot = timeSlot;
-                                        _model.clearMessages();
-                                      });
-                                    },
-                                    child: Container(
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            blurRadius: 4.0,
-                                            color: isSelected ? Color(0x1A00A4E4) : Color(0x1A000000),
-                                            offset: Offset(0.0, 1.0),
-                                          )
-                                        ],
-                                        borderRadius: BorderRadius.circular(12.0),
-                                        border: Border.all(
-                                          color: isSelected ? Color(0xFF00A4E4) : Color(0xFFE0E0E0),
-                                          width: isSelected ? 2.0 : 1.0,
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      16.0, 0.0, 16.0, 8.0),
+                                  child: IgnorePointer(
+                                    ignoring: availableSpots == 0,
+                                    child: InkWell(
+                                      onTap: availableSpots > 0
+                                          ? () {
+                                              if (mounted) {
+                                                setState(() {
+                                                  _model.selectedTimeSlot =
+                                                      timeSlot;
+                                                  _model.clearMessages();
+                                                });
+                                              }
+                                            }
+                                          : null,
+                                      borderRadius: BorderRadius.circular(12.0),
+                                      child: Container(
+                                        width: double.infinity,
+                                        constraints: BoxConstraints(
+                                          minHeight: 80.0,
                                         ),
-                                      ),
-                                      child: Padding(
-                                        padding: EdgeInsets.all(12.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              children: [
-                                                Container(
-                                                  width: 36.0,
-                                                  height: 36.0,
-                                                  decoration: BoxDecoration(
-                                                    color: isSelected ? Color(0xFF00A4E4) : Color(0xFF005BAA),
-                                                    shape: BoxShape.circle,
-                                                  ),
-                                                  child: Align(
-                                                    alignment: AlignmentDirectional(0.0, 0.0),
-                                                    child: Icon(
-                                                      Icons.schedule,
-                                                      color: Colors.white,
-                                                      size: 18.0,
-                                                    ),
-                                                  ),
-                                                ),
-                                                Column(
-                                                  mainAxisSize: MainAxisSize.max,
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      '${DateFormat('HH:mm').format(startTime)} - ${DateFormat('HH:mm').format(endTime)}',
-                                                      style: FlutterFlowTheme.of(context).bodyLarge.override(
-                                                            font: GoogleFonts.inter(
-                                                              fontWeight: FontWeight.w600,
-                                                            ),
-                                                            color: Color(0xFF005BAA),
-                                                            fontSize: 16.0,
-                                                            letterSpacing: 0.0,
-                                                            fontWeight: FontWeight.w600,
-                                                          ),
-                                                    ),
-                                                    Text(
-                                                      '${availableSpots} places disponibles',
-                                                      style: FlutterFlowTheme.of(context).bodySmall.override(
-                                                            font: GoogleFonts.inter(),
-                                                            color: availableSpots > 5 ? Color(0xFF00A855) : Color(0xFFFF6B35),
-                                                            fontSize: 12.0,
-                                                            letterSpacing: 0.0,
-                                                          ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ].divide(SizedBox(width: 12.0)),
-                                            ),
-                                            Column(
-                                              mainAxisSize: MainAxisSize.max,
-                                              crossAxisAlignment: CrossAxisAlignment.end,
-                                              children: [
-                                                Text(
-                                                  '${timeSlot.price.toStringAsFixed(2)} TND',
-                                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                        font: GoogleFonts.inter(
-                                                          fontWeight: FontWeight.w600,
-                                                        ),
-                                                        color: Color(0xFF005BAA),
-                                                        fontSize: 14.0,
-                                                        letterSpacing: 0.0,
-                                                        fontWeight: FontWeight.w600,
-                                                      ),
-                                                ),
-                                                if (isSelected)
+                                        decoration: BoxDecoration(
+                                          color: availableSpots > 0
+                                              ? Colors.white
+                                              : Color(0xFFF5F5F5),
+                                          boxShadow: availableSpots > 0
+                                              ? [
+                                                  BoxShadow(
+                                                    blurRadius: 4.0,
+                                                    color: isSelected
+                                                        ? Color(0x1A00A4E4)
+                                                        : Color(0x1A000000),
+                                                    offset: Offset(0.0, 1.0),
+                                                  )
+                                                ]
+                                              : [],
+                                          borderRadius:
+                                              BorderRadius.circular(12.0),
+                                          border: Border.all(
+                                            color: availableSpots == 0
+                                                ? Color(0xFFE74C3C)
+                                                : isSelected
+                                                    ? Color(0xFF00A4E4)
+                                                    : Color(0xFFE0E0E0),
+                                            width: availableSpots == 0 ||
+                                                    isSelected
+                                                ? 2.0
+                                                : 1.0,
+                                          ),
+                                        ),
+                                        child: Padding(
+                                          padding: EdgeInsets.all(12.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Row(
+                                                mainAxisSize: MainAxisSize.max,
+                                                children: [
                                                   Container(
-                                                    padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                                                    width: 36.0,
+                                                    height: 36.0,
                                                     decoration: BoxDecoration(
-                                                      color: Color(0xFF00A4E4),
-                                                      borderRadius: BorderRadius.circular(8.0),
+                                                      color: isSelected
+                                                          ? Color(0xFF00A4E4)
+                                                          : Color(0xFF005BAA),
+                                                      shape: BoxShape.circle,
                                                     ),
-                                                    child: Text(
-                                                      'Sélectionné',
-                                                      style: FlutterFlowTheme.of(context).bodySmall.override(
-                                                            font: GoogleFonts.inter(),
-                                                            color: Colors.white,
-                                                            fontSize: 10.0,
-                                                            letterSpacing: 0.0,
-                                                          ),
+                                                    child: Align(
+                                                      alignment:
+                                                          AlignmentDirectional(
+                                                              0.0, 0.0),
+                                                      child: Icon(
+                                                        Icons.schedule,
+                                                        color: Colors.white,
+                                                        size: 18.0,
+                                                      ),
                                                     ),
                                                   ),
-                                              ],
-                                            ),
-                                          ],
+                                                  Column(
+                                                    mainAxisSize:
+                                                        MainAxisSize.max,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        '${DateFormat('HH:mm').format(startTime)} - ${DateFormat('HH:mm').format(endTime)}',
+                                                        style: FlutterFlowTheme
+                                                                .of(context)
+                                                            .bodyLarge
+                                                            .override(
+                                                              font: GoogleFonts
+                                                                  .inter(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                              ),
+                                                              color: Color(
+                                                                  0xFF005BAA),
+                                                              fontSize: 16.0,
+                                                              letterSpacing:
+                                                                  0.0,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
+                                                      ),
+                                                      Text(
+                                                        availableSpots > 0
+                                                            ? '${availableSpots} places available'
+                                                            : 'Full',
+                                                        style: FlutterFlowTheme
+                                                                .of(context)
+                                                            .bodySmall
+                                                            .override(
+                                                              font: GoogleFonts
+                                                                  .inter(),
+                                                              color: availableSpots >
+                                                                      5
+                                                                  ? Color(
+                                                                      0xFF00A855)
+                                                                  : availableSpots >
+                                                                          0
+                                                                      ? Color(
+                                                                          0xFFFF6B35)
+                                                                      : Color(
+                                                                          0xFFE74C3C),
+                                                              fontSize: 12.0,
+                                                              letterSpacing:
+                                                                  0.0,
+                                                              fontWeight:
+                                                                  availableSpots ==
+                                                                          0
+                                                                      ? FontWeight
+                                                                          .bold
+                                                                      : FontWeight
+                                                                          .normal,
+                                                            ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ].divide(SizedBox(width: 12.0)),
+                                              ),
+                                              Column(
+                                                mainAxisSize: MainAxisSize.max,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: [
+                                                  Text(
+                                                    '${timeSlot.price.toStringAsFixed(2)} TND',
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          font:
+                                                              GoogleFonts.inter(
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
+                                                          color:
+                                                              Color(0xFF005BAA),
+                                                          fontSize: 14.0,
+                                                          letterSpacing: 0.0,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                  ),
+                                                  if (isSelected)
+                                                    Container(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                              horizontal: 8.0,
+                                                              vertical: 2.0),
+                                                      decoration: BoxDecoration(
+                                                        color:
+                                                            Color(0xFF00A4E4),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8.0),
+                                                      ),
+                                                      child: Text(
+                                                        'Selected',
+                                                        style: FlutterFlowTheme
+                                                                .of(context)
+                                                            .bodySmall
+                                                            .override(
+                                                              font: GoogleFonts
+                                                                  .inter(),
+                                                              color:
+                                                                  Colors.white,
+                                                              fontSize: 10.0,
+                                                              letterSpacing:
+                                                                  0.0,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -607,17 +776,20 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                         ),
                       ].divide(SizedBox(height: 16.0)),
                     ),
-                    
+
                     // Daily menu section with real data
                     Column(
                       mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              20.0, 0.0, 20.0, 0.0),
                           child: Text(
                             'Plat du Jour',
-                            style: FlutterFlowTheme.of(context).headlineSmall.override(
+                            style: FlutterFlowTheme.of(context)
+                                .headlineSmall
+                                .override(
                                   font: GoogleFonts.interTight(
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -627,12 +799,13 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                 ),
                           ),
                         ),
-                        
+
                         // Stream builder for daily menu
                         StreamBuilder<List<DailyMenuRecord>>(
                           stream: queryDailyMenuRecord(
                             queryBuilder: (dailyMenuRecord) => dailyMenuRecord
-                                .where('day_of_week', isEqualTo: DateTime.now().weekday)
+                                .where('day_of_week',
+                                    isEqualTo: DateTime.now().weekday)
                                 .where('available', isEqualTo: true)
                                 .orderBy('meal_type')
                                 .limit(1),
@@ -640,7 +813,8 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                           builder: (context, snapshot) {
                             if (snapshot.hasError) {
                               return Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    20.0, 0.0, 20.0, 0.0),
                                 child: Container(
                                   padding: EdgeInsets.all(16.0),
                                   decoration: BoxDecoration(
@@ -649,15 +823,18 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                   ),
                                   child: Text(
                                     'Erreur lors du chargement du menu',
-                                    style: TextStyle(color: Colors.red.shade700),
+                                    style:
+                                        TextStyle(color: Colors.red.shade700),
                                   ),
                                 ),
                               );
                             }
-                            
-                            if (snapshot.connectionState == ConnectionState.waiting) {
+
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
                               return Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    20.0, 0.0, 20.0, 0.0),
                                 child: Container(
                                   height: 150.0,
                                   decoration: BoxDecoration(
@@ -672,12 +849,13 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                 ),
                               );
                             }
-                            
+
                             final menus = snapshot.data ?? [];
-                            
+
                             if (menus.isEmpty) {
                               return Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    20.0, 0.0, 20.0, 0.0),
                                 child: Container(
                                   padding: EdgeInsets.all(16.0),
                                   decoration: BoxDecoration(
@@ -686,16 +864,18 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                   ),
                                   child: Text(
                                     'Aucun menu disponible pour aujourd\'hui',
-                                    style: TextStyle(color: Colors.orange.shade700),
+                                    style: TextStyle(
+                                        color: Colors.orange.shade700),
                                   ),
                                 ),
                               );
                             }
-                            
+
                             final menu = menus.first;
-                            
+
                             return Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  20.0, 0.0, 20.0, 0.0),
                               child: Container(
                                 width: double.infinity,
                                 decoration: BoxDecoration(
@@ -713,57 +893,81 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                   padding: EdgeInsets.all(16.0),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.max,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Expanded(
                                             child: Column(
                                               mainAxisSize: MainAxisSize.max,
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   menu.mainDish,
-                                                  style: FlutterFlowTheme.of(context)
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
                                                       .titleLarge
                                                       .override(
-                                                        font: GoogleFonts.interTight(
-                                                          fontWeight: FontWeight.w600,
+                                                        font: GoogleFonts
+                                                            .interTight(
+                                                          fontWeight:
+                                                              FontWeight.w600,
                                                         ),
-                                                        color: Color(0xFF005BAA),
+                                                        color:
+                                                            Color(0xFF005BAA),
                                                         letterSpacing: 0.0,
-                                                        fontWeight: FontWeight.w600,
+                                                        fontWeight:
+                                                            FontWeight.w600,
                                                       ),
                                                 ),
                                                 Padding(
-                                                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 0.0),
+                                                  padding: EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                          0.0, 4.0, 0.0, 0.0),
                                                   child: Text(
-                                                    menu.accompaniments.isNotEmpty 
-                                                        ? menu.accompaniments.join(', ')
+                                                    menu.accompaniments
+                                                            .isNotEmpty
+                                                        ? menu.accompaniments
+                                                            .join(', ')
                                                         : menu.description,
-                                                    style: FlutterFlowTheme.of(context)
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
                                                         .bodyMedium
                                                         .override(
-                                                          color: Color(0xFF666666),
+                                                          color:
+                                                              Color(0xFF666666),
                                                           letterSpacing: 0.0,
                                                           lineHeight: 1.4,
                                                         ),
                                                   ),
                                                 ),
-                                                if (menu.description.isNotEmpty && menu.accompaniments.isNotEmpty)
+                                                if (menu.description
+                                                        .isNotEmpty &&
+                                                    menu.accompaniments
+                                                        .isNotEmpty)
                                                   Padding(
-                                                    padding: EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+                                                    padding:
+                                                        EdgeInsetsDirectional
+                                                            .fromSTEB(0.0, 8.0,
+                                                                0.0, 0.0),
                                                     child: Text(
                                                       menu.description,
-                                                      style: FlutterFlowTheme.of(context)
+                                                      style: FlutterFlowTheme
+                                                              .of(context)
                                                           .bodySmall
                                                           .override(
-                                                            color: Color(0xFF888888),
+                                                            color: Color(
+                                                                0xFF888888),
                                                             letterSpacing: 0.0,
-                                                            fontStyle: FontStyle.italic,
+                                                            fontStyle: FontStyle
+                                                                .italic,
                                                           ),
                                                     ),
                                                   ),
@@ -771,25 +975,35 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                             ),
                                           ),
                                           Padding(
-                                            padding: EdgeInsetsDirectional.fromSTEB(12.0, 6.0, 12.0, 6.0),
+                                            padding:
+                                                EdgeInsetsDirectional.fromSTEB(
+                                                    12.0, 6.0, 12.0, 6.0),
                                             child: Container(
                                               decoration: BoxDecoration(
-                                                color: menu.available ? Colors.green : Colors.red,
-                                                borderRadius: BorderRadius.circular(20.0),
+                                                color: menu.available
+                                                    ? Colors.green
+                                                    : Colors.red,
+                                                borderRadius:
+                                                    BorderRadius.circular(20.0),
                                               ),
                                               child: Padding(
                                                 padding: EdgeInsets.all(8.0),
                                                 child: Text(
-                                                  menu.available ? 'Disponible' : 'Indisponible',
-                                                  style: FlutterFlowTheme.of(context)
+                                                  menu.available
+                                                      ? 'Disponible'
+                                                      : 'Indisponible',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
                                                       .bodySmall
                                                       .override(
                                                         font: GoogleFonts.inter(
-                                                          fontWeight: FontWeight.w600,
+                                                          fontWeight:
+                                                              FontWeight.w600,
                                                         ),
                                                         color: Colors.white,
                                                         letterSpacing: 0.0,
-                                                        fontWeight: FontWeight.w600,
+                                                        fontWeight:
+                                                            FontWeight.w600,
                                                       ),
                                                 ),
                                               ),
@@ -799,8 +1013,10 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                       ),
                                       Row(
                                         mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
                                         children: [
                                           Row(
                                             mainAxisSize: MainAxisSize.max,
@@ -813,13 +1029,16 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                               SizedBox(width: 8.0),
                                               Text(
                                                 '${menu.price.toStringAsFixed(2)} DT',
-                                                style: FlutterFlowTheme.of(context)
-                                                    .titleMedium
-                                                    .override(
-                                                      color: Color(0xFF005BAA),
-                                                      letterSpacing: 0.0,
-                                                      fontWeight: FontWeight.w600,
-                                                    ),
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .titleMedium
+                                                        .override(
+                                                          color:
+                                                              Color(0xFF005BAA),
+                                                          letterSpacing: 0.0,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
                                               ),
                                             ],
                                           ),
@@ -831,7 +1050,8 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                               shape: BoxShape.circle,
                                             ),
                                             child: Align(
-                                              alignment: AlignmentDirectional(0.0, 0.0),
+                                              alignment: AlignmentDirectional(
+                                                  0.0, 0.0),
                                               child: Icon(
                                                 Icons.info_outline,
                                                 color: Color(0xFF00A4E4),
@@ -850,234 +1070,252 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                         ),
                       ].divide(SizedBox(height: 16.0)),
                     ),
-                    
+
                     // Reserve button
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                      padding:
+                          EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                              // Error message
-                              if (_model.errorMessage != null)
-                                Container(
-                                  width: double.infinity,
-                                  padding: EdgeInsets.all(12.0),
-                                  margin: EdgeInsets.only(bottom: 16.0),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red.shade50,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    border: Border.all(color: Colors.red.shade200),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.error_outline, color: Colors.red.shade700, size: 20.0),
-                                      SizedBox(width: 8.0),
-                                      Expanded(
-                                        child: Text(
-                                          _model.errorMessage!,
-                                          style: TextStyle(
-                                            color: Colors.red.shade700,
-                                            fontSize: 14.0,
-                                          ),
-                                        ),
+                          // Error message
+                          if (_model.errorMessage != null)
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(12.0),
+                              margin: EdgeInsets.only(bottom: 16.0),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade50,
+                                borderRadius: BorderRadius.circular(8.0),
+                                border: Border.all(color: Colors.red.shade200),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.error_outline,
+                                      color: Colors.red.shade700, size: 20.0),
+                                  SizedBox(width: 8.0),
+                                  Expanded(
+                                    child: Text(
+                                      _model.errorMessage!,
+                                      style: TextStyle(
+                                        color: Colors.red.shade700,
+                                        fontSize: 14.0,
                                       ),
-                                      IconButton(
-                                        icon: Icon(Icons.close, color: Colors.red.shade700, size: 18.0),
-                                        onPressed: () => _model.clearMessages(),
-                                        padding: EdgeInsets.zero,
-                                        constraints: BoxConstraints(),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              
-                              // Success message
-                              if (_model.successMessage != null)
-                                Container(
-                                  width: double.infinity,
-                                  padding: EdgeInsets.all(12.0),
-                                  margin: EdgeInsets.only(bottom: 16.0),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.shade50,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    border: Border.all(color: Colors.green.shade200),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.check_circle_outline, color: Colors.green.shade700, size: 20.0),
-                                      SizedBox(width: 8.0),
-                                      Expanded(
-                                        child: Text(
-                                          _model.successMessage!,
-                                          style: TextStyle(
-                                            color: Colors.green.shade700,
-                                            fontSize: 14.0,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              
-                              // Balance and validation info
-                              if (_model.selectedTimeSlot != null)
-                                Container(
-                                  width: double.infinity,
-                                  padding: EdgeInsets.all(12.0),
-                                  margin: EdgeInsets.only(bottom: 16.0),
-                                  decoration: BoxDecoration(
-                                    color: _model.canAffordSelectedSlot() 
-                                        ? Colors.green.shade50 
-                                        : Colors.orange.shade50,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    border: Border.all(
-                                      color: _model.canAffordSelectedSlot() 
-                                          ? Colors.green.shade200 
-                                          : Colors.orange.shade200,
                                     ),
                                   ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            'Prix du créneau:',
-                                            style: TextStyle(
-                                              color: Colors.grey.shade700,
-                                              fontSize: 14.0,
-                                            ),
-                                          ),
-                                          Text(
-                                            '${_model.selectedTimeSlot!.price.toStringAsFixed(2)} TND',
-                                            style: TextStyle(
-                                              color: Color(0xFF005BAA),
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 4.0),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            'Votre solde:',
-                                            style: TextStyle(
-                                              color: Colors.grey.shade700,
-                                              fontSize: 14.0,
-                                            ),
-                                          ),
-                                          Text(
-                                            _model.isLoadingBalance 
-                                                ? 'Chargement...'
-                                                : '${_model.userBalance.toStringAsFixed(2)} TND',
-                                            style: TextStyle(
-                                              color: _model.canAffordSelectedSlot() 
-                                                  ? Colors.green.shade700 
-                                                  : Colors.orange.shade700,
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      if (!_model.canAffordSelectedSlot() && !_model.isLoadingBalance) ...[
-                                        SizedBox(height: 8.0),
-                                        Text(
-                                          'Solde insuffisant pour cette réservation',
-                                          style: TextStyle(
-                                            color: Colors.orange.shade700,
-                                            fontSize: 12.0,
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
+                                  IconButton(
+                                    icon: Icon(Icons.close,
+                                        color: Colors.red.shade700, size: 18.0),
+                                    onPressed: () => _model.clearMessages(),
+                                    padding: EdgeInsets.zero,
+                                    constraints: BoxConstraints(),
                                   ),
-                                ),
-                              
-                              // Reserve button
-                              FFButtonWidget(
-                                onPressed: _model.selectedTimeSlot == null || 
-                                          _model.isProcessingReservation ||
-                                          _model.isLoadingBalance ||
-                                          !_model.canAffordSelectedSlot()
-                                    ? null
-                                    : () async {
-                                        // Show confirmation dialog
-                                        final confirmed = await _showReservationConfirmationDialog(context);
-                                        if (!confirmed) return;
-                                        
-                                        // Create reservation
-                                        final result = await _model.createReservation();
-                                        
-                                        if (result['success']) {
-                                          // Navigate to confirmation page
-                                          context.pushNamed(
-                                            'Reservationconfirme',
-                                            queryParameters: {
-                                              'reservationId': result['reservationId'],
-                                              'paymentId': result['paymentId'],
-                                            },
-                                          );
-                                        }
-                                      },
-                                text: _model.isProcessingReservation
-                                    ? 'Réservation en cours...'
-                                    : _model.selectedTimeSlot == null
-                                        ? 'Sélectionnez un créneau'
-                                        : !_model.canAffordSelectedSlot()
-                                            ? 'Solde insuffisant'
-                                            : 'Réserver',
-                                icon: _model.isProcessingReservation
-                                    ? SizedBox(
-                                        width: 20.0,
-                                        height: 20.0,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2.0,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                        ),
-                                      )
-                                    : Icon(
-                                        Icons.restaurant_menu,
-                                        color: Colors.white,
-                                        size: 20.0,
+                                ],
+                              ),
+                            ),
+
+                          // Success message
+                          if (_model.successMessage != null)
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(12.0),
+                              margin: EdgeInsets.only(bottom: 16.0),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade50,
+                                borderRadius: BorderRadius.circular(8.0),
+                                border:
+                                    Border.all(color: Colors.green.shade200),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.check_circle_outline,
+                                      color: Colors.green.shade700, size: 20.0),
+                                  SizedBox(width: 8.0),
+                                  Expanded(
+                                    child: Text(
+                                      _model.successMessage!,
+                                      style: TextStyle(
+                                        color: Colors.green.shade700,
+                                        fontSize: 14.0,
                                       ),
-                                options: FFButtonOptions(
-                                  width: double.infinity,
-                                  height: 56.0,
-                                  padding: EdgeInsets.all(8.0),
-                                  iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                  color: _model.selectedTimeSlot == null || 
-                                         _model.isProcessingReservation ||
-                                         _model.isLoadingBalance ||
-                                         !_model.canAffordSelectedSlot()
-                                      ? Colors.grey.shade400
-                                      : Color(0xFF005BAA),
-                                  textStyle: FlutterFlowTheme.of(context).titleMedium.override(
-                                        font: GoogleFonts.interTight(
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        color: Colors.white,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                  elevation: _model.selectedTimeSlot != null && 
-                                            !_model.isProcessingReservation &&
-                                            !_model.isLoadingBalance &&
-                                            _model.canAffordSelectedSlot() ? 2.0 : 0.0,
-                                  borderSide: BorderSide(
-                                    color: Colors.transparent,
+                                    ),
                                   ),
-                                  borderRadius: BorderRadius.circular(12.0),
+                                ],
+                              ),
+                            ),
+
+                          // Balance and validation info
+                          if (_model.selectedTimeSlot != null)
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(12.0),
+                              margin: EdgeInsets.only(bottom: 16.0),
+                              decoration: BoxDecoration(
+                                color: _model.canAffordSelectedSlot()
+                                    ? Colors.green.shade50
+                                    : Colors.orange.shade50,
+                                borderRadius: BorderRadius.circular(8.0),
+                                border: Border.all(
+                                  color: _model.canAffordSelectedSlot()
+                                      ? Colors.green.shade200
+                                      : Colors.orange.shade200,
                                 ),
                               ),
-                            ],
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Prix du créneau:',
+                                        style: TextStyle(
+                                          color: Colors.grey.shade700,
+                                          fontSize: 14.0,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${_model.selectedTimeSlot!.price.toStringAsFixed(2)} TND',
+                                        style: TextStyle(
+                                          color: Color(0xFF005BAA),
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 4.0),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Votre solde:',
+                                        style: TextStyle(
+                                          color: Colors.grey.shade700,
+                                          fontSize: 14.0,
+                                        ),
+                                      ),
+                                      Text(
+                                        _model.isLoadingBalance
+                                            ? 'Chargement...'
+                                            : '${_model.userBalance.toStringAsFixed(2)} TND',
+                                        style: TextStyle(
+                                          color: _model.canAffordSelectedSlot()
+                                              ? Colors.green.shade700
+                                              : Colors.orange.shade700,
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  if (!_model.canAffordSelectedSlot() &&
+                                      !_model.isLoadingBalance) ...[
+                                    SizedBox(height: 8.0),
+                                    Text(
+                                      'Solde insuffisant pour cette réservation',
+                                      style: TextStyle(
+                                        color: Colors.orange.shade700,
+                                        fontSize: 12.0,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+
+                          // Reserve button
+                          FFButtonWidget(
+                            onPressed: _model.selectedTimeSlot == null ||
+                                    _model.isProcessingReservation ||
+                                    _model.isLoadingBalance ||
+                                    !_model.canAffordSelectedSlot()
+                                ? null
+                                : () async {
+                                    // Show confirmation dialog
+                                    final confirmed =
+                                        await _showReservationConfirmationDialog(
+                                            context);
+                                    if (!confirmed) return;
+
+                                    // Create reservation
+                                    final result =
+                                        await _model.createReservation();
+
+                                    if (result['success']) {
+                                      // Navigate to confirmation page
+                                      context.pushNamed(
+                                        'Reservationconfirme',
+                                        queryParameters: {
+                                          'reservationId':
+                                              result['reservationId'],
+                                          'paymentId': result['paymentId'],
+                                        },
+                                      );
+                                    }
+                                  },
+                            text: _model.isProcessingReservation
+                                ? 'Réservation en cours...'
+                                : _model.selectedTimeSlot == null
+                                    ? 'Sélectionnez un créneau'
+                                    : !_model.canAffordSelectedSlot()
+                                        ? 'Solde insuffisant'
+                                        : 'Réserver',
+                            icon: _model.isProcessingReservation
+                                ? SizedBox(
+                                    width: 20.0,
+                                    height: 20.0,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.0,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.restaurant_menu,
+                                    color: Colors.white,
+                                    size: 20.0,
+                                  ),
+                            options: FFButtonOptions(
+                              width: double.infinity,
+                              height: 56.0,
+                              padding: EdgeInsets.all(8.0),
+                              iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 0.0, 0.0, 0.0),
+                              color: _model.selectedTimeSlot == null ||
+                                      _model.isProcessingReservation ||
+                                      _model.isLoadingBalance ||
+                                      !_model.canAffordSelectedSlot()
+                                  ? Colors.grey.shade400
+                                  : Color(0xFF005BAA),
+                              textStyle: FlutterFlowTheme.of(context)
+                                  .titleMedium
+                                  .override(
+                                    font: GoogleFonts.interTight(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    color: Colors.white,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                              elevation: _model.selectedTimeSlot != null &&
+                                      !_model.isProcessingReservation &&
+                                      !_model.isLoadingBalance &&
+                                      _model.canAffordSelectedSlot()
+                                  ? 2.0
+                                  : 0.0,
+                              borderSide: BorderSide(
+                                color: Colors.transparent,
+                              ),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
                           ),
+                        ],
                       ),
+                    ),
                   ]
                       .divide(SizedBox(height: 24.0))
                       .addToStart(SizedBox(height: 16.0))

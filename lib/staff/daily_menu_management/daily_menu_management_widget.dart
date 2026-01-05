@@ -718,6 +718,8 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
     );
   }
 
+  // Unused method - kept for potential future use
+  // ignore: unused_element
   Widget _buildMenuCard(BuildContext context, DailyMenuRecord menu) {
     return Card(
       margin: EdgeInsets.only(bottom: 16.0),

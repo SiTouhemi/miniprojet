@@ -34,14 +34,14 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
   }
 
   Future<void> _checkAdminAccess() async {
-     try {
-       await RoleMiddleware.requireRole(UserRole.admin, 'gestion des créneaux');
-     } catch (e) {
-       if (mounted) {
-         context.go('/');
-       }
-     }
-   }
+    try {
+      await RoleMiddleware.requireRole(UserRole.admin, 'gestion des créneaux');
+    } catch (e) {
+      if (mounted) {
+        context.go('/');
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -77,7 +77,7 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
             },
           ),
           title: Text(
-            'Gestion des Créneaux',
+            'Time Slot Management',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
                   font: GoogleFonts.urbanist(
                     fontWeight: FontWeight.bold,
@@ -88,7 +88,22 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
                   fontWeight: FontWeight.bold,
                 ),
           ),
-          actions: [],
+          actions: [
+            FlutterFlowIconButton(
+              borderColor: Colors.transparent,
+              borderRadius: 30.0,
+              borderWidth: 1.0,
+              buttonSize: 60.0,
+              icon: Icon(
+                Icons.auto_awesome,
+                color: Color(0xFF4B986C),
+                size: 24.0,
+              ),
+              onPressed: () async {
+                await _showBulkCreateDialog();
+              },
+            ),
+          ],
           centerTitle: false,
           elevation: 0.0,
         ),
@@ -108,7 +123,8 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
           top: true,
           child: StreamBuilder<List<TimeSlotRecord>>(
             stream: queryTimeSlotRecord(
-              queryBuilder: (timeSlotRecord) => timeSlotRecord.orderBy('date', descending: true),
+              queryBuilder: (timeSlotRecord) =>
+                  timeSlotRecord.orderBy('date', descending: true),
             ),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
@@ -176,12 +192,14 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
                     children: [
                       Text(
                         '${DateFormat('d MMM y', 'fr_FR').format(date)}',
-                        style: FlutterFlowTheme.of(context).titleMedium.override(
-                          font: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.w600,
-                          ),
-                          color: isActive ? Color(0xFF0B191E) : Colors.grey,
-                        ),
+                        style: FlutterFlowTheme.of(context)
+                            .titleMedium
+                            .override(
+                              font: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.w600,
+                              ),
+                              color: isActive ? Color(0xFF0B191E) : Colors.grey,
+                            ),
                       ),
                       SizedBox(height: 4),
                       Text(
@@ -191,55 +209,61 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
                       SizedBox(height: 4),
                       Text(
                         'Type: ${slot.mealType} | Places: ${slot.currentReservations}/${slot.maxCapacity}',
-                         style: FlutterFlowTheme.of(context).bodySmall,
+                        style: FlutterFlowTheme.of(context).bodySmall,
                       ),
                     ],
                   ),
                 ),
                 Row(
                   children: [
-                     Switch(
-                        value: isActive,
-                        activeColor: Color(0xFF4B986C),
-                        onChanged: (val) async {
-                          // Toggle active status
-                          await slot.reference.update({'is_active': val});
-                        },
-                     ),
-                     IconButton(
-                       icon: Icon(Icons.edit, color: Color(0xFF384E58)),
-                       onPressed: () => _showEditSlotDialog(slot),
-                     ),
-                     IconButton(
-                       icon: Icon(Icons.delete_outline, color: Colors.red),
-                        onPressed: () async {
-                           // Check if slot has reservations
-                           if (slot.currentReservations > 0) {
-                             ScaffoldMessenger.of(context).showSnackBar(
-                               SnackBar(
-                                 content: Text('Impossible de supprimer: ${slot.currentReservations} réservation(s) existante(s)'),
-                                 backgroundColor: Colors.red,
-                               ),
-                             );
-                             return;
-                           }
-                           
-                           final confirm = await showDialog<bool>(
-                             context: context,
-                             builder: (c) => AlertDialog(
-                               title: Text('Supprimer ?'),
-                               content: Text('Cette action est irréversible.'),
-                               actions: [
-                                 TextButton(onPressed: () => Navigator.pop(c, false), child: Text('Annuler')),
-                                 TextButton(onPressed: () => Navigator.pop(c, true), child: Text('Supprimer', style: TextStyle(color: Colors.red))),
-                               ],
-                             ),
-                           );
-                           if (confirm == true) {
-                             await slot.reference.delete();
-                           }
-                        },
-                     ),
+                    Switch(
+                      value: isActive,
+                      activeColor: Color(0xFF4B986C),
+                      onChanged: (val) async {
+                        // Toggle active status
+                        await slot.reference.update({'is_active': val});
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.edit, color: Color(0xFF384E58)),
+                      onPressed: () => _showEditSlotDialog(slot),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.delete_outline, color: Colors.red),
+                      onPressed: () async {
+                        // Check if slot has reservations
+                        if (slot.currentReservations > 0) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Impossible de supprimer: ${slot.currentReservations} réservation(s) existante(s)'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
+
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (c) => AlertDialog(
+                            title: Text('Supprimer ?'),
+                            content: Text('Cette action est irréversible.'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () => Navigator.pop(c, false),
+                                  child: Text('Annuler')),
+                              TextButton(
+                                  onPressed: () => Navigator.pop(c, true),
+                                  child: Text('Supprimer',
+                                      style: TextStyle(color: Colors.red))),
+                            ],
+                          ),
+                        );
+                        if (confirm == true) {
+                          await slot.reference.delete();
+                        }
+                      },
+                    ),
                   ],
                 ),
               ],
@@ -249,11 +273,21 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
       ),
     );
   }
-  
+
+  /// Show bulk time slot creation dialog
+  Future<void> _showBulkCreateDialog() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return BulkCreateSlotsDialog();
+      },
+    );
+  }
+
   Future<void> _showCreateSlotDialog() async {
     // Show a dialog to create a new slot
     // This is a simplified version.
-     await showDialog(
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return CreateSlotDialog();
@@ -262,7 +296,7 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
   }
 
   Future<void> _showEditSlotDialog(TimeSlotRecord slot) async {
-      await showDialog(
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return EditSlotDialog(slot: slot);
@@ -277,97 +311,109 @@ class CreateSlotDialog extends StatefulWidget {
 }
 
 class _CreateSlotDialogState extends State<CreateSlotDialog> {
-    final _formKey = GlobalKey<FormState>();
-    DateTime _selectedDate = DateTime.now();
-    TimeOfDay _startTime = TimeOfDay(hour: 12, minute: 0);
-    TimeOfDay _endTime = TimeOfDay(hour: 13, minute: 0);
-    int _capacity = 50;
-    double _price = 2.5;
-    String _mealType = 'lunch'; // or dinner
+  final _formKey = GlobalKey<FormState>();
+  DateTime _selectedDate = DateTime.now();
+  TimeOfDay _startTime = TimeOfDay(hour: 12, minute: 0);
+  TimeOfDay _endTime = TimeOfDay(hour: 13, minute: 0);
+  int _capacity = 50;
+  double _price = 2.5;
+  String _mealType = 'lunch'; // or dinner
 
-    @override
-    Widget build(BuildContext context) {
-      return AlertDialog(
-        title: Text('Ajouter Créneau'),
-        content: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                 ListTile(
-                   title: Text('Date: ${DateFormat('d/M/y').format(_selectedDate)}'),
-                   trailing: Icon(Icons.calendar_today),
-                   onTap: () async {
-                     final d = await showDatePicker(context: context, initialDate: _selectedDate, firstDate: DateTime.now(), lastDate: DateTime.now().add(Duration(days: 30)));
-                     if (d != null) setState(() => _selectedDate = d);
-                   },
-                 ),
-                 ListTile(
-                   title: Text('Début: ${_startTime.format(context)}'),
-                   trailing: Icon(Icons.access_time),
-                   onTap: () async {
-                      final t = await showTimePicker(context: context, initialTime: _startTime);
-                      if (t != null) setState(() => _startTime = t);
-                   },
-                 ),
-                 ListTile(
-                   title: Text('Fin: ${_endTime.format(context)}'),
-                   trailing: Icon(Icons.access_time),
-                   onTap: () async {
-                      final t = await showTimePicker(context: context, initialTime: _endTime);
-                      if (t != null) setState(() => _endTime = t);
-                   },
-                 ),
-                 TextFormField(
-                   initialValue: '50',
-                   decoration: InputDecoration(labelText: 'Capacité'),
-                   keyboardType: TextInputType.number,
-                   onChanged: (v) => _capacity = int.tryParse(v) ?? 50,
-                 ),
-                 TextFormField(
-                   initialValue: '2.5',
-                   decoration: InputDecoration(labelText: 'Prix (TND)'),
-                   keyboardType: TextInputType.number,
-                   onChanged: (v) => _price = double.tryParse(v) ?? 2.5,
-                 ),
-                 DropdownButtonFormField<String>(
-                   value: _mealType,
-                   items: [
-                     DropdownMenuItem(value: 'lunch', child: Text('Déjeuner')),
-                     DropdownMenuItem(value: 'dinner', child: Text('Dîner')),
-                   ],
-                   onChanged: (v) => setState(() => _mealType = v!),
-                   decoration: InputDecoration(labelText: 'Type de repas'),
-                 ),
-              ],
-            ),
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Ajouter Créneau'),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title:
+                    Text('Date: ${DateFormat('d/M/y').format(_selectedDate)}'),
+                trailing: Icon(Icons.calendar_today),
+                onTap: () async {
+                  final d = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedDate,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(Duration(days: 30)));
+                  if (d != null) setState(() => _selectedDate = d);
+                },
+              ),
+              ListTile(
+                title: Text('Début: ${_startTime.format(context)}'),
+                trailing: Icon(Icons.access_time),
+                onTap: () async {
+                  final t = await showTimePicker(
+                      context: context, initialTime: _startTime);
+                  if (t != null) setState(() => _startTime = t);
+                },
+              ),
+              ListTile(
+                title: Text('Fin: ${_endTime.format(context)}'),
+                trailing: Icon(Icons.access_time),
+                onTap: () async {
+                  final t = await showTimePicker(
+                      context: context, initialTime: _endTime);
+                  if (t != null) setState(() => _endTime = t);
+                },
+              ),
+              TextFormField(
+                initialValue: '50',
+                decoration: InputDecoration(labelText: 'Capacité'),
+                keyboardType: TextInputType.number,
+                onChanged: (v) => _capacity = int.tryParse(v) ?? 50,
+              ),
+              TextFormField(
+                initialValue: '2.5',
+                decoration: InputDecoration(labelText: 'Prix (TND)'),
+                keyboardType: TextInputType.number,
+                onChanged: (v) => _price = double.tryParse(v) ?? 2.5,
+              ),
+              DropdownButtonFormField<String>(
+                value: _mealType,
+                items: [
+                  DropdownMenuItem(value: 'lunch', child: Text('Déjeuner')),
+                  DropdownMenuItem(value: 'dinner', child: Text('Dîner')),
+                ],
+                onChanged: (v) => setState(() => _mealType = v!),
+                decoration: InputDecoration(labelText: 'Type de repas'),
+              ),
+            ],
           ),
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text('Annuler')),
-          ElevatedButton(
-            onPressed: () async {
-               // Construct DateTimes
-               final start = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, _startTime.hour, _startTime.minute);
-               final end = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, _endTime.hour, _endTime.minute);
+      ),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(context), child: Text('Annuler')),
+        ElevatedButton(
+          onPressed: () async {
+            // Construct DateTimes
+            final start = DateTime(_selectedDate.year, _selectedDate.month,
+                _selectedDate.day, _startTime.hour, _startTime.minute);
+            final end = DateTime(_selectedDate.year, _selectedDate.month,
+                _selectedDate.day, _endTime.hour, _endTime.minute);
 
-               await TimeSlotService.instance.createTimeSlot(
-                 startTime: start,
-                 endTime: end,
-                 maxCapacity: _capacity,
-                 price: _price,
-                 mealType: _mealType,
-                 date: _selectedDate,
-               );
-               Navigator.pop(context);
-            },
-            child: Text('Ajouter'),
-            style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF4B986C), foregroundColor: Colors.white),
-          ),
-        ],
-      );
-    }
+            await TimeSlotService.instance.createTimeSlot(
+              startTime: start,
+              endTime: end,
+              maxCapacity: _capacity,
+              price: _price,
+              mealType: _mealType,
+              date: _selectedDate,
+            );
+            Navigator.pop(context);
+          },
+          child: Text('Ajouter'),
+          style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF4B986C),
+              foregroundColor: Colors.white),
+        ),
+      ],
+    );
+  }
 }
 
 class EditSlotDialog extends StatefulWidget {
@@ -379,51 +425,241 @@ class EditSlotDialog extends StatefulWidget {
 }
 
 class _EditSlotDialogState extends State<EditSlotDialog> {
-   late int _capacity;
-   late double _price;
+  late int _capacity;
+  late double _price;
 
-   @override
-   void initState() {
-     super.initState();
-     _capacity = widget.slot.maxCapacity;
-     _price = widget.slot.price;
-   }
+  @override
+  void initState() {
+    super.initState();
+    _capacity = widget.slot.maxCapacity;
+    _price = widget.slot.price;
+  }
 
-   @override
-   Widget build(BuildContext context) {
-      return AlertDialog(
-        title: Text('Modifier Créneau'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-             TextFormField(
-               initialValue: _capacity.toString(),
-               decoration: InputDecoration(labelText: 'Capacité'),
-               keyboardType: TextInputType.number,
-               onChanged: (v) => _capacity = int.tryParse(v) ?? _capacity,
-             ),
-             TextFormField(
-               initialValue: _price.toString(),
-               decoration: InputDecoration(labelText: 'Prix'),
-               keyboardType: TextInputType.number,
-               onChanged: (v) => _price = double.tryParse(v) ?? _price,
-             ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text('Annuler')),
-          ElevatedButton(
-             onPressed: () async {
-                await TimeSlotService.instance.updateTimeSlotCapacity(
-                  widget.slot.reference.id,
-                  _capacity,
-                );
-                Navigator.pop(context);
-             },
-             child: Text('Sauvegarder'),
-             style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF4B986C), foregroundColor: Colors.white),
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Modifier Créneau'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            initialValue: _capacity.toString(),
+            decoration: InputDecoration(labelText: 'Capacité'),
+            keyboardType: TextInputType.number,
+            onChanged: (v) => _capacity = int.tryParse(v) ?? _capacity,
+          ),
+          TextFormField(
+            initialValue: _price.toString(),
+            decoration: InputDecoration(labelText: 'Prix'),
+            keyboardType: TextInputType.number,
+            onChanged: (v) => _price = double.tryParse(v) ?? _price,
           ),
         ],
+      ),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(context), child: Text('Annuler')),
+        ElevatedButton(
+          onPressed: () async {
+            await TimeSlotService.instance.updateTimeSlotCapacity(
+              widget.slot.reference.id,
+              _capacity,
+            );
+            Navigator.pop(context);
+          },
+          child: Text('Sauvegarder'),
+          style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF4B986C),
+              foregroundColor: Colors.white),
+        ),
+      ],
+    );
+  }
+}
+
+/// Dialog for bulk creating time slots with 20-minute intervals
+class BulkCreateSlotsDialog extends StatefulWidget {
+  @override
+  _BulkCreateSlotsDialogState createState() => _BulkCreateSlotsDialogState();
+}
+
+class _BulkCreateSlotsDialogState extends State<BulkCreateSlotsDialog> {
+  DateTime _startDate = DateTime.now();
+  int _numberOfDays = 7;
+  bool _isCreating = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Row(
+        children: [
+          Icon(Icons.auto_awesome, color: Color(0xFF4B986C)),
+          SizedBox(width: 8),
+          Text('Generate Time Slots'),
+        ],
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'This will create 20-minute time slots for:',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
+            SizedBox(height: 8),
+            Text('• Lunch: 11:40 - 14:00 (7 slots per day)'),
+            Text('• Dinner: 17:40 - 18:40 (3 slots per day)'),
+            SizedBox(height: 16),
+
+            // Start date picker
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(Icons.calendar_today, color: Color(0xFF4B986C)),
+              title: Text('Start Date'),
+              subtitle: Text(DateFormat('MMM dd, yyyy').format(_startDate)),
+              onTap: () async {
+                final date = await showDatePicker(
+                  context: context,
+                  initialDate: _startDate,
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(Duration(days: 365)),
+                );
+                if (date != null) {
+                  setState(() => _startDate = date);
+                }
+              },
+            ),
+
+            // Number of days
+            TextFormField(
+              initialValue: _numberOfDays.toString(),
+              decoration: InputDecoration(
+                labelText: 'Number of Days',
+                prefixIcon: Icon(Icons.event_repeat, color: Color(0xFF4B986C)),
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+              onChanged: (v) => _numberOfDays = int.tryParse(v) ?? 7,
+            ),
+
+            SizedBox(height: 16),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Color(0xFFF0F8F4),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Color(0xFF4B986C).withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Summary:',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600, color: Color(0xFF4B986C)),
+                  ),
+                  SizedBox(height: 4),
+                  Text('• $_numberOfDays days of time slots'),
+                  Text(
+                      '• ${_numberOfDays * 10} total slots (7 lunch + 3 dinner per day)'),
+                  Text('• 25 capacity per slot'),
+                  Text('• 0.2 TND per reservation'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isCreating ? null : () => Navigator.pop(context),
+          child: Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: _isCreating ? null : _createTimeSlots,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xFF4B986C),
+            foregroundColor: Colors.white,
+          ),
+          child: _isCreating
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Text('Creating...'),
+                  ],
+                )
+              : Text('Generate Slots'),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _createTimeSlots() async {
+    setState(() => _isCreating = true);
+
+    try {
+      final result = await TimeSlotService.instance.bulkCreateTimeSlots(
+        startDate: _startDate,
+        numberOfDays: _numberOfDays,
       );
-   }
+
+      Navigator.pop(context);
+
+      // Show result dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                result['created'] > 0 ? Icons.check_circle : Icons.warning,
+                color: result['created'] > 0 ? Colors.green : Colors.orange,
+              ),
+              SizedBox(width: 8),
+              Text('Generation Complete'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('✅ Created: ${result['created']} days'),
+              if (result['skipped'] > 0)
+                Text('⏭️ Skipped: ${result['skipped']} days (already exist)'),
+              if (result['errors'].isNotEmpty) ...[
+                SizedBox(height: 8),
+                Text('❌ Errors:', style: TextStyle(color: Colors.red)),
+                ...result['errors'].map<Widget>((error) => Text('• $error')),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      setState(() => _isCreating = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error creating time slots: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 }

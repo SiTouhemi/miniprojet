@@ -6,7 +6,8 @@ import '/utils/app_logger.dart';
 
 class ReservationService {
   static ReservationService? _instance;
-  static ReservationService get instance => _instance ??= ReservationService._();
+  static ReservationService get instance =>
+      _instance ??= ReservationService._();
   ReservationService._();
 
   // Create a new reservation with payment method support
@@ -17,21 +18,21 @@ class ReservationService {
     String? paymentId,
     String? paymentMethod,
     String? transactionId,
+    double? amount,
+    int capacity = 1,
   }) async {
     try {
       // Call cloud function to create reservation
       final result = await makeCloudCall('createReservation', {
-        'userId': userId,
         'timeSlotId': timeSlotId,
-        'mealType': mealType,
-        'paymentId': paymentId,
-        'paymentMethod': paymentMethod ?? 'wallet',
-        'transactionId': transactionId,
+        'capacity': capacity,
+        'amount': amount ?? 0.2, // Default meal price
       });
 
       return result;
     } catch (e) {
-      AppLogger.e('Error creating reservation', error: e, tag: 'ReservationService');
+      AppLogger.e('Error creating reservation',
+          error: e, tag: 'ReservationService');
       return {
         'success': false,
         'error': 'Failed to create reservation: ${e.toString()}'
@@ -52,7 +53,8 @@ class ReservationService {
 
       return result;
     } catch (e) {
-      AppLogger.e('Error validating QR code', error: e, tag: 'ReservationService');
+      AppLogger.e('Error validating QR code',
+          error: e, tag: 'ReservationService');
       return {
         'success': false,
         'error': 'Failed to validate QR code: ${e.toString()}'
@@ -70,27 +72,30 @@ class ReservationService {
 
       return reservations.isNotEmpty ? reservations.first : null;
     } catch (e) {
-      AppLogger.e('Error fetching reservation by QR', error: e, tag: 'ReservationService');
+      AppLogger.e('Error fetching reservation by QR',
+          error: e, tag: 'ReservationService');
       return null;
     }
   }
 
   // Get reservations for a specific time slot
-  Future<List<ReservationRecord>> getTimeSlotReservations(String timeSlotId) async {
+  Future<List<ReservationRecord>> getTimeSlotReservations(
+      String timeSlotId) async {
     try {
       // First get the time slot to get its start time
       final timeSlotDoc = await TimeSlotRecord.collection.doc(timeSlotId).get();
       if (!timeSlotDoc.exists) return [];
-      
+
       final timeSlot = TimeSlotRecord.fromSnapshot(timeSlotDoc);
-      
+
       return await queryReservationRecordOnce(
         queryBuilder: (query) => query
             .where('creneaux', isEqualTo: timeSlot.startTime)
             .where('status', whereIn: ['confirmed', 'used']),
       );
     } catch (e) {
-      AppLogger.e('Error fetching time slot reservations', error: e, tag: 'ReservationService');
+      AppLogger.e('Error fetching time slot reservations',
+          error: e, tag: 'ReservationService');
       return [];
     }
   }
@@ -99,16 +104,17 @@ class ReservationService {
   Future<List<ReservationRecord>> getUpcomingReservations(String userId) async {
     try {
       final now = DateTime.now();
-      
+
       return await queryReservationRecordOnce(
         queryBuilder: (query) => query
             .where('user_id', isEqualTo: userId)
             .where('creneaux', isGreaterThan: now)
-            .where('status', whereIn: ['confirmed', 'pending'])
-            .orderBy('creneaux'),
+            .where('status',
+                whereIn: ['confirmed', 'pending']).orderBy('creneaux'),
       );
     } catch (e) {
-      AppLogger.e('Error fetching upcoming reservations', error: e, tag: 'ReservationService');
+      AppLogger.e('Error fetching upcoming reservations',
+          error: e, tag: 'ReservationService');
       return [];
     }
   }
@@ -117,7 +123,7 @@ class ReservationService {
   Future<List<ReservationRecord>> getPastReservations(String userId) async {
     try {
       final now = DateTime.now();
-      
+
       return await queryReservationRecordOnce(
         queryBuilder: (query) => query
             .where('user_id', isEqualTo: userId)
@@ -126,7 +132,8 @@ class ReservationService {
         limit: 20, // Limit to last 20 reservations
       );
     } catch (e) {
-      AppLogger.e('Error fetching past reservations', error: e, tag: 'ReservationService');
+      AppLogger.e('Error fetching past reservations',
+          error: e, tag: 'ReservationService');
       return [];
     }
   }
@@ -141,11 +148,12 @@ class ReservationService {
   }) async {
     try {
       // Use Firestore transaction for atomic operations
-      return await FirebaseFirestore.instance.runTransaction<Map<String, dynamic>>((transaction) async {
+      return await FirebaseFirestore.instance
+          .runTransaction<Map<String, dynamic>>((transaction) async {
         // Get current reservation
         final reservationRef = ReservationRecord.collection.doc(reservationId);
         final reservationDoc = await transaction.get(reservationRef);
-        
+
         if (!reservationDoc.exists) {
           return {
             'success': false,
@@ -153,18 +161,19 @@ class ReservationService {
             'errorCode': 'RESERVATION_NOT_FOUND'
           };
         }
-        
+
         final reservation = ReservationRecord.fromSnapshot(reservationDoc);
-        
+
         // Check ownership
         if (reservation.userId != userId) {
           return {
             'success': false,
-            'error': 'Access denied. You can only cancel your own reservations.',
+            'error':
+                'Access denied. You can only cancel your own reservations.',
             'errorCode': 'ACCESS_DENIED'
           };
         }
-        
+
         // Check if reservation can be cancelled
         if (reservation.status == 'cancelled') {
           return {
@@ -173,7 +182,7 @@ class ReservationService {
             'errorCode': 'ALREADY_CANCELLED'
           };
         }
-        
+
         if (reservation.status == 'used') {
           return {
             'success': false,
@@ -181,33 +190,36 @@ class ReservationService {
             'errorCode': 'ALREADY_USED'
           };
         }
-        
+
         // Requirement 5.7: Prevent modifications for past reservations
         final now = DateTime.now();
-        if (reservation.creneaux != null && reservation.creneaux!.isBefore(now)) {
+        if (reservation.creneaux != null &&
+            reservation.creneaux!.isBefore(now)) {
           return {
             'success': false,
             'error': 'Cannot cancel past reservations',
             'errorCode': 'PAST_RESERVATION'
           };
         }
-        
+
         // Check if cancellation is too close to meal time (2 hours minimum)
-        if (reservation.creneaux != null && 
+        if (reservation.creneaux != null &&
             reservation.creneaux!.difference(now).inHours < 2) {
           return {
             'success': false,
-            'error': 'Cannot cancel reservation less than 2 hours before meal time',
+            'error':
+                'Cannot cancel reservation less than 2 hours before meal time',
             'errorCode': 'TOO_LATE_TO_CANCEL'
           };
         }
-        
+
         // Find the time slot to update capacity
         final timeSlotQuery = await queryTimeSlotRecordOnce(
-          queryBuilder: (query) => query.where('start_time', isEqualTo: reservation.creneaux),
+          queryBuilder: (query) =>
+              query.where('start_time', isEqualTo: reservation.creneaux),
           limit: 1,
         );
-        
+
         if (timeSlotQuery.isEmpty) {
           return {
             'success': false,
@@ -215,9 +227,9 @@ class ReservationService {
             'errorCode': 'TIME_SLOT_NOT_FOUND'
           };
         }
-        
+
         final timeSlot = timeSlotQuery.first;
-        
+
         // Requirement 5.5: Atomic counter decrements for cancellations
         // Update reservation status to cancelled
         transaction.update(reservationRef, {
@@ -226,7 +238,7 @@ class ReservationService {
           'cancellation_reason': reason ?? 'User cancelled',
           'modified_at': FieldValue.serverTimestamp(),
         });
-        
+
         // Atomically decrement time slot capacity
         transaction.update(timeSlot.reference, {
           'current_reservations': FieldValue.increment(-reservation.capacity),
@@ -235,9 +247,10 @@ class ReservationService {
         // Bug Fix: Refund the ticket to the user
         final userRef = UserRecord.collection.doc(userId);
         transaction.update(userRef, {
-          'tickets': FieldValue.increment(reservation.capacity), // Assuming 1 ticket per person capacity
+          'tickets': FieldValue.increment(
+              reservation.capacity), // Assuming 1 ticket per person capacity
         });
-        
+
         return {
           'success': true,
           'message': 'Reservation cancelled successfully',
@@ -246,7 +259,8 @@ class ReservationService {
         };
       });
     } catch (e) {
-      AppLogger.e('Error cancelling reservation', error: e, tag: 'ReservationService');
+      AppLogger.e('Error cancelling reservation',
+          error: e, tag: 'ReservationService');
       return {
         'success': false,
         'error': 'Failed to cancel reservation: ${e.toString()}',
@@ -264,11 +278,12 @@ class ReservationService {
   }) async {
     try {
       // Use Firestore transaction for atomic operations
-      return await FirebaseFirestore.instance.runTransaction<Map<String, dynamic>>((transaction) async {
+      return await FirebaseFirestore.instance
+          .runTransaction<Map<String, dynamic>>((transaction) async {
         // Get current reservation
         final reservationRef = ReservationRecord.collection.doc(reservationId);
         final reservationDoc = await transaction.get(reservationRef);
-        
+
         if (!reservationDoc.exists) {
           return {
             'success': false,
@@ -276,51 +291,55 @@ class ReservationService {
             'errorCode': 'RESERVATION_NOT_FOUND'
           };
         }
-        
+
         final reservation = ReservationRecord.fromSnapshot(reservationDoc);
-        
+
         // Check ownership
         if (reservation.userId != userId) {
           return {
             'success': false,
-            'error': 'Access denied. You can only modify your own reservations.',
+            'error':
+                'Access denied. You can only modify your own reservations.',
             'errorCode': 'ACCESS_DENIED'
           };
         }
-        
+
         // Check if reservation can be modified
-        if (reservation.status != 'confirmed' && reservation.status != 'pending') {
+        if (reservation.status != 'confirmed' &&
+            reservation.status != 'pending') {
           return {
             'success': false,
             'error': 'Only confirmed or pending reservations can be modified',
             'errorCode': 'INVALID_STATUS'
           };
         }
-        
+
         // Requirement 5.7: Prevent modifications for past reservations
         final now = DateTime.now();
-        if (reservation.creneaux != null && reservation.creneaux!.isBefore(now)) {
+        if (reservation.creneaux != null &&
+            reservation.creneaux!.isBefore(now)) {
           return {
             'success': false,
             'error': 'Cannot modify past reservations',
             'errorCode': 'PAST_RESERVATION'
           };
         }
-        
+
         // Check if modification is too close to meal time (2 hours minimum)
-        if (reservation.creneaux != null && 
+        if (reservation.creneaux != null &&
             reservation.creneaux!.difference(now).inHours < 2) {
           return {
             'success': false,
-            'error': 'Cannot modify reservation less than 2 hours before meal time',
+            'error':
+                'Cannot modify reservation less than 2 hours before meal time',
             'errorCode': 'TOO_LATE_TO_MODIFY'
           };
         }
-        
+
         // Get new time slot
         final newTimeSlotRef = TimeSlotRecord.collection.doc(newTimeSlotId);
         final newTimeSlotDoc = await transaction.get(newTimeSlotRef);
-        
+
         if (!newTimeSlotDoc.exists) {
           return {
             'success': false,
@@ -328,33 +347,36 @@ class ReservationService {
             'errorCode': 'NEW_TIME_SLOT_NOT_FOUND'
           };
         }
-        
+
         final newTimeSlot = TimeSlotRecord.fromSnapshot(newTimeSlotDoc);
-        
+
         // Check if new time slot is in the future
-        if (newTimeSlot.startTime != null && newTimeSlot.startTime!.isBefore(now)) {
+        if (newTimeSlot.startTime != null &&
+            newTimeSlot.startTime!.isBefore(now)) {
           return {
             'success': false,
             'error': 'Cannot modify to a past time slot',
             'errorCode': 'PAST_TIME_SLOT'
           };
         }
-        
+
         // Check availability in new time slot
-        if (newTimeSlot.currentReservations + reservation.capacity > newTimeSlot.maxCapacity) {
+        if (newTimeSlot.currentReservations + reservation.capacity >
+            newTimeSlot.maxCapacity) {
           return {
             'success': false,
             'error': 'New time slot does not have enough capacity',
             'errorCode': 'INSUFFICIENT_CAPACITY'
           };
         }
-        
+
         // Find old time slot to update capacity
         final oldTimeSlotQuery = await queryTimeSlotRecordOnce(
-          queryBuilder: (query) => query.where('start_time', isEqualTo: reservation.creneaux),
+          queryBuilder: (query) =>
+              query.where('start_time', isEqualTo: reservation.creneaux),
           limit: 1,
         );
-        
+
         if (oldTimeSlotQuery.isEmpty) {
           return {
             'success': false,
@@ -362,45 +384,47 @@ class ReservationService {
             'errorCode': 'OLD_TIME_SLOT_NOT_FOUND'
           };
         }
-        
+
         final oldTimeSlot = oldTimeSlotQuery.first;
 
         // NEW: Handle price difference
         final double oldTotal = reservation.total.toDouble();
-        final double newTotal = newTimeSlot.price * 1; // Assuming capacity is 1 for individual reservations
+        final double newTotal = newTimeSlot.price *
+            1; // Assuming capacity is 1 for individual reservations
         final double priceDiff = newTotal - oldTotal;
 
         if (priceDiff != 0) {
-           final userRef = UserRecord.collection.doc(userId);
-           final userDoc = await transaction.get(userRef);
-           
-           if (!userDoc.exists) {
-             return {
-               'success': false,
-               'error': 'User not found',
-               'errorCode': 'USER_NOT_FOUND'
-             };
-           }
-           
-           final user = UserRecord.fromSnapshot(userDoc);
-           
-           if (priceDiff > 0) {
-             // Upgrade: Check balance
-             if (user.pocket < priceDiff) {
-               return {
-                 'success': false,
-                 'error': 'Insufficient balance for this modification. Additional cost: ${priceDiff}DT',
-                 'errorCode': 'INSUFFICIENT_FUNDS'
-               };
-             }
-           }
-           
-           // Update user balance (deduct diff; if negative, it adds)
-           transaction.update(userRef, {
-             'pocket': FieldValue.increment(-priceDiff),
-           });
+          final userRef = UserRecord.collection.doc(userId);
+          final userDoc = await transaction.get(userRef);
+
+          if (!userDoc.exists) {
+            return {
+              'success': false,
+              'error': 'User not found',
+              'errorCode': 'USER_NOT_FOUND'
+            };
+          }
+
+          final user = UserRecord.fromSnapshot(userDoc);
+
+          if (priceDiff > 0) {
+            // Upgrade: Check balance
+            if (user.pocket < priceDiff) {
+              return {
+                'success': false,
+                'error':
+                    'Insufficient balance for this modification. Additional cost: ${priceDiff}DT',
+                'errorCode': 'INSUFFICIENT_FUNDS'
+              };
+            }
+          }
+
+          // Update user balance (deduct diff; if negative, it adds)
+          transaction.update(userRef, {
+            'pocket': FieldValue.increment(-priceDiff),
+          });
         }
-        
+
         // Atomic updates
         // Update reservation with new time slot details
         transaction.update(reservationRef, {
@@ -409,17 +433,17 @@ class ReservationService {
           'total': newTimeSlot.price * reservation.capacity,
           'modified_at': FieldValue.serverTimestamp(),
         });
-        
+
         // Decrease capacity in old time slot
         transaction.update(oldTimeSlot.reference, {
           'current_reservations': FieldValue.increment(-reservation.capacity),
         });
-        
+
         // Increase capacity in new time slot
         transaction.update(newTimeSlotRef, {
           'current_reservations': FieldValue.increment(reservation.capacity),
         });
-        
+
         return {
           'success': true,
           'message': 'Reservation modified successfully',
@@ -434,7 +458,8 @@ class ReservationService {
         };
       });
     } catch (e) {
-      AppLogger.e('Error modifying reservation', error: e, tag: 'ReservationService');
+      AppLogger.e('Error modifying reservation',
+          error: e, tag: 'ReservationService');
       return {
         'success': false,
         'error': 'Failed to modify reservation: ${e.toString()}',
@@ -449,8 +474,9 @@ class ReservationService {
     required String userId,
   }) async {
     try {
-      final reservationDoc = await ReservationRecord.collection.doc(reservationId).get();
-      
+      final reservationDoc =
+          await ReservationRecord.collection.doc(reservationId).get();
+
       if (!reservationDoc.exists) {
         return {
           'canCancel': false,
@@ -458,9 +484,9 @@ class ReservationService {
           'errorCode': 'RESERVATION_NOT_FOUND'
         };
       }
-      
+
       final reservation = ReservationRecord.fromSnapshot(reservationDoc);
-      
+
       // Check ownership
       if (reservation.userId != userId) {
         return {
@@ -469,7 +495,7 @@ class ReservationService {
           'errorCode': 'ACCESS_DENIED'
         };
       }
-      
+
       // Check status
       if (reservation.status == 'cancelled') {
         return {
@@ -478,7 +504,7 @@ class ReservationService {
           'errorCode': 'ALREADY_CANCELLED'
         };
       }
-      
+
       if (reservation.status == 'used') {
         return {
           'canCancel': false,
@@ -486,7 +512,7 @@ class ReservationService {
           'errorCode': 'ALREADY_USED'
         };
       }
-      
+
       // Check timing
       final now = DateTime.now();
       if (reservation.creneaux != null) {
@@ -497,7 +523,7 @@ class ReservationService {
             'errorCode': 'PAST_RESERVATION'
           };
         }
-        
+
         if (reservation.creneaux!.difference(now).inHours < 2) {
           return {
             'canCancel': false,
@@ -506,13 +532,14 @@ class ReservationService {
           };
         }
       }
-      
+
       return {
         'canCancel': true,
         'hoursUntilMeal': reservation.creneaux?.difference(now).inHours ?? 0,
       };
     } catch (e) {
-      AppLogger.e('Error checking cancellation eligibility', error: e, tag: 'ReservationService');
+      AppLogger.e('Error checking cancellation eligibility',
+          error: e, tag: 'ReservationService');
       return {
         'canCancel': false,
         'reason': 'Error checking eligibility: ${e.toString()}',
@@ -527,8 +554,9 @@ class ReservationService {
     required String userId,
   }) async {
     try {
-      final reservationDoc = await ReservationRecord.collection.doc(reservationId).get();
-      
+      final reservationDoc =
+          await ReservationRecord.collection.doc(reservationId).get();
+
       if (!reservationDoc.exists) {
         return {
           'canModify': false,
@@ -536,9 +564,9 @@ class ReservationService {
           'errorCode': 'RESERVATION_NOT_FOUND'
         };
       }
-      
+
       final reservation = ReservationRecord.fromSnapshot(reservationDoc);
-      
+
       // Check ownership
       if (reservation.userId != userId) {
         return {
@@ -547,16 +575,17 @@ class ReservationService {
           'errorCode': 'ACCESS_DENIED'
         };
       }
-      
+
       // Check status
-      if (reservation.status != 'confirmed' && reservation.status != 'pending') {
+      if (reservation.status != 'confirmed' &&
+          reservation.status != 'pending') {
         return {
           'canModify': false,
           'reason': 'Only confirmed or pending reservations can be modified',
           'errorCode': 'INVALID_STATUS'
         };
       }
-      
+
       // Check timing
       final now = DateTime.now();
       if (reservation.creneaux != null) {
@@ -567,7 +596,7 @@ class ReservationService {
             'errorCode': 'PAST_RESERVATION'
           };
         }
-        
+
         if (reservation.creneaux!.difference(now).inHours < 2) {
           return {
             'canModify': false,
@@ -576,13 +605,14 @@ class ReservationService {
           };
         }
       }
-      
+
       return {
         'canModify': true,
         'hoursUntilMeal': reservation.creneaux?.difference(now).inHours ?? 0,
       };
     } catch (e) {
-      AppLogger.e('Error checking modification eligibility', error: e, tag: 'ReservationService');
+      AppLogger.e('Error checking modification eligibility',
+          error: e, tag: 'ReservationService');
       return {
         'canModify': false,
         'reason': 'Error checking eligibility: ${e.toString()}',
@@ -606,7 +636,8 @@ class ReservationService {
 
       return result;
     } catch (e) {
-      AppLogger.e('Error cancelling reservation via Cloud Function', error: e, tag: 'ReservationService');
+      AppLogger.e('Error cancelling reservation via Cloud Function',
+          error: e, tag: 'ReservationService');
       return {
         'success': false,
         'error': 'Failed to cancel reservation: ${e.toString()}',
@@ -629,7 +660,8 @@ class ReservationService {
 
       return result;
     } catch (e) {
-      AppLogger.e('Error modifying reservation via Cloud Function', error: e, tag: 'ReservationService');
+      AppLogger.e('Error modifying reservation via Cloud Function',
+          error: e, tag: 'ReservationService');
       return {
         'success': false,
         'error': 'Failed to modify reservation: ${e.toString()}',
@@ -644,22 +676,23 @@ class ReservationService {
       final today = DateTime.now();
       final startOfDay = DateTime(today.year, today.month, today.day);
       final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
-      
+
       final reservations = await queryReservationRecordOnce(
         queryBuilder: (query) => query
             .where('creneaux', isGreaterThanOrEqualTo: startOfDay)
             .where('creneaux', isLessThan: endOfDay)
             .orderBy('creneaux'),
       );
-      
+
       // Enrich with user data
       final enrichedReservations = <Map<String, dynamic>>[];
-      
+
       for (final reservation in reservations) {
         try {
-          final userDoc = await UserRecord.collection.doc(reservation.userId).get();
+          final userDoc =
+              await UserRecord.collection.doc(reservation.userId).get();
           final user = userDoc.exists ? UserRecord.fromSnapshot(userDoc) : null;
-          
+
           enrichedReservations.add({
             'reservation': reservation,
             'user': user,
@@ -667,7 +700,8 @@ class ReservationService {
             'userClass': user?.classe ?? '',
           });
         } catch (e) {
-          AppLogger.w('Error fetching user data for reservation', error: e, tag: 'ReservationService');
+          AppLogger.w('Error fetching user data for reservation',
+              error: e, tag: 'ReservationService');
           enrichedReservations.add({
             'reservation': reservation,
             'user': null,
@@ -676,10 +710,11 @@ class ReservationService {
           });
         }
       }
-      
+
       return enrichedReservations;
     } catch (e) {
-      AppLogger.e('Error fetching today\'s reservations', error: e, tag: 'ReservationService');
+      AppLogger.e('Error fetching today\'s reservations',
+          error: e, tag: 'ReservationService');
       return [];
     }
   }
@@ -689,14 +724,14 @@ class ReservationService {
     try {
       final startOfDay = DateTime(date.year, date.month, date.day);
       final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
-      
+
       // Get all time slots for the date
       final timeSlots = await queryTimeSlotRecordOnce(
         queryBuilder: (query) => query
             .where('date', isGreaterThanOrEqualTo: startOfDay)
             .where('date', isLessThan: endOfDay),
       );
-      
+
       // Get all reservations for the date
       final reservations = await queryReservationRecordOnce(
         queryBuilder: (query) => query
@@ -704,11 +739,13 @@ class ReservationService {
             .where('creneaux', isLessThan: endOfDay)
             .where('status', whereIn: ['confirmed', 'used']),
       );
-      
-      final totalCapacity = timeSlots.fold<int>(0, (sum, slot) => sum + slot.maxCapacity);
+
+      final totalCapacity =
+          timeSlots.fold<int>(0, (sum, slot) => sum + slot.maxCapacity);
       final totalReservations = reservations.length;
-      final occupancyRate = totalCapacity > 0 ? (totalReservations / totalCapacity) * 100 : 0.0;
-      
+      final occupancyRate =
+          totalCapacity > 0 ? (totalReservations / totalCapacity) * 100 : 0.0;
+
       return {
         'totalCapacity': totalCapacity,
         'totalReservations': totalReservations,
@@ -717,7 +754,8 @@ class ReservationService {
         'timeSlots': timeSlots.length,
       };
     } catch (e) {
-      AppLogger.e('Error calculating occupancy stats', error: e, tag: 'ReservationService');
+      AppLogger.e('Error calculating occupancy stats',
+          error: e, tag: 'ReservationService');
       return {
         'totalCapacity': 0,
         'totalReservations': 0,
