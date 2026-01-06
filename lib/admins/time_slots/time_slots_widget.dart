@@ -24,7 +24,6 @@ class TimeSlotsWidget extends StatefulWidget {
 class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
   late TimeSlotsModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final TimeSlotService _timeSlotService = TimeSlotService.instance;
 
   @override
   void initState() {

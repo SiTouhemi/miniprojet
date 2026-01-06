@@ -3,6 +3,7 @@ import '/backend/backend.dart';
 import '/backend/cloud_functions/cloud_functions.dart';
 import '/backend/services/payment_service.dart';
 import '/backend/services/app_service.dart';
+import '/backend/services/qr_service.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/utils/app_logger.dart';
 
@@ -48,7 +49,7 @@ class ReservationService {
       }
       
       // Use Firestore transaction to ensure atomicity
-      return await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final transactionResult = await FirebaseFirestore.instance.runTransaction((transaction) async {
         // Get user document
         final userRef = FirebaseFirestore.instance.collection('user').doc(userId);
         final userDoc = await transaction.get(userRef);
@@ -79,7 +80,7 @@ class ReservationService {
         });
         
         // Create reservation document
-        final reservationRef = FirebaseFirestore.instance.collection('reservations').doc();
+        final reservationRef = FirebaseFirestore.instance.collection('reservation').doc();
         transaction.set(reservationRef, {
           'user_id': userId,
           'time_slot_id': timeSlotId,
@@ -90,7 +91,7 @@ class ReservationService {
           'payment_method': 'wallet',
           'payment_id': 'wallet_${DateTime.now().millisecondsSinceEpoch}',
           'created_at': FieldValue.serverTimestamp(),
-          'qr_code': _generateQRCode(reservationRef.id),
+          'qr_code': '', // Will be generated after reservation creation
         });
         
         // Log the transaction
@@ -115,6 +116,17 @@ class ReservationService {
         };
       });
       
+      // Generate QR code after successful reservation creation
+      if (transactionResult['success'] == true) {
+        await _generateQRCodeForReservation(
+          reservationId: transactionResult['reservationId'] as String,
+          userId: userId,
+          mealType: mealType,
+        );
+      }
+      
+      return transactionResult;
+      
     } catch (e) {
       AppLogger.e('Error creating reservation',
           error: e, tag: 'ReservationService');
@@ -125,10 +137,41 @@ class ReservationService {
     }
   }
   
-  // Generate QR code for reservation
-  String _generateQRCode(String reservationId) {
-    return 'RES_${reservationId}_${DateTime.now().millisecondsSinceEpoch}';
+  // Generate QR code for a reservation using QRService
+  Future<void> _generateQRCodeForReservation({
+    required String reservationId,
+    required String userId,
+    required String mealType,
+  }) async {
+    try {
+      // Get the reservation to get the creneaux
+      final reservationDoc = await FirebaseFirestore.instance
+          .collection('reservation')
+          .doc(reservationId)
+          .get();
+      
+      if (!reservationDoc.exists) return;
+      
+      final reservation = ReservationRecord.fromSnapshot(reservationDoc);
+      
+      // Import QRService
+      final qrService = QRService.instance;
+      
+      // Generate QR code
+      await qrService.generateQRCode(
+        reservationId: reservationId,
+        userId: userId,
+        creneaux: reservation.creneaux!,
+        mealType: mealType,
+      );
+      
+      AppLogger.i('QR code generated for reservation $reservationId', tag: 'ReservationService');
+    } catch (e) {
+      AppLogger.e('Error generating QR code for reservation', error: e, tag: 'ReservationService');
+    }
   }
+  
+  // Old simple QR generation method - replaced by QRService
 
   // Validate QR code for staff
   Future<Map<String, dynamic>> validateQRCode({

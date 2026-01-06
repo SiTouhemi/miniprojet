@@ -95,7 +95,7 @@ class DataValidationService {
       // Fetch fresh reservations from Firestore
       final query = await FirebaseFirestore.instance
           .collection('reservation')
-          .where('userId', isEqualTo: userId)
+          .where('user_id', isEqualTo: userId)
           .orderBy('createdAt', descending: true)
           .get();
 

@@ -37,7 +37,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => HomeModel());
-    
+
     // Load user data when the widget initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeUserData();
@@ -46,7 +46,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Future<void> _initializeUserData() async {
     final appState = Provider.of<FFAppState>(context, listen: false);
-    
+
     try {
       // Check if user is authenticated
       if (!authService.isLoggedIn) {
@@ -54,7 +54,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
         return;
       }
-      
+
       // If user is already loaded in app state, no need to reload
       if (appState.currentUser != null) {
         setState(() {
@@ -62,16 +62,19 @@ class _HomeWidgetState extends State<HomeWidget> {
         });
         return;
       }
-      
+
       // Load user data and initialize real-time sync
       final userDoc = await authService.getCurrentUserDocument();
       if (userDoc != null) {
         appState.setCurrentUser(userDoc);
-        AppLogger.i('User data loaded: ${userDoc.nom} (${userDoc.pocket} DT)', tag: 'HomeWidget');
+        AppLogger.i('User data loaded: ${userDoc.nom} (${userDoc.pocket} DT)',
+            tag: 'HomeWidget');
       } else if (authService.isLoggedIn) {
         // User is logged in but document doesn't exist - this shouldn't happen
-        AppLogger.w('User is authenticated but no user document found', tag: 'HomeWidget');
-        appState.setLastError('Données utilisateur introuvables. Veuillez vous reconnecter.');
+        AppLogger.w('User is authenticated but no user document found',
+            tag: 'HomeWidget');
+        appState.setLastError(
+            'Données utilisateur introuvables. Veuillez vous reconnecter.');
       }
     } catch (e) {
       AppLogger.e('Error loading current user', error: e, tag: 'HomeWidget');
@@ -87,7 +90,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Future<void> _handleRefresh() async {
     final appState = Provider.of<FFAppState>(context, listen: false);
     final l10n = AppLocalizations.of(context)!;
-    
+
     try {
       await appState.refreshAll();
       _errorHandler.showError(
@@ -106,26 +109,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   void _handleQRCodeAccess(FFAppState appState) {
-    final l10n = AppLocalizations.of(context)!;
-    
-    try {
-      final upcomingReservations = appState.getUpcomingReservations();
-      if (upcomingReservations.isNotEmpty) {
-        context.pushNamed('LastQR');
-      } else {
-        _errorHandler.showError(
-          context,
-          l10n.translate('no_confirmed_reservations'),
-          duration: const Duration(seconds: 3),
-        );
-      }
-    } catch (e) {
-      _errorHandler.showError(
-        context,
-        e,
-        contextInfo: 'qr_access',
-      );
-    }
+    // Simple demo QR - always show QR page for presentation
+    context.pushNamed('LastQR');
   }
 
   void _handleReservationAccess() {
@@ -149,11 +134,11 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Consumer<FFAppState>(
       builder: (context, appState, _) {
         final user = appState.currentUser;
-        
+
         return GestureDetector(
           onTap: () {
             FocusScope.of(context).unfocus();
@@ -230,15 +215,20 @@ class _HomeWidgetState extends State<HomeWidget> {
                         ],
                       ),
                     ),
-                  
+
                   // Enhanced offline indicator
-                  _errorHandler.buildOfflineIndicator(isOffline: !appState.isOnline),
+                  _errorHandler.buildOfflineIndicator(
+                      isOffline: !appState.isOnline),
 
                   // Main content with enhanced loading and error handling
                   Expanded(
                     child: _errorHandler.buildLoadingWithError(
                       isLoading: _isInitializing,
-                      error: _isInitializing ? null : (user == null ? l10n.translate('unable_to_load_user_data') : null),
+                      error: _isInitializing
+                          ? null
+                          : (user == null
+                              ? l10n.translate('unable_to_load_user_data')
+                              : null),
                       onRetry: _initializeUserData,
                       loadingMessage: l10n.translate('loading_user_data'),
                       child: RefreshIndicator(
@@ -252,29 +242,29 @@ class _HomeWidgetState extends State<HomeWidget> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 AppSpacing.verticalMD,
-                                
+
                                 // User greeting with enhanced data validation
                                 _buildUserGreeting(user, l10n),
-                                
+
                                 AppSpacing.verticalLG,
-                                
+
                                 // Balance card with real-time data and validation
                                 _buildBalanceCard(user, l10n),
-                                
+
                                 AppSpacing.verticalLG,
-                                
+
                                 Text(
                                   l10n.translate('quick_actions'),
                                   style: AppTypography.h5,
                                 ),
-                                
+
                                 AppSpacing.verticalMD,
-                                
+
                                 // Enhanced action cards with error handling
                                 _buildActionCards(appState, l10n),
-                                
+
                                 AppSpacing.verticalLG,
-                                
+
                                 // Today's menu section with error handling
                                 _buildTodaysMenu(appState, l10n),
                               ],
@@ -304,9 +294,10 @@ class _HomeWidgetState extends State<HomeWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                user != null 
+                user != null
                     ? l10n.translate('greeting', params: {
-                        'name': user.nom.isNotEmpty ? user.nom : user.displayName
+                        'name':
+                            user.nom.isNotEmpty ? user.nom : user.displayName
                       })
                     : l10n.translate('greeting_default'),
                 style: AppTypography.h3.copyWith(
@@ -387,9 +378,9 @@ class _HomeWidgetState extends State<HomeWidget> {
                   Padding(
                     padding: const EdgeInsets.only(top: AppSpacing.sm),
                     child: Text(
-                      user != null 
-                        ? AppConfig.formatPrice(user.pocket)
-                        : AppConfig.formatPrice(0.0),
+                      user != null
+                          ? AppConfig.formatPrice(user.pocket)
+                          : AppConfig.formatPrice(0.0),
                       style: AppTypography.h3.copyWith(
                         color: AppColors.textOnPrimary,
                         fontWeight: AppTypography.bold,
@@ -400,9 +391,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                     Padding(
                       padding: const EdgeInsets.only(top: AppSpacing.xs),
                       child: Text(
-                        l10n.translate('tickets_available', params: {
-                          'count': user.tickets.toString()
-                        }),
+                        l10n.translate('tickets_available',
+                            params: {'count': user.tickets.toString()}),
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textOnPrimary.withValues(alpha: 0.7),
                         ),
@@ -438,7 +428,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           subtitle: l10n.translate('reserve_meal_subtitle'),
           onTap: _handleReservationAccess,
         ),
-        
+
         // QR Code card with enhanced error handling
         _buildActionCard(
           icon: Icons.qr_code,
@@ -447,7 +437,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           subtitle: l10n.translate('restaurant_access'),
           onTap: () => _handleQRCodeAccess(appState),
         ),
-        
+
         // History card
         _buildActionCard(
           icon: Icons.history,
@@ -466,7 +456,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             }
           },
         ),
-        
+
         // Profile card
         _buildActionCard(
           icon: Icons.person,
@@ -540,7 +530,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget _buildTodaysMenu(FFAppState appState, AppLocalizations l10n) {
     final menu = appState.todaysMenu;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -579,48 +569,50 @@ class _HomeWidgetState extends State<HomeWidget> {
             ),
           )
         else
-          ...menu.map((dailyMenu) => Container(
-            width: double.infinity,
-            margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-            padding: AppSpacing.paddingMD,
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: AppBorders.borderMD,
-              boxShadow: AppShadows.small,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        dailyMenu.mainDish,
-                        style: AppTypography.h6.copyWith(
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      if (dailyMenu.description.isNotEmpty)
-                        Text(
-                          dailyMenu.description,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
+          ...menu
+              .map((dailyMenu) => Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    padding: AppSpacing.paddingMD,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: AppBorders.borderMD,
+                      boxShadow: AppShadows.small,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                dailyMenu.mainDish,
+                                style: AppTypography.h6.copyWith(
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              if (dailyMenu.description.isNotEmpty)
+                                Text(
+                                  dailyMenu.description,
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
-                    ],
-                  ),
-                ),
-                Text(
-                  AppConfig.formatPrice(dailyMenu.price),
-                  style: AppTypography.h6.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: AppTypography.bold,
-                  ),
-                ),
-              ],
-            ),
-          )).toList(),
+                        Text(
+                          AppConfig.formatPrice(dailyMenu.price),
+                          style: AppTypography.h6.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: AppTypography.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ))
+              .toList(),
       ],
     );
   }

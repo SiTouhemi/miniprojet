@@ -6,7 +6,6 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'user_management_model.dart';
 export 'user_management_model.dart';
 

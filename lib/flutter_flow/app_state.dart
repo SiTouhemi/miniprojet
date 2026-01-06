@@ -197,7 +197,7 @@ class FFAppState extends ChangeNotifier {
     
     _reservationsSubscription = FirebaseFirestore.instance
         .collection('reservation')
-        .where('userId', isEqualTo: uid)
+        .where('user_id', isEqualTo: uid)
         .orderBy('createdAt', descending: true)
         .snapshots()
         .listen(
