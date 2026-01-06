@@ -93,21 +93,21 @@ class _DialogErrorBoundaryState extends State<DialogErrorBoundary> {
             size: 24.0,
           ),
           SizedBox(width: 8.0),
-          Text('Erreur d\'affichage'),
+          Text('Display Error'),
         ],
       ),
       content: const Text(
-        'Une erreur est survenue lors de l\'affichage du dialogue. '
-        'Voulez-vous continuer avec une version simplifiée?',
+        'An error occurred while displaying the dialog. '
+        'Would you like to continue with a simplified version?',
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Annuler'),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Continuer'),
+          child: const Text('Continue'),
         ),
       ],
     );
@@ -144,7 +144,7 @@ class _ErrorCatcher extends StatelessWidget {
           // Return a simple error widget
           return const Center(
             child: Text(
-              'Erreur de rendu',
+              'Rendering Error',
               style: TextStyle(color: Colors.red),
             ),
           );
@@ -160,9 +160,9 @@ class DialogFallbackStrategies {
   static Widget simpleConfirmationDialog({
     required BuildContext context,
     String title = 'Confirmation',
-    String message = 'Voulez-vous continuer?',
-    String confirmText = 'Confirmer',
-    String cancelText = 'Annuler',
+    String message = 'Do you want to continue?',
+    String confirmText = 'Confirm',
+    String cancelText = 'Cancel',
     VoidCallback? onConfirm,
     VoidCallback? onCancel,
   }) {

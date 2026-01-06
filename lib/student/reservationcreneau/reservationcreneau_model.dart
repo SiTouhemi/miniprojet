@@ -149,35 +149,19 @@ class ReservationcreneauModel
       final timeSlotId = selectedTimeSlot!.reference.id;
       final amount = selectedTimeSlot!.price;
 
-      // Process payment first
-      final paymentResult = await PaymentService.instance.processD17Payment(
-        userId: userId,
-        amount: amount,
-        description: 'Restaurant reservation - ${selectedTimeSlot!.mealType}',
-      );
-
-      if (!paymentResult['success']) {
-        errorMessage = paymentResult['error'] ?? 'Payment failed';
-        return {
-          'success': false,
-          'error': errorMessage,
-        };
-      }
-
-      // Create reservation with payment ID
+      // Create reservation with wallet deduction (no separate payment processing needed)
       final reservationResult = await _reservationService.createReservation(
         userId: userId,
         timeSlotId: timeSlotId,
         mealType: selectedTimeSlot!.mealType,
-        paymentId: paymentResult['paymentId'],
         amount: amount,
         capacity: 1,
       );
 
       if (reservationResult['success']) {
-        successMessage = 'Reservation created successfully!';
+        successMessage = 'Reservation created successfully! ${amount.toStringAsFixed(2)} TND deducted from wallet.';
 
-        // Reload user balance
+        // Reload user balance to reflect the deduction
         await loadUserBalance();
 
         // Clear selected time slot to prevent accidental re-submission
@@ -186,12 +170,12 @@ class ReservationcreneauModel
         return {
           'success': true,
           'reservationId': reservationResult['reservationId'],
-          'paymentId': paymentResult['paymentId'],
+          'newBalance': reservationResult['newBalance'],
+          'deductedAmount': amount,
           'message': successMessage,
         };
       } else {
-        errorMessage =
-            reservationResult['error'] ?? 'Failed to create reservation';
+        errorMessage = reservationResult['error'] ?? 'Failed to create reservation';
         return {
           'success': false,
           'error': errorMessage,

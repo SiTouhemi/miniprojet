@@ -95,6 +95,20 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
               borderWidth: 1.0,
               buttonSize: 60.0,
               icon: Icon(
+                Icons.settings,
+                color: Color(0xFF1C1284),
+                size: 24.0,
+              ),
+              onPressed: () async {
+                Navigator.pushNamed(context, '/admin/timeSlotTemplates');
+              },
+            ),
+            FlutterFlowIconButton(
+              borderColor: Colors.transparent,
+              borderRadius: 30.0,
+              borderWidth: 1.0,
+              buttonSize: 60.0,
+              icon: Icon(
                 Icons.auto_awesome,
                 color: Color(0xFF4B986C),
                 size: 24.0,
@@ -137,7 +151,7 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
               List<TimeSlotRecord> slots = snapshot.data!;
               if (slots.isEmpty) {
                 return Center(
-                  child: Text('Aucun créneau trouvé.'),
+                  child: Text('No time slots found.'),
                 );
               }
 
@@ -236,7 +250,7 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                  'Impossible de supprimer: ${slot.currentReservations} réservation(s) existante(s)'),
+                                  'Cannot delete: ${slot.currentReservations} existing reservation(s)'),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -246,15 +260,15 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
                         final confirm = await showDialog<bool>(
                           context: context,
                           builder: (c) => AlertDialog(
-                            title: Text('Supprimer ?'),
-                            content: Text('Cette action est irréversible.'),
+                            title: Text('Delete?'),
+                            content: Text('This action is irreversible.'),
                             actions: [
                               TextButton(
                                   onPressed: () => Navigator.pop(c, false),
-                                  child: Text('Annuler')),
+                                  child: Text('Cancel')),
                               TextButton(
                                   onPressed: () => Navigator.pop(c, true),
-                                  child: Text('Supprimer',
+                                  child: Text('Delete',
                                       style: TextStyle(color: Colors.red))),
                             ],
                           ),
@@ -322,7 +336,7 @@ class _CreateSlotDialogState extends State<CreateSlotDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Ajouter Créneau'),
+      title: Text('Add Time Slot'),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -362,21 +376,21 @@ class _CreateSlotDialogState extends State<CreateSlotDialog> {
               ),
               TextFormField(
                 initialValue: '50',
-                decoration: InputDecoration(labelText: 'Capacité'),
+                decoration: InputDecoration(labelText: 'Capacity'),
                 keyboardType: TextInputType.number,
                 onChanged: (v) => _capacity = int.tryParse(v) ?? 50,
               ),
               TextFormField(
                 initialValue: '2.5',
-                decoration: InputDecoration(labelText: 'Prix (TND)'),
+                decoration: InputDecoration(labelText: 'Price (TND)'),
                 keyboardType: TextInputType.number,
                 onChanged: (v) => _price = double.tryParse(v) ?? 2.5,
               ),
               DropdownButtonFormField<String>(
                 value: _mealType,
                 items: [
-                  DropdownMenuItem(value: 'lunch', child: Text('Déjeuner')),
-                  DropdownMenuItem(value: 'dinner', child: Text('Dîner')),
+                  DropdownMenuItem(value: 'lunch', child: Text('Lunch')),
+                  DropdownMenuItem(value: 'dinner', child: Text('Dinner')),
                 ],
                 onChanged: (v) => setState(() => _mealType = v!),
                 decoration: InputDecoration(labelText: 'Type de repas'),
@@ -387,7 +401,7 @@ class _CreateSlotDialogState extends State<CreateSlotDialog> {
       ),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(context), child: Text('Annuler')),
+            onPressed: () => Navigator.pop(context), child: Text('Cancel')),
         ElevatedButton(
           onPressed: () async {
             // Construct DateTimes
@@ -406,7 +420,7 @@ class _CreateSlotDialogState extends State<CreateSlotDialog> {
             );
             Navigator.pop(context);
           },
-          child: Text('Ajouter'),
+          child: Text('Add'),
           style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFF4B986C),
               foregroundColor: Colors.white),
@@ -438,19 +452,19 @@ class _EditSlotDialogState extends State<EditSlotDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Modifier Créneau'),
+      title: Text('Edit Time Slot'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextFormField(
             initialValue: _capacity.toString(),
-            decoration: InputDecoration(labelText: 'Capacité'),
+            decoration: InputDecoration(labelText: 'Capacity'),
             keyboardType: TextInputType.number,
             onChanged: (v) => _capacity = int.tryParse(v) ?? _capacity,
           ),
           TextFormField(
             initialValue: _price.toString(),
-            decoration: InputDecoration(labelText: 'Prix'),
+            decoration: InputDecoration(labelText: 'Price'),
             keyboardType: TextInputType.number,
             onChanged: (v) => _price = double.tryParse(v) ?? _price,
           ),
@@ -458,7 +472,7 @@ class _EditSlotDialogState extends State<EditSlotDialog> {
       ),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(context), child: Text('Annuler')),
+            onPressed: () => Navigator.pop(context), child: Text('Cancel')),
         ElevatedButton(
           onPressed: () async {
             await TimeSlotService.instance.updateTimeSlotCapacity(
@@ -467,7 +481,7 @@ class _EditSlotDialogState extends State<EditSlotDialog> {
             );
             Navigator.pop(context);
           },
-          child: Text('Sauvegarder'),
+          child: Text('Save'),
           style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFF4B986C),
               foregroundColor: Colors.white),

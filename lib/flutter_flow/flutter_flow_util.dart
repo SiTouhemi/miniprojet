@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert' show base64Encode;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -454,3 +455,15 @@ String getCurrentRoute(BuildContext context) =>
     context.mounted ? MyApp.of(context).getRoute() : '';
 List<String> getCurrentRouteStack(BuildContext context) =>
     context.mounted ? MyApp.of(context).getRouteStack() : [];
+
+/// Download file for web platform using data URL
+Future<void> downloadFile(Uint8List bytes, String fileName) async {
+  if (kIsWeb) {
+    // Create a data URL and trigger download
+    final base64 = base64Encode(bytes);
+    final dataUrl = 'data:application/octet-stream;base64,$base64';
+    await launchUrl(Uri.parse(dataUrl));
+  } else {
+    throw UnsupportedError('downloadFile is only supported on web platform');
+  }
+}

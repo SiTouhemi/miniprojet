@@ -85,7 +85,7 @@ class ErrorHandler {
         duration: duration ?? Duration(seconds: errorResult.isTemporary ? 3 : 5),
         action: errorResult.canRetry && errorResult.onRetry != null
             ? SnackBarAction(
-                label: 'Réessayer',
+                label: 'Retry',
                 textColor: Colors.white,
                 onPressed: errorResult.onRetry!,
               )
@@ -101,7 +101,7 @@ class ErrorHandler {
     String? error,
     required Widget child,
     VoidCallback? onRetry,
-    String loadingMessage = 'Chargement...',
+    String loadingMessage = 'Loading...',
   }) {
     if (isLoading) {
       return Center(
@@ -146,7 +146,7 @@ class ErrorHandler {
               ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: Icon(Icons.refresh),
-                label: Text('Réessayer'),
+                label: Text('Retry'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
@@ -180,7 +180,7 @@ class ErrorHandler {
           SizedBox(width: 8.0),
           Expanded(
             child: Text(
-              'Mode hors ligne - Données mises en cache affichées',
+              'Offline mode - Cached data displayed',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 14,
@@ -240,7 +240,7 @@ class ErrorHandler {
         backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
         action: SnackBarAction(
-          label: 'Fermer',
+          label: 'Close',
           textColor: Colors.white,
           onPressed: () {
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -291,7 +291,7 @@ class ErrorHandler {
   String _translateToFrench(String errorMessage, String? context) {
     // Network errors
     if (_isNetworkError(errorMessage)) {
-      return 'Erreur de connexion. Vérifiez votre réseau et réessayez.';
+      return 'Connection error. Check your network and try again.';
     }
 
     // Firestore errors
@@ -299,13 +299,13 @@ class ErrorHandler {
       return 'Accès refusé. Vous n\'avez pas les permissions nécessaires.';
     }
     if (errorMessage.contains('not-found')) {
-      return 'Données introuvables. Elles ont peut-être été supprimées.';
+      return 'Data not found. It may have been deleted.';
     }
     if (errorMessage.contains('already-exists')) {
-      return 'Ces données existent déjà.';
+      return 'This data already exists.';
     }
     if (errorMessage.contains('deadline-exceeded') || errorMessage.contains('timeout')) {
-      return 'Délai d\'attente dépassé. Veuillez réessayer.';
+      return 'Timeout exceeded. Please try again.';
     }
     if (errorMessage.contains('unavailable')) {
       return 'Service temporairement indisponible. Réessayez dans quelques instants.';
@@ -313,46 +313,46 @@ class ErrorHandler {
 
     // Authentication errors
     if (errorMessage.contains('user-not-found')) {
-      return 'Utilisateur introuvable. Vérifiez votre adresse e-mail.';
+      return 'User not found. Check your email address.';
     }
     if (errorMessage.contains('wrong-password')) {
-      return 'Mot de passe incorrect.';
+      return 'Incorrect password.';
     }
     if (errorMessage.contains('invalid-email')) {
-      return 'Adresse e-mail invalide.';
+      return 'Invalid email address.';
     }
     if (errorMessage.contains('user-disabled')) {
       return 'Ce compte a été désactivé.';
     }
     if (errorMessage.contains('too-many-requests')) {
-      return 'Trop de tentatives. Attendez avant de réessayer.';
+      return 'Too many attempts. Wait before trying again.';
     }
 
     // Data validation errors
     if (errorMessage.contains('validation')) {
-      return 'Données invalides. Vérifiez les informations saisies.';
+      return 'Invalid data. Check the entered information.';
     }
 
     // Context-specific errors
     if (context != null) {
       switch (context.toLowerCase()) {
         case 'user_data':
-          return 'Erreur lors du chargement des données utilisateur.';
+          return 'Error loading user data.';
         case 'reservations':
-          return 'Erreur lors du chargement des réservations.';
+          return 'Error loading reservations.';
         case 'menu':
-          return 'Erreur lors du chargement du menu.';
+          return 'Error loading menu.';
         case 'time_slots':
-          return 'Erreur lors du chargement des créneaux horaires.';
+          return 'Error loading time slots.';
         case 'payment':
-          return 'Erreur lors du traitement du paiement.';
+          return 'Error processing payment.';
         default:
           break;
       }
     }
 
     // Generic error with original message if no translation found
-    return 'Une erreur est survenue. Veuillez réessayer.';
+    return 'An error occurred. Please try again.';
   }
 
   ErrorType _categorizeError(dynamic error) {

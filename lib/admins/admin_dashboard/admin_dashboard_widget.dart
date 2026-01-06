@@ -33,7 +33,8 @@ class AdminDashboardWidget extends StatefulWidget {
   State<AdminDashboardWidget> createState() => _AdminDashboardWidgetState();
 }
 
-class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAwareMixin {
+class _AdminDashboardWidgetState extends State<AdminDashboardWidget>
+    with RoleAwareMixin {
   late AdminDashboardModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -42,14 +43,15 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
   void initState() {
     super.initState();
     _model = createModel(context, () => AdminDashboardModel());
-    
+
     // Check admin permissions on widget initialization
     _checkAdminAccess();
   }
 
   Future<void> _checkAdminAccess() async {
     try {
-      await RoleMiddleware.requireRole(UserRole.admin, 'accès au tableau de bord administrateur');
+      await RoleMiddleware.requireRole(
+          UserRole.admin, 'accès au tableau de bord administrateur');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -252,7 +254,8 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                 // Role-based access control demonstration
                 AdminOnlyWidget(
                   child: Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(16.0, 8.0, 16.0, 8.0),
+                    padding:
+                        EdgeInsetsDirectional.fromSTEB(16.0, 8.0, 16.0, 8.0),
                     child: Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
@@ -279,16 +282,20 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                                 children: [
                                   Text(
                                     'Accès Administrateur Vérifié',
-                                    style: FlutterFlowTheme.of(context).bodyLarge.override(
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF4B986C),
-                                    ),
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyLarge
+                                        .override(
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF4B986C),
+                                        ),
                                   ),
                                   Text(
                                     'Vous avez les permissions administrateur requises pour accéder à cette section.',
-                                    style: FlutterFlowTheme.of(context).bodySmall.override(
-                                      color: Color(0xFF6B7280),
-                                    ),
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodySmall
+                                        .override(
+                                          color: Color(0xFF6B7280),
+                                        ),
                                   ),
                                 ],
                               ),
@@ -313,10 +320,12 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                     stream: queryReservationRecord(
                       queryBuilder: (query) {
                         final now = DateTime.now();
-                        final startOfDay = DateTime(now.year, now.month, now.day);
+                        final startOfDay =
+                            DateTime(now.year, now.month, now.day);
                         final endOfDay = startOfDay.add(Duration(days: 1));
                         return query
-                            .where('creneaux', isGreaterThanOrEqualTo: startOfDay)
+                            .where('creneaux',
+                                isGreaterThanOrEqualTo: startOfDay)
                             .where('creneaux', isLessThan: endOfDay);
                       },
                     ),
@@ -325,10 +334,12 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                         stream: queryTimeSlotRecord(
                           queryBuilder: (query) {
                             final now = DateTime.now();
-                            final startOfDay = DateTime(now.year, now.month, now.day);
+                            final startOfDay =
+                                DateTime(now.year, now.month, now.day);
                             final endOfDay = startOfDay.add(Duration(days: 1));
                             return query
-                                .where('date', isGreaterThanOrEqualTo: startOfDay)
+                                .where('date',
+                                    isGreaterThanOrEqualTo: startOfDay)
                                 .where('date', isLessThan: endOfDay)
                                 .where('is_active', isEqualTo: true);
                           },
@@ -336,23 +347,26 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                         builder: (context, slotSnapshot) {
                           final reservations = reservationSnapshot.data ?? [];
                           final slots = slotSnapshot.data ?? [];
-                          
-                          final todayReservations = reservations.where((r) => 
-                            r.status == 'confirmed' || r.status == 'used'
-                          ).length;
-                          
+
+                          final todayReservations = reservations
+                              .where((r) =>
+                                  r.status == 'confirmed' || r.status == 'used')
+                              .length;
+
                           int totalCapacity = 0;
                           int currentReservations = 0;
                           for (var slot in slots) {
                             totalCapacity += slot.maxCapacity;
                             currentReservations += slot.currentReservations;
                           }
-                          
-                          final occupancyRate = totalCapacity > 0 
-                              ? ((currentReservations / totalCapacity) * 100).round()
+
+                          final occupancyRate = totalCapacity > 0
+                              ? ((currentReservations / totalCapacity) * 100)
+                                  .round()
                               : 0;
-                          final remainingSeats = totalCapacity - currentReservations;
-                          
+                          final remainingSeats =
+                              totalCapacity - currentReservations;
+
                           return Container(
                             width: double.infinity,
                             decoration: BoxDecoration(
@@ -367,29 +381,34 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                               padding: EdgeInsets.all(16.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
                                   Expanded(
                                     child: Container(
                                       height: 80.0,
                                       decoration: BoxDecoration(
                                         color: Color(0x4D4B986C),
-                                        borderRadius: BorderRadius.circular(8.0),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
                                       ),
                                       child: Padding(
                                         padding: EdgeInsets.all(12.0),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             Text(
                                               '$todayReservations',
                                               textAlign: TextAlign.center,
-                                              style: FlutterFlowTheme.of(context)
+                                              style: FlutterFlowTheme.of(
+                                                      context)
                                                   .headlineMedium
                                                   .override(
                                                     font: GoogleFonts.urbanist(
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
                                                     color: Color(0xFF4B986C),
                                                     fontSize: 20.0,
@@ -402,11 +421,14 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                                               'Réservations\nAujourd\'hui',
                                               textAlign: TextAlign.center,
                                               maxLines: 2,
-                                              style: FlutterFlowTheme.of(context)
+                                              style: FlutterFlowTheme.of(
+                                                      context)
                                                   .labelSmall
                                                   .override(
-                                                    font: GoogleFonts.plusJakartaSans(
-                                                      fontWeight: FontWeight.w500,
+                                                    font: GoogleFonts
+                                                        .plusJakartaSans(
+                                                      fontWeight:
+                                                          FontWeight.w500,
                                                     ),
                                                     color: Color(0xFF4B986C),
                                                     fontSize: 10.0,
@@ -425,22 +447,26 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                                       height: 80.0,
                                       decoration: BoxDecoration(
                                         color: Color(0x4D928163),
-                                        borderRadius: BorderRadius.circular(8.0),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
                                       ),
                                       child: Padding(
                                         padding: EdgeInsets.all(12.0),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             Text(
                                               '$occupancyRate%',
                                               textAlign: TextAlign.center,
-                                              style: FlutterFlowTheme.of(context)
+                                              style: FlutterFlowTheme.of(
+                                                      context)
                                                   .headlineMedium
                                                   .override(
                                                     font: GoogleFonts.urbanist(
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
                                                     color: Color(0xFF928163),
                                                     fontSize: 20.0,
@@ -453,11 +479,14 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                                               'Taux\nOccupation',
                                               textAlign: TextAlign.center,
                                               maxLines: 2,
-                                              style: FlutterFlowTheme.of(context)
+                                              style: FlutterFlowTheme.of(
+                                                      context)
                                                   .labelSmall
                                                   .override(
-                                                    font: GoogleFonts.plusJakartaSans(
-                                                      fontWeight: FontWeight.w500,
+                                                    font: GoogleFonts
+                                                        .plusJakartaSans(
+                                                      fontWeight:
+                                                          FontWeight.w500,
                                                     ),
                                                     color: Color(0xFF928163),
                                                     fontSize: 10.0,
@@ -476,22 +505,26 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                                       height: 80.0,
                                       decoration: BoxDecoration(
                                         color: Color(0x4C6D604A),
-                                        borderRadius: BorderRadius.circular(8.0),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
                                       ),
                                       child: Padding(
                                         padding: EdgeInsets.all(12.0),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             Text(
                                               '$remainingSeats',
                                               textAlign: TextAlign.center,
-                                              style: FlutterFlowTheme.of(context)
+                                              style: FlutterFlowTheme.of(
+                                                      context)
                                                   .headlineMedium
                                                   .override(
                                                     font: GoogleFonts.urbanist(
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
                                                     color: Color(0xFF6D604A),
                                                     fontSize: 20.0,
@@ -504,11 +537,14 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                                               'Places\nRestantes',
                                               textAlign: TextAlign.center,
                                               maxLines: 2,
-                                              style: FlutterFlowTheme.of(context)
+                                              style: FlutterFlowTheme.of(
+                                                      context)
                                                   .labelSmall
                                                   .override(
-                                                    font: GoogleFonts.plusJakartaSans(
-                                                      fontWeight: FontWeight.w500,
+                                                    font: GoogleFonts
+                                                        .plusJakartaSans(
+                                                      fontWeight:
+                                                          FontWeight.w500,
                                                     ),
                                                     color: Color(0xFF6D604A),
                                                     fontSize: 10.0,
@@ -531,7 +567,8 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 8.0, 16.0, 16.0),
+                  padding:
+                      EdgeInsetsDirectional.fromSTEB(16.0, 8.0, 16.0, 16.0),
                   child: GridView(
                     padding: EdgeInsets.zero,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -667,6 +704,79 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                                   SizedBox(height: 4.0),
                                   Text(
                                     'Manage capacity & slots',
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodySmall
+                                        .override(
+                                          font: GoogleFonts.plusJakartaSans(
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                          color: Color(0xFF384E58),
+                                          fontSize: 11.0,
+                                          letterSpacing: 0.0,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          // Navigate to time slot templates management
+                          Navigator.pushNamed(
+                              context, '/admin/timeSlotTemplates');
+                        },
+                        child: Material(
+                          color: Colors.transparent,
+                          elevation: 2.0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12.0),
+                              border: Border.all(
+                                color: Color(0xFFC8D7E4),
+                                width: 1.0,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.settings,
+                                    color: Color(0xFF1C1284),
+                                    size: 32.0,
+                                  ),
+                                  SizedBox(height: 8.0),
+                                  Text(
+                                    'Slot Templates',
+                                    textAlign: TextAlign.center,
+                                    style: FlutterFlowTheme.of(context)
+                                        .titleMedium
+                                        .override(
+                                          font: GoogleFonts.plusJakartaSans(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          color: Color(0xFF0B191E),
+                                          fontSize: 16.0,
+                                          letterSpacing: 0.0,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                  SizedBox(height: 4.0),
+                                  Text(
+                                    'Recurring slot patterns',
                                     textAlign: TextAlign.center,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
@@ -832,6 +942,78 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                           ),
                         ),
                       ),
+                      InkWell(
+                        onTap: () {
+                          // Navigate to import/export users
+                          context.pushNamed('user_import');
+                        },
+                        child: Material(
+                          color: Colors.transparent,
+                          elevation: 2.0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12.0),
+                              border: Border.all(
+                                color: Color(0xFFC8D7E4),
+                                width: 1.0,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.upload_file,
+                                    color: Color(0xFF4B39EF),
+                                    size: 32.0,
+                                  ),
+                                  SizedBox(height: 8.0),
+                                  Text(
+                                    'Import/Export',
+                                    textAlign: TextAlign.center,
+                                    style: FlutterFlowTheme.of(context)
+                                        .titleMedium
+                                        .override(
+                                          font: GoogleFonts.plusJakartaSans(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          color: Color(0xFF0B191E),
+                                          fontSize: 16.0,
+                                          letterSpacing: 0.0,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                  SizedBox(height: 4.0),
+                                  Text(
+                                    'Bulk user import via Excel',
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodySmall
+                                        .override(
+                                          font: GoogleFonts.plusJakartaSans(
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                          color: Color(0xFF384E58),
+                                          fontSize: 11.0,
+                                          letterSpacing: 0.0,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -900,20 +1082,22 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                                       width: 50.0,
                                       height: 50.0,
                                       child: CircularProgressIndicator(
-                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
                                           Color(0xFF4B986C),
                                         ),
                                       ),
                                     ),
                                   );
                                 }
-                                
+
                                 final recentReservations = snapshot.data!;
-                                
+
                                 if (recentReservations.isEmpty) {
                                   return Center(
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Icon(
                                           Icons.event_seat_outlined,
@@ -923,15 +1107,17 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                                         SizedBox(height: 16.0),
                                         Text(
                                           'Aucune réservation récente',
-                                          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                            color: Color(0xFF6B7280),
-                                          ),
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                color: Color(0xFF6B7280),
+                                              ),
                                         ),
                                       ],
                                     ),
                                   );
                                 }
-                                
+
                                 return ListView.builder(
                                   padding: EdgeInsets.zero,
                                   primary: false,
@@ -939,7 +1125,8 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                                   scrollDirection: Axis.vertical,
                                   itemCount: recentReservations.length,
                                   itemBuilder: (context, index) {
-                                    final reservation = recentReservations[index];
+                                    final reservation =
+                                        recentReservations[index];
                                     return _buildReservationCard(reservation);
                                   },
                                 );
@@ -953,7 +1140,8 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                 ),
                 // Add responsive payment and history cards section
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 0.0),
+                  padding:
+                      EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 0.0),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -1091,7 +1279,6 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                     ),
                   ),
                 ),
-
               ],
             ),
           ),
@@ -1105,9 +1292,10 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
       future: _getUserForReservation(reservation),
       builder: (context, userSnapshot) {
         final user = userSnapshot.data;
-        final userName = user?.nom ?? user?.displayName ?? 'Utilisateur inconnu';
+        final userName =
+            user?.nom ?? user?.displayName ?? 'Utilisateur inconnu';
         final userInitials = _getInitials(userName);
-        
+
         return Padding(
           padding: EdgeInsets.all(12.0),
           child: Container(
@@ -1129,7 +1317,8 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                         width: 40.0,
                         height: 40.0,
                         decoration: BoxDecoration(
-                          color: _getStatusColor(reservation.status).withValues(alpha: 0.3),
+                          color: _getStatusColor(reservation.status)
+                              .withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                         ),
                         child: Align(
@@ -1173,17 +1362,16 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                           ),
                           Text(
                             _formatReservationDetails(reservation),
-                            style: FlutterFlowTheme.of(context)
-                                .bodySmall
-                                .override(
-                                  font: GoogleFonts.plusJakartaSans(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  color: Color(0xFF384E58),
-                                  fontSize: 12.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                            style:
+                                FlutterFlowTheme.of(context).bodySmall.override(
+                                      font: GoogleFonts.plusJakartaSans(
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      color: Color(0xFF384E58),
+                                      fontSize: 12.0,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                           ),
                         ],
                       ),
@@ -1193,7 +1381,8 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(8.0, 4.0, 8.0, 4.0),
+                        padding:
+                            EdgeInsetsDirectional.fromSTEB(8.0, 4.0, 8.0, 4.0),
                         child: Container(
                           height: 24.0,
                           decoration: BoxDecoration(
@@ -1235,7 +1424,8 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
     );
   }
 
-  Future<UserRecord?> _getUserForReservation(ReservationRecord reservation) async {
+  Future<UserRecord?> _getUserForReservation(
+      ReservationRecord reservation) async {
     try {
       if (reservation.userId.isNotEmpty) {
         final userDoc = await FirebaseFirestore.instance
@@ -1293,7 +1483,8 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> with RoleAw
 
   String _formatReservationDetails(ReservationRecord reservation) {
     final date = reservation.creneaux;
-    final timeStr = date != null ? DateFormat('HH:mm').format(date) : 'Heure inconnue';
+    final timeStr =
+        date != null ? DateFormat('HH:mm').format(date) : 'Heure inconnue';
     final mealType = reservation.type.isNotEmpty ? reservation.type : 'Repas';
     return '$mealType • $timeStr';
   }

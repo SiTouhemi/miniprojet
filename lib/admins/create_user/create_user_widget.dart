@@ -98,7 +98,7 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
             },
           ),
           title: Text(
-            'Administration - Utilisateurs',
+            'Administration - Users',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
                   font: GoogleFonts.interTight(
                     fontWeight: FontWeight.w600,
@@ -148,7 +148,7 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Créer un Utilisateur',
+                            'Create User',
                             style: FlutterFlowTheme.of(context)
                                 .headlineMedium
                                 .override(
@@ -187,7 +187,7 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                                                 EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 0.0, 0.0, 4.0),
                                             child: Text(
-                                              'Prénom *',
+                                              'First Name *',
                                               style: FlutterFlowTheme.of(
                                                       context)
                                                   .labelMedium
@@ -223,7 +223,7 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                                                 TextInputAction.next,
                                             obscureText: false,
                                             decoration: InputDecoration(
-                                              hintText: 'Entrez le prénom',
+                                              hintText: 'Enter first name',
                                               hintStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodySmall
@@ -351,7 +351,7 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                                                 EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 0.0, 0.0, 4.0),
                                             child: Text(
-                                              'Nom *',
+                                              'Last Name *',
                                               style: FlutterFlowTheme.of(
                                                       context)
                                                   .labelMedium
@@ -387,7 +387,7 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                                                 TextInputAction.next,
                                             obscureText: false,
                                             decoration: InputDecoration(
-                                              hintText: 'Entrez le nom',
+                                              hintText: 'Enter last name',
                                               hintStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodySmall
@@ -514,7 +514,7 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                                       padding: EdgeInsetsDirectional.fromSTEB(
                                           0.0, 0.0, 0.0, 4.0),
                                       child: Text(
-                                        'Adresse Email *',
+                                        'Email Address *',
                                         style: FlutterFlowTheme.of(context)
                                             .labelMedium
                                             .override(
@@ -641,7 +641,7 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                                       padding: EdgeInsetsDirectional.fromSTEB(
                                           0.0, 0.0, 0.0, 4.0),
                                       child: Text(
-                                        'CIN (Carte d\'Identité Nationale) *',
+                                        'National ID (CIN) *',
                                         style: FlutterFlowTheme.of(context)
                                             .labelMedium
                                             .override(
@@ -774,7 +774,7 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                                                 EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 0.0, 0.0, 4.0),
                                             child: Text(
-                                              'Mot de Passe *',
+                                              'Password *',
                                               style: FlutterFlowTheme.of(
                                                       context)
                                                   .labelMedium
@@ -809,7 +809,7 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                                             obscureText:
                                                 !_model.passwordVisibility1,
                                             decoration: InputDecoration(
-                                              hintText: 'Minimum 8 caractères',
+                                              hintText: 'Minimum 8 characters',
                                               hintStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodySmall
@@ -941,7 +941,7 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                                                 EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 0.0, 0.0, 4.0),
                                             child: Text(
-                                              'Confirmer Mot de Passe *',
+                                              'Confirm Password *',
                                               style: FlutterFlowTheme.of(
                                                       context)
                                                   .labelMedium
@@ -1314,39 +1314,47 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                                   !_model.formKey.currentState!.validate()) {
                                 return;
                               }
-                              
+
                               // Get form values
                               final prenom = _model.textController1?.text ?? '';
                               final nom = _model.textController2?.text ?? '';
                               final email = _model.textController3?.text ?? '';
                               final cin = _model.textController4?.text ?? '';
-                              final password = _model.textController5?.text ?? '';
-                              final confirmPassword = _model.textController6?.text ?? '';
+                              final password =
+                                  _model.textController5?.text ?? '';
+                              final confirmPassword =
+                                  _model.textController6?.text ?? '';
                               final classe = _model.dropDownValue ?? '';
-                              final roleStr = _model.choiceChipsValue ?? 'Étudiant';
-                              
+                              final roleStr =
+                                  _model.choiceChipsValue ?? 'Étudiant';
+
                               // Validate required fields
-                              if (prenom.isEmpty || nom.isEmpty || email.isEmpty || password.isEmpty) {
+                              if (prenom.isEmpty ||
+                                  nom.isEmpty ||
+                                  email.isEmpty ||
+                                  password.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Veuillez remplir tous les champs obligatoires'),
+                                    content: Text(
+                                        'Veuillez remplir tous les champs obligatoires'),
                                     backgroundColor: Colors.red,
                                   ),
                                 );
                                 return;
                               }
-                              
+
                               // Validate passwords match
                               if (password != confirmPassword) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Les mots de passe ne correspondent pas'),
+                                    content: Text(
+                                        'Les mots de passe ne correspondent pas'),
                                     backgroundColor: Colors.red,
                                   ),
                                 );
                                 return;
                               }
-                              
+
                               // Map role string to UserRole
                               UserRole role;
                               switch (roleStr) {
@@ -1359,7 +1367,7 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                                 default:
                                   role = UserRole.student;
                               }
-                              
+
                               // Show loading indicator
                               showDialog(
                                 context: context,
@@ -1368,10 +1376,10 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                                   child: CircularProgressIndicator(),
                                 ),
                               );
-                              
+
                               try {
                                 // Create user
-                                final result = await authService.createUserWithRole(
+                                await authService.createUserWithRole(
                                   email: email,
                                   password: password,
                                   displayName: '$prenom $nom',
@@ -1379,18 +1387,19 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                                   cin: cin.isNotEmpty ? cin : null,
                                   classe: classe.isNotEmpty ? classe : null,
                                 );
-                                
+
                                 // Close loading dialog
                                 Navigator.of(context).pop();
-                                
+
                                 // Show success message
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Utilisateur créé avec succès'),
+                                    content:
+                                        Text('User created successfully'),
                                     backgroundColor: Colors.green,
                                   ),
                                 );
-                                
+
                                 // Clear form
                                 _model.textController1?.clear();
                                 _model.textController2?.clear();
@@ -1399,21 +1408,20 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                                 _model.textController5?.clear();
                                 _model.textController6?.clear();
                                 setState(() {});
-                                
                               } catch (e) {
                                 // Close loading dialog
                                 Navigator.of(context).pop();
-                                
+
                                 // Show error message
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Erreur: ${e.toString()}'),
+                                    content: Text('Error: ${e.toString()}'),
                                     backgroundColor: Colors.red,
                                   ),
                                 );
                               }
                             },
-                            text: 'Créer l\'Utilisateur',
+                            text: 'Create User',
                             icon: Icon(
                               Icons.person_add_rounded,
                               size: 20.0,

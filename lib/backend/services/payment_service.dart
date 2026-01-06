@@ -88,20 +88,68 @@ class PaymentService {
     }
   }
 
-  // Deduct amount from user balance
-  Future<bool> deductFromBalance(String userId, double amount) async {
+  // Deduct amount from user balance using atomic transaction
+  Future<Map<String, dynamic>> deductFromBalance(String userId, double amount, {String? description}) async {
     try {
-      final currentBalance = await getUserBalance(userId);
-      if (currentBalance >= amount) {
+      return await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final userRef = FirebaseFirestore.instance.collection('user').doc(userId);
+        final userDoc = await transaction.get(userRef);
+        
+        if (!userDoc.exists) {
+          return {
+            'success': false,
+            'error': 'User not found',
+          };
+        }
+        
+        final userData = userDoc.data() as Map<String, dynamic>;
+        final currentBalance = (userData['pocket'] as num?)?.toDouble() ?? 0.0;
+        
+        if (currentBalance < amount) {
+          return {
+            'success': false,
+            'error': 'Insufficient balance. Current: ${currentBalance.toStringAsFixed(2)} TND, Required: ${amount.toStringAsFixed(2)} TND',
+            'currentBalance': currentBalance,
+            'requiredAmount': amount,
+          };
+        }
+        
         final newBalance = currentBalance - amount;
-        return await updateUserBalance(userId, newBalance);
-      } else {
-        AppLogger.w('Insufficient balance. Current: $currentBalance DT, Required: $amount DT', tag: 'PaymentService');
-        return false;
-      }
+        
+        // Update user balance
+        transaction.update(userRef, {
+          'pocket': newBalance,
+        });
+        
+        // Log the transaction if description provided
+        if (description != null) {
+          final transactionLogRef = FirebaseFirestore.instance.collection('payment_transactions').doc();
+          transaction.set(transactionLogRef, {
+            'user_id': userId,
+            'amount': -amount, // Negative for deduction
+            'type': 'balance_deduction',
+            'description': description,
+            'timestamp': FieldValue.serverTimestamp(),
+            'balance_before': currentBalance,
+            'balance_after': newBalance,
+          });
+        }
+        
+        AppLogger.i('Deducted ${amount.toStringAsFixed(2)} TND from user $userId. New balance: ${newBalance.toStringAsFixed(2)} TND', tag: 'PaymentService');
+        
+        return {
+          'success': true,
+          'previousBalance': currentBalance,
+          'newBalance': newBalance,
+          'deductedAmount': amount,
+        };
+      });
     } catch (e) {
       AppLogger.e('Error deducting from balance', error: e, tag: 'PaymentService');
-      return false;
+      return {
+        'success': false,
+        'error': 'Failed to deduct from balance: ${e.toString()}',
+      };
     }
   }
 

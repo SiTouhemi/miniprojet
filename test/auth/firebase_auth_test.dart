@@ -29,16 +29,16 @@ void main() {
         
         // Test error message generation
         final errorMsg = authService.getPasswordStrengthMessage('weak');
-        expect(errorMsg, contains('8 caractères'));
+        expect(errorMsg, contains('8 characters'));
         
         final errorMsg2 = authService.getPasswordStrengthMessage('weak123');
-        expect(errorMsg2, contains('majuscule'));
+        expect(errorMsg2, contains('uppercase'));
         
         final errorMsg3 = authService.getPasswordStrengthMessage('WEAK123');
-        expect(errorMsg3, contains('minuscule'));
+        expect(errorMsg3, contains('lowercase'));
         
         final errorMsg4 = authService.getPasswordStrengthMessage('WeakPass');
-        expect(errorMsg4, contains('chiffre'));
+        expect(errorMsg4, contains('digit'));
       });
 
       test('AuthService should have FirebaseAuth instance', () {

@@ -136,8 +136,8 @@ class SafeAlertDialog extends StatelessWidget {
             ),
             const SizedBox(height: 16.0),
             const Text(
-              'Une erreur est survenue lors de l\'affichage du dialogue. '
-              'Voulez-vous continuer?',
+              'An error occurred while displaying the dialog. '
+              'Do you want to continue?',
             ),
             const SizedBox(height: 24.0),
             Row(
@@ -145,12 +145,12 @@ class SafeAlertDialog extends StatelessWidget {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Annuler'),
+                  child: const Text('Cancel'),
                 ),
                 const SizedBox(width: 8.0),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Continuer'),
+                  child: const Text('Continue'),
                 ),
               ],
             ),

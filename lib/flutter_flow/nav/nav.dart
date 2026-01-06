@@ -18,6 +18,7 @@ import '/auth/role_middleware.dart';
 import '/auth/firebase_auth/auth_util.dart';
 import '/admins/time_slots/time_slots_widget.dart';
 import '/admins/reservation_list/reservation_list_widget.dart';
+import '/admins/user_import/user_import_widget.dart';
 import '/staff/monjeya_scan/monjeya_scan_widget.dart';
 import '/staff/qr_scanner/qr_scanner_widget.dart';
 
@@ -181,6 +182,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           allowedRoles: [UserRole.admin],
           builder: (context, params) => AjoutPlatWidget(),
         ),
+        FFRoute(
+          name: UserImportWidget.routeName,
+          path: UserImportWidget.routePath,
+          requireAuth: true,
+          allowedRoles: [UserRole.admin],
+          builder: (context, params) => UserImportWidget(),
+        ),
         // Public routes
         FFRoute(
           name: LoginWidget.routeName,
@@ -307,7 +315,7 @@ class FFRoute {
         pageBuilder: (context, state) {
           fixStatusBarOniOS16AndBelow(context);
           final ffParams = FFParameters(state, asyncParams);
-          
+
           // Create the page widget
           final page = ffParams.hasFutures
               ? FutureBuilder(
@@ -318,7 +326,9 @@ class FFRoute {
 
           // Wrap with role-based access control if needed
           Widget child;
-          if (requireAuth || allowedRoles != null || requiredPermission != null) {
+          if (requireAuth ||
+              allowedRoles != null ||
+              requiredPermission != null) {
             child = RoleGuardWrapper(
               allowedRoles: allowedRoles,
               requiredPermission: requiredPermission,
@@ -439,7 +449,9 @@ class _RoleGuardWrapperState extends State<RoleGuardWrapper> {
   Future<void> _checkAccess() async {
     try {
       // Check authentication if required
-      if (widget.requireAuth || widget.allowedRoles != null || widget.requiredPermission != null) {
+      if (widget.requireAuth ||
+          widget.allowedRoles != null ||
+          widget.requiredPermission != null) {
         await RoleMiddleware.requireAuthentication();
       }
 
@@ -468,39 +480,39 @@ class _RoleGuardWrapperState extends State<RoleGuardWrapper> {
       if (!canAccess) {
         // Get user role to provide better error message
         final role = await RoleMiddleware.getCurrentUserRole();
-        final roleMessage = role != null ? 'Rôle actuel: ${role.name}' : 'Rôle non défini';
-        throw UnauthorizedException('Accès non autorisé à cette page. $roleMessage');
+        final roleMessage =
+            role != null ? 'Rôle actuel: ${role.name}' : 'Rôle non défini';
+        throw UnauthorizedException(
+            'Accès non autorisé à cette page. $roleMessage');
       }
-      
+
       setState(() {
         _hasAccess = true;
         _isLoading = false;
       });
-
     } on UnauthenticatedException catch (e) {
       setState(() {
         _hasAccess = false;
         _isLoading = false;
         _errorMessage = e.message;
       });
-      
+
       // Redirect to login
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.go('/login');
       });
-      
     } on UnauthorizedException catch (e) {
       setState(() {
         _hasAccess = false;
         _isLoading = false;
         _errorMessage = e.message;
       });
-      
+
       // Redirect to appropriate home based on role
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         final role = await RoleMiddleware.getCurrentUserRole();
         final homeRoute = _getHomeRouteForRole(role);
-        
+
         // Show error message before redirecting
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -509,17 +521,16 @@ class _RoleGuardWrapperState extends State<RoleGuardWrapper> {
             duration: Duration(seconds: 3),
           ),
         );
-        
+
         context.go(homeRoute);
       });
-      
     } catch (e) {
       setState(() {
         _hasAccess = false;
         _isLoading = false;
         _errorMessage = 'Erreur d\'accès: ${e.toString()}';
       });
-      
+
       // For unknown errors, redirect to login for safety
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.go('/login');
@@ -576,7 +587,8 @@ class _RoleGuardWrapperState extends State<RoleGuardWrapper> {
               ),
               const SizedBox(height: 8),
               Text(
-                _errorMessage ?? 'Vous n\'avez pas les permissions nécessaires pour accéder à cette page.',
+                _errorMessage ??
+                    'Vous n\'avez pas les permissions nécessaires pour accéder à cette page.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey[600]),
               ),

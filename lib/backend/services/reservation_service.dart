@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '/backend/backend.dart';
 import '/backend/cloud_functions/cloud_functions.dart';
+import '/backend/services/payment_service.dart';
+import '/backend/services/app_service.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/utils/app_logger.dart';
 
@@ -10,7 +12,7 @@ class ReservationService {
       _instance ??= ReservationService._();
   ReservationService._();
 
-  // Create a new reservation with payment method support
+  // Create a new reservation with wallet deduction
   Future<Map<String, dynamic>> createReservation({
     required String userId,
     required String timeSlotId,
@@ -22,14 +24,97 @@ class ReservationService {
     int capacity = 1,
   }) async {
     try {
-      // Call cloud function to create reservation
-      final result = await makeCloudCall('createReservation', {
-        'timeSlotId': timeSlotId,
-        'capacity': capacity,
-        'amount': amount ?? 0.2, // Default meal price
+      // Get the correct meal price from app settings if not provided
+      double reservationAmount;
+      if (amount != null) {
+        reservationAmount = amount;
+      } else {
+        final appSettings = await AppService.instance.getAppSettings();
+        reservationAmount = appSettings.defaultMealPrice;
+      }
+      
+      // First validate user has sufficient balance
+      final paymentValidation = await PaymentService.instance.validatePayment(
+        userId: userId,
+        amount: reservationAmount,
+      );
+      
+      if (!paymentValidation['success']) {
+        return {
+          'success': false,
+          'error': paymentValidation['message'] ?? 'Insufficient balance',
+          'errorCode': 'INSUFFICIENT_FUNDS'
+        };
+      }
+      
+      // Use Firestore transaction to ensure atomicity
+      return await FirebaseFirestore.instance.runTransaction((transaction) async {
+        // Get user document
+        final userRef = FirebaseFirestore.instance.collection('user').doc(userId);
+        final userDoc = await transaction.get(userRef);
+        
+        if (!userDoc.exists) {
+          return {
+            'success': false,
+            'error': 'User not found',
+            'errorCode': 'USER_NOT_FOUND'
+          };
+        }
+        
+        final userData = userDoc.data() as Map<String, dynamic>;
+        final currentBalance = (userData['pocket'] as num?)?.toDouble() ?? 0.0;
+        
+        // Double-check balance in transaction
+        if (currentBalance < reservationAmount) {
+          return {
+            'success': false,
+            'error': 'Insufficient balance. Required: ${reservationAmount.toStringAsFixed(2)} TND, Available: ${currentBalance.toStringAsFixed(2)} TND',
+            'errorCode': 'INSUFFICIENT_FUNDS'
+          };
+        }
+        
+        // Deduct from user balance
+        transaction.update(userRef, {
+          'pocket': FieldValue.increment(-reservationAmount),
+        });
+        
+        // Create reservation document
+        final reservationRef = FirebaseFirestore.instance.collection('reservations').doc();
+        transaction.set(reservationRef, {
+          'user_id': userId,
+          'time_slot_id': timeSlotId,
+          'meal_type': mealType,
+          'capacity': capacity,
+          'total': reservationAmount,
+          'status': 'confirmed',
+          'payment_method': 'wallet',
+          'payment_id': 'wallet_${DateTime.now().millisecondsSinceEpoch}',
+          'created_at': FieldValue.serverTimestamp(),
+          'qr_code': _generateQRCode(reservationRef.id),
+        });
+        
+        // Log the transaction
+        final transactionLogRef = FirebaseFirestore.instance.collection('payment_transactions').doc();
+        transaction.set(transactionLogRef, {
+          'user_id': userId,
+          'reservation_id': reservationRef.id,
+          'amount': -reservationAmount, // Negative for deduction
+          'type': 'reservation_payment',
+          'description': 'Reservation payment for $mealType',
+          'timestamp': FieldValue.serverTimestamp(),
+          'balance_before': currentBalance,
+          'balance_after': currentBalance - reservationAmount,
+        });
+        
+        return {
+          'success': true,
+          'reservationId': reservationRef.id,
+          'amount': reservationAmount,
+          'newBalance': currentBalance - reservationAmount,
+          'message': 'Reservation created successfully. ${reservationAmount.toStringAsFixed(2)} TND deducted from wallet.',
+        };
       });
-
-      return result;
+      
     } catch (e) {
       AppLogger.e('Error creating reservation',
           error: e, tag: 'ReservationService');
@@ -38,6 +123,11 @@ class ReservationService {
         'error': 'Failed to create reservation: ${e.toString()}'
       };
     }
+  }
+  
+  // Generate QR code for reservation
+  String _generateQRCode(String reservationId) {
+    return 'RES_${reservationId}_${DateTime.now().millisecondsSinceEpoch}';
   }
 
   // Validate QR code for staff

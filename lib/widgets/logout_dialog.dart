@@ -12,17 +12,17 @@ class LogoutDialog {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Déconnexion'),
-          content: Text('Êtes-vous sûr de vouloir vous déconnecter?'),
+          title: Text('Logout'),
+          content: Text('Are you sure you want to logout?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text('Annuler'),
+              child: Text('Cancel'),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               child: Text(
-                'Déconnexion',
+                'Logout',
                 style: TextStyle(color: Colors.red),
               ),
             ),
@@ -47,7 +47,7 @@ class LogoutDialog {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Erreur lors de la déconnexion: $e'),
+              content: Text('Error during logout: $e'),
               backgroundColor: Colors.red,
             ),
           );

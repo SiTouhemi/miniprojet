@@ -131,15 +131,15 @@ class _DataConsistencyValidatorState extends State<DataConsistencyValidator> {
     final errors = <String>[];
     
     if (!userValidation.isValid) {
-      errors.add('Données utilisateur incohérentes');
+      errors.add('Inconsistent user data');
     }
     
     if (!hardcodedValidation.isValid) {
-      errors.add('Données codées en dur détectées');
+      errors.add('Hardcoded data detected');
     }
     
     if (!comprehensiveValidation.reservationValidation.isValid) {
-      errors.add('Réservations incohérentes');
+      errors.add('Inconsistent reservations');
     }
     
     if (!comprehensiveValidation.menuValidation.isValid) {
@@ -147,7 +147,7 @@ class _DataConsistencyValidatorState extends State<DataConsistencyValidator> {
     }
     
     if (!comprehensiveValidation.timeSlotValidation.isValid) {
-      errors.add('Créneaux incohérents');
+      errors.add('Inconsistent time slots');
     }
 
     return errors.join(', ');
@@ -164,7 +164,7 @@ class _DataConsistencyValidatorState extends State<DataConsistencyValidator> {
       case ValidationStatus.valid:
         indicatorColor = Colors.green;
         indicatorIcon = Icons.check_circle;
-        tooltipMessage = 'Données validées et cohérentes';
+        tooltipMessage = 'Data validated and consistent';
         break;
       case ValidationStatus.invalid:
         indicatorColor = Colors.orange;
@@ -179,7 +179,7 @@ class _DataConsistencyValidatorState extends State<DataConsistencyValidator> {
       case ValidationStatus.noData:
         indicatorColor = Colors.grey;
         indicatorIcon = Icons.help_outline;
-        tooltipMessage = 'Aucune donnée à valider';
+        tooltipMessage = 'No data to validate';
         break;
       case ValidationStatus.unknown:
         indicatorColor = Colors.grey;
@@ -260,7 +260,7 @@ class HardcodedDataChecker extends StatelessWidget {
                 padding: EdgeInsets.all(8),
                 color: Colors.yellow[700],
                 child: Text(
-                  'ATTENTION: Données potentiellement codées en dur détectées',
+                  'WARNING: Potentially hardcoded data detected',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 12,
@@ -291,7 +291,7 @@ class HardcodedDataChecker extends StatelessWidget {
           ),
           SizedBox(height: 8),
           Text(
-            'Aucune donnée utilisateur disponible',
+            'No user data available',
             style: TextStyle(
               color: Colors.grey[600],
               fontSize: 16,
@@ -428,7 +428,7 @@ class _RealTimeUpdateValidatorState extends State<RealTimeUpdateValidator> {
                       ),
                       SizedBox(width: 4),
                       Text(
-                        'Données obsolètes',
+                        'Stale data',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 12,

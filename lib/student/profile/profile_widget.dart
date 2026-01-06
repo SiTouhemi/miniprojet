@@ -1,8 +1,6 @@
 import '/backend/backend.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import '/flutter_flow/form_field_controller.dart';
 import '/l10n/app_localizations.dart';
 import '/design_system/app_theme.dart';
 import '/config/app_config.dart';
@@ -24,7 +22,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -44,7 +42,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
         child: Consumer<FFAppState>(
           builder: (context, appState, _) {
             final user = appState.currentUser;
-            
+
             if (user == null) {
               return Center(
                 child: Column(
@@ -71,7 +69,8 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       options: FFButtonOptions(
                         height: AppButtonSizes.heightLarge,
                         padding: AppButtonSizes.paddingLarge,
-                        iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                        iconPadding:
+                            EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                         color: AppColors.primary,
                         textStyle: AppTypography.button.copyWith(
                           color: AppColors.textOnPrimary,
@@ -128,7 +127,9 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  user.displayName.isNotEmpty ? user.displayName : user.nom,
+                                  user.displayName.isNotEmpty
+                                      ? user.displayName
+                                      : user.nom,
                                   style: AppTypography.h5.copyWith(
                                     color: AppColors.textPrimary,
                                   ),
@@ -141,7 +142,8 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                 ),
                                 if (user.classe.isNotEmpty)
                                   Text(
-                                    l10n.translate('class_label', params: {'class': user.classe}),
+                                    l10n.translate('class_label',
+                                        params: {'class': user.classe}),
                                     style: AppTypography.bodySmall.copyWith(
                                       color: AppColors.primary,
                                     ),
@@ -151,7 +153,8 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                           ),
                           // Read-only indicator
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 8.0, vertical: 4.0),
                             decoration: BoxDecoration(
                               color: AppColors.warning.withValues(alpha: 0.1),
                               borderRadius: AppBorders.borderSM,
@@ -199,18 +202,68 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            l10n.translate('current_balance'),
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: AppColors.textOnPrimary.withValues(alpha: 0.7),
-                              fontWeight: AppTypography.semiBold,
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                l10n.translate('current_balance'),
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: AppColors.textOnPrimary
+                                      .withValues(alpha: 0.7),
+                                  fontWeight: AppTypography.semiBold,
+                                ),
+                              ),
+                              if (user != null)
+                                InkWell(
+                                  onTap: () {
+                                    // TODO: Navigate to wallet top-up
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Wallet top-up feature coming soon!'),
+                                        backgroundColor: Colors.blue,
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          Colors.white.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color:
+                                            Colors.white.withValues(alpha: 0.3),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.add_circle_outline,
+                                          color: AppColors.textOnPrimary,
+                                          size: 16,
+                                        ),
+                                        SizedBox(width: 4),
+                                        Text(
+                                          'Recharger',
+                                          style:
+                                              AppTypography.bodySmall.copyWith(
+                                            color: AppColors.textOnPrimary,
+                                            fontWeight: AppTypography.semiBold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                           AppSpacing.verticalSM,
                           Text(
-                            user != null 
-                              ? AppConfig.formatPrice(user.pocket)
-                              : AppConfig.formatPrice(0.0),
+                            user != null
+                                ? AppConfig.formatPrice(user.pocket)
+                                : AppConfig.formatPrice(0.0),
                             style: AppTypography.h3.copyWith(
                               color: AppColors.textOnPrimary,
                               fontWeight: AppTypography.bold,
@@ -218,13 +271,14 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                           ),
                           if (user != null)
                             Padding(
-                              padding: const EdgeInsets.only(top: AppSpacing.xs),
+                              padding:
+                                  const EdgeInsets.only(top: AppSpacing.xs),
                               child: Text(
-                                l10n.translate('tickets_available', params: {
-                                  'count': user.tickets.toString()
-                                }),
+                                l10n.translate('tickets_available',
+                                    params: {'count': user.tickets.toString()}),
                                 style: AppTypography.bodySmall.copyWith(
-                                  color: AppColors.textOnPrimary.withValues(alpha: 0.7),
+                                  color: AppColors.textOnPrimary
+                                      .withValues(alpha: 0.7),
                                 ),
                               ),
                             ),
@@ -283,7 +337,9 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                     context,
                     icon: Icons.person,
                     label: l10n.translate('full_name'),
-                    value: user.displayName.isNotEmpty ? user.displayName : user.nom,
+                    value: user.displayName.isNotEmpty
+                        ? user.displayName
+                        : user.nom,
                   ),
 
                   AppSpacing.verticalMD,
@@ -301,7 +357,9 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                     context,
                     icon: Icons.phone,
                     label: l10n.translate('phone_number'),
-                    value: user.phoneNumber.isNotEmpty ? user.phoneNumber : 'Not provided',
+                    value: user.phoneNumber.isNotEmpty
+                        ? user.phoneNumber
+                        : 'Not provided',
                   ),
 
                   AppSpacing.verticalMD,
@@ -310,7 +368,8 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                     context,
                     icon: Icons.school,
                     label: l10n.translate('class'),
-                    value: user.classe.isNotEmpty ? user.classe : 'Not assigned',
+                    value:
+                        user.classe.isNotEmpty ? user.classe : 'Not assigned',
                   ),
 
                   AppSpacing.verticalLG,
@@ -337,7 +396,9 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                     context,
                     icon: Icons.notifications,
                     label: l10n.translate('push_notifications'),
-                    value: (user.notificationsEnabled ?? true) ? 'Enabled' : 'Disabled',
+                    value: (user.notificationsEnabled ?? true)
+                        ? 'Enabled'
+                        : 'Disabled',
                   ),
 
                   AppSpacing.verticalXL,
@@ -352,8 +413,10 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                     options: FFButtonOptions(
                       width: double.infinity,
                       height: AppButtonSizes.heightLarge,
-                      padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                      iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                      padding:
+                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                      iconPadding:
+                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                       color: AppColors.surface,
                       textStyle: AppTypography.button.copyWith(
                         color: AppColors.error,

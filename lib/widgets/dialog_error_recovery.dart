@@ -200,9 +200,9 @@ class DialogErrorRecovery {
   /// Builds the default fallback dialog
   static Widget _buildDefaultFallback(BuildContext context) {
     return AlertDialog(
-      title: const Text('Erreur'),
+      title: const Text('Error'),
       content: const Text(
-        'Une erreur est survenue lors de l\'affichage du dialogue.',
+        'An error occurred while displaying the dialog.',
       ),
       actions: [
         TextButton(
@@ -227,9 +227,9 @@ class DialogErrorRecovery {
     return await showDialog<T>(
       context: context,
       builder: (context) => const AlertDialog(
-        title: Text('Erreur'),
+        title: Text('Error'),
         content: Text(
-          'Une erreur critique est survenue. Veuillez réessayer.',
+          'A critical error occurred. Please try again.',
         ),
         actions: [
           TextButton(

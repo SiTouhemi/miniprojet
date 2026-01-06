@@ -77,7 +77,7 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
               borderRadius: BorderRadius.circular(16.0),
             ),
             title: Text(
-              'Confirmation de réservation',
+              'Reservation Confirmation',
               style: FlutterFlowTheme.of(context).titleLarge.override(
                     font: GoogleFonts.interTight(
                       fontWeight: FontWeight.w600,
@@ -92,7 +92,7 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Détails de la réservation:',
+                  'Reservation details:',
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                         font: GoogleFonts.inter(
                           fontWeight: FontWeight.w600,
@@ -142,7 +142,7 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
                 child: Text(
-                  'Annuler',
+                  'Cancel',
                   style: TextStyle(
                     color: Colors.grey.shade600,
                     fontWeight: FontWeight.w500,
@@ -155,7 +155,7 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                   backgroundColor: Color(0xFF005BAA),
                   foregroundColor: Colors.white,
                 ),
-                child: Text('Confirmer'),
+                child: Text('Confirm'),
               ),
             ],
           ),
@@ -204,7 +204,7 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    'Réservation',
+                    'Reservation',
                     style: FlutterFlowTheme.of(context).titleLarge.override(
                           font: GoogleFonts.interTight(
                             fontWeight: FontWeight.w600,
@@ -261,7 +261,7 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Solde Actuel',
+                                'Current Balance',
                                 style: FlutterFlowTheme.of(context)
                                     .titleMedium
                                     .override(
@@ -281,7 +281,7 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                 children: [
                                   Text(
                                     _model.isLoadingBalance
-                                        ? 'Chargement...'
+                                        ? 'Loading...'
                                         : '${_model.userBalance.toStringAsFixed(2)} DT',
                                     style: FlutterFlowTheme.of(context)
                                         .headlineMedium
@@ -327,7 +327,7 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                           padding: EdgeInsetsDirectional.fromSTEB(
                               20.0, 0.0, 20.0, 0.0),
                           child: Text(
-                            'Choisir un Créneau',
+                            'Choose a Time Slot',
                             style: FlutterFlowTheme.of(context)
                                 .headlineSmall
                                 .override(
@@ -798,12 +798,12 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                     }
                                   },
                             text: _model.isProcessingReservation
-                                ? 'Réservation en cours...'
+                                ? 'Processing reservation...'
                                 : _model.selectedTimeSlot == null
-                                    ? 'Sélectionnez un créneau'
+                                    ? 'Select a time slot'
                                     : !_model.canAffordSelectedSlot()
-                                        ? 'Solde insuffisant'
-                                        : 'Réserver',
+                                        ? 'Insufficient balance'
+                                        : 'Reserve',
                             icon: _model.isProcessingReservation
                                 ? SizedBox(
                                     width: 20.0,

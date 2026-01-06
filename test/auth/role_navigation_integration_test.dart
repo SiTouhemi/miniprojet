@@ -13,10 +13,10 @@ void main() {
 
     test('Welcome messages are appropriate for each role', () {
       // Test welcome message logic
-      expect(_getWelcomeMessageForRole('admin'), equals('Bienvenue, Administrateur !'));
-      expect(_getWelcomeMessageForRole('staff'), equals('Bienvenue, Personnel !'));
-      expect(_getWelcomeMessageForRole('student'), equals('Bienvenue, Étudiant !'));
-      expect(_getWelcomeMessageForRole('unknown'), equals('Bienvenue !'));
+      expect(_getWelcomeMessageForRole('admin'), equals('Welcome, Administrator!'));
+      expect(_getWelcomeMessageForRole('staff'), equals('Welcome, Staff!'));
+      expect(_getWelcomeMessageForRole('student'), equals('Welcome, Student!'));
+      expect(_getWelcomeMessageForRole('unknown'), equals('Welcome!'));
     });
 
     test('Route access control logic is correct', () {
@@ -71,13 +71,13 @@ String _getDefaultRouteForRole(String? role) {
 String _getWelcomeMessageForRole(String role) {
   switch (role) {
     case 'admin':
-      return 'Bienvenue, Administrateur !';
+      return 'Welcome, Administrator!';
     case 'staff':
-      return 'Bienvenue, Personnel !';
+      return 'Welcome, Staff!';
     case 'student':
-      return 'Bienvenue, Étudiant !';
+      return 'Welcome, Student!';
     default:
-      return 'Bienvenue !';
+      return 'Welcome!';
   }
 }
 
