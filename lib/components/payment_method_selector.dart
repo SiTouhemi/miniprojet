@@ -41,7 +41,7 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
   @override
   Widget build(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
-    
+
     return Container(
       padding: EdgeInsets.all(20.0),
       decoration: BoxDecoration(
@@ -172,7 +172,7 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
     FlutterFlowTheme theme,
   ) {
     final isSelected = selectedMethod == method;
-    
+
     return GestureDetector(
       onTap: enabled ? () => setState(() => selectedMethod = method) : null,
       child: Container(
@@ -183,8 +183,10 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
             width: isSelected ? 2.0 : 1.0,
           ),
           borderRadius: BorderRadius.circular(12.0),
-          color: enabled 
-              ? (isSelected ? theme.primary.withOpacity(0.1) : theme.secondaryBackground) 
+          color: enabled
+              ? (isSelected
+                  ? theme.primary.withOpacity(0.1)
+                  : theme.secondaryBackground)
               : theme.primaryBackground,
         ),
         child: Row(
@@ -192,15 +194,17 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
             Container(
               padding: EdgeInsets.all(8.0),
               decoration: BoxDecoration(
-                color: enabled 
-                    ? (isSelected ? theme.primary.withOpacity(0.2) : theme.primaryBackground)
+                color: enabled
+                    ? (isSelected
+                        ? theme.primary.withOpacity(0.2)
+                        : theme.primaryBackground)
                     : theme.alternate,
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: Icon(
                 icon,
-                color: enabled 
-                    ? (isSelected ? theme.primary : theme.secondaryText) 
+                color: enabled
+                    ? (isSelected ? theme.primary : theme.secondaryText)
                     : theme.secondaryText.withOpacity(0.5),
                 size: 24.0,
               ),
@@ -214,7 +218,9 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
                     title,
                     style: theme.titleMedium.override(
                       fontFamily: 'Inter Tight',
-                      color: enabled ? theme.primaryText : theme.secondaryText.withOpacity(0.5),
+                      color: enabled
+                          ? theme.primaryText
+                          : theme.secondaryText.withOpacity(0.5),
                       letterSpacing: 0.0,
                       fontWeight: FontWeight.w600,
                     ),
@@ -224,7 +230,9 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
                     subtitle,
                     style: theme.bodySmall.override(
                       fontFamily: 'Inter',
-                      color: enabled ? theme.secondaryText : theme.secondaryText.withOpacity(0.5),
+                      color: enabled
+                          ? theme.secondaryText
+                          : theme.secondaryText.withOpacity(0.5),
                       letterSpacing: 0.0,
                     ),
                   ),
@@ -252,7 +260,7 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
 
   Widget _buildWalletPayment(FlutterFlowTheme theme) {
     final hasEnoughBalance = widget.user.pocket >= widget.amount;
-    
+
     return Column(
       children: [
         if (!hasEnoughBalance)
@@ -286,7 +294,8 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
           ),
         SizedBox(height: 16.0),
         FFButtonWidget(
-          onPressed: hasEnoughBalance && !isProcessing ? _processWalletPayment : null,
+          onPressed:
+              hasEnoughBalance && !isProcessing ? _processWalletPayment : null,
           text: 'Payer avec le portefeuille',
           options: FFButtonOptions(
             width: double.infinity,
@@ -357,7 +366,8 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
                 ),
                 SizedBox(height: 16.0),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
                   decoration: BoxDecoration(
                     color: theme.warning.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20.0),
@@ -397,7 +407,8 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
                   options: FFButtonOptions(
                     height: 44.0,
                     padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                    iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                    iconPadding:
+                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                     color: theme.secondaryBackground,
                     textStyle: theme.titleSmall.override(
                       fontFamily: 'Inter Tight',
@@ -422,7 +433,8 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
                   options: FFButtonOptions(
                     height: 44.0,
                     padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                    iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                    iconPadding:
+                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                     color: theme.primary,
                     textStyle: theme.titleSmall.override(
                       fontFamily: 'Inter Tight',
@@ -495,10 +507,10 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
 
   String _getTimeRemaining() {
     if (qrExpiresAt == null) return '';
-    
+
     final remaining = qrExpiresAt!.difference(DateTime.now());
     if (remaining.isNegative) return 'Expiré';
-    
+
     final minutes = remaining.inMinutes;
     final seconds = remaining.inSeconds % 60;
     return '${minutes}:${seconds.toString().padLeft(2, '0')}';
@@ -506,11 +518,11 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
 
   Future<void> _processWalletPayment() async {
     setState(() => isProcessing = true);
-    
+
     try {
       // Simulate payment processing
       await Future.delayed(Duration(seconds: 1));
-      
+
       widget.onPaymentComplete({
         'success': true,
         'paymentMethod': 'wallet',
@@ -518,7 +530,8 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
         'transactionId': 'wallet_${DateTime.now().millisecondsSinceEpoch}',
       });
     } catch (e) {
-      AppLogger.e('Wallet payment failed', error: e, tag: 'PaymentMethodSelector');
+      AppLogger.e('Wallet payment failed',
+          error: e, tag: 'PaymentMethodSelector');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -536,7 +549,7 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
 
   Future<void> _generateD17QR() async {
     setState(() => isProcessing = true);
-    
+
     try {
       final result = await D17PaymentService.instance.generatePaymentQR(
         userId: widget.user.uid,
@@ -544,7 +557,7 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
         description: widget.description,
         orderId: widget.orderId,
       );
-      
+
       if (result['success']) {
         setState(() {
           paymentRequestId = result['paymentRequestId'];
@@ -555,7 +568,8 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
         throw Exception(result['error']);
       }
     } catch (e) {
-      AppLogger.e('D17 QR generation failed', error: e, tag: 'PaymentMethodSelector');
+      AppLogger.e('D17 QR generation failed',
+          error: e, tag: 'PaymentMethodSelector');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -573,13 +587,14 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
 
   Future<void> _checkD17PaymentStatus() async {
     if (paymentRequestId == null) return;
-    
+
     try {
-      final result = await D17PaymentService.instance.checkPaymentStatus(paymentRequestId!);
-      
+      final result = await D17PaymentService.instance
+          .checkPaymentStatus(paymentRequestId!);
+
       if (result['success']) {
         final status = result['status'];
-        
+
         if (status == 'completed') {
           widget.onPaymentComplete({
             'success': true,
@@ -596,7 +611,8 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Le code QR a expiré. Veuillez en générer un nouveau.'),
+                content: Text(
+                    'Le code QR a expiré. Veuillez en générer un nouveau.'),
                 backgroundColor: FlutterFlowTheme.of(context).warning,
               ),
             );
@@ -604,7 +620,8 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
         }
       }
     } catch (e) {
-      AppLogger.e('D17 status check failed', error: e, tag: 'PaymentMethodSelector');
+      AppLogger.e('D17 status check failed',
+          error: e, tag: 'PaymentMethodSelector');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -620,7 +637,7 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
     if (paymentRequestId != null) {
       await D17PaymentService.instance.cancelPayment(paymentRequestId!);
     }
-    
+
     setState(() {
       qrData = null;
       paymentRequestId = null;

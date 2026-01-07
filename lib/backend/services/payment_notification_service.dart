@@ -4,7 +4,8 @@ import '/utils/app_logger.dart';
 
 class PaymentNotificationService {
   static PaymentNotificationService? _instance;
-  static PaymentNotificationService get instance => _instance ??= PaymentNotificationService._();
+  static PaymentNotificationService get instance =>
+      _instance ??= PaymentNotificationService._();
   PaymentNotificationService._();
 
   /// Listen to payment status changes for a specific user
@@ -17,20 +18,20 @@ class PaymentNotificationService {
         .limit(10)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        return {
-          'id': doc.id,
-          'status': data['status'],
-          'amount': data['amount'],
-          'description': data['description'],
-          'paymentMethod': data['paymentMethod'],
-          'createdAt': (data['createdAt'] as Timestamp?)?.toDate(),
-          'completedAt': (data['completedAt'] as Timestamp?)?.toDate(),
-          'expiresAt': (data['expiresAt'] as Timestamp?)?.toDate(),
-        };
-      }).toList();
-    });
+          return snapshot.docs.map((doc) {
+            final data = doc.data();
+            return {
+              'id': doc.id,
+              'status': data['status'],
+              'amount': data['amount'],
+              'description': data['description'],
+              'paymentMethod': data['paymentMethod'],
+              'createdAt': (data['createdAt'] as Timestamp?)?.toDate(),
+              'completedAt': (data['completedAt'] as Timestamp?)?.toDate(),
+              'expiresAt': (data['expiresAt'] as Timestamp?)?.toDate(),
+            };
+          }).toList();
+        });
   }
 
   /// Listen to all pending D17 payments (for admin)
@@ -73,17 +74,20 @@ class PaymentNotificationService {
       switch (status) {
         case 'completed':
           title = 'Payment Successful';
-          message = 'Your payment of ${amount.toStringAsFixed(3)} TND has been processed successfully.';
+          message =
+              'Your payment of ${amount.toStringAsFixed(3)} TND has been processed successfully.';
           type = 'payment_success';
           break;
         case 'expired':
           title = 'Payment Expired';
-          message = 'Your payment request for ${amount.toStringAsFixed(3)} TND has expired.';
+          message =
+              'Your payment request for ${amount.toStringAsFixed(3)} TND has expired.';
           type = 'payment_expired';
           break;
         case 'cancelled':
           title = 'Payment Cancelled';
-          message = 'Your payment of ${amount.toStringAsFixed(3)} TND has been cancelled.';
+          message =
+              'Your payment of ${amount.toStringAsFixed(3)} TND has been cancelled.';
           type = 'payment_cancelled';
           break;
         default:
@@ -102,14 +106,17 @@ class PaymentNotificationService {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      AppLogger.i('Payment notification created', tag: 'PaymentNotificationService');
+      AppLogger.i('Payment notification created',
+          tag: 'PaymentNotificationService');
     } catch (e) {
-      AppLogger.e('Error creating payment notification', error: e, tag: 'PaymentNotificationService');
+      AppLogger.e('Error creating payment notification',
+          error: e, tag: 'PaymentNotificationService');
     }
   }
 
   /// Get unread notifications for a user
-  Future<List<Map<String, dynamic>>> getUnreadNotifications(String userId) async {
+  Future<List<Map<String, dynamic>>> getUnreadNotifications(
+      String userId) async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('notifications')
@@ -133,7 +140,8 @@ class PaymentNotificationService {
         };
       }).toList();
     } catch (e) {
-      AppLogger.e('Error fetching notifications', error: e, tag: 'PaymentNotificationService');
+      AppLogger.e('Error fetching notifications',
+          error: e, tag: 'PaymentNotificationService');
       return [];
     }
   }
@@ -146,7 +154,8 @@ class PaymentNotificationService {
           .doc(notificationId)
           .update({'isRead': true});
     } catch (e) {
-      AppLogger.e('Error marking notification as read', error: e, tag: 'PaymentNotificationService');
+      AppLogger.e('Error marking notification as read',
+          error: e, tag: 'PaymentNotificationService');
     }
   }
 
@@ -154,7 +163,7 @@ class PaymentNotificationService {
   Future<void> markAllNotificationsAsRead(String userId) async {
     try {
       final batch = FirebaseFirestore.instance.batch();
-      
+
       final querySnapshot = await FirebaseFirestore.instance
           .collection('notifications')
           .where('userId', isEqualTo: userId)
@@ -167,7 +176,8 @@ class PaymentNotificationService {
 
       await batch.commit();
     } catch (e) {
-      AppLogger.e('Error marking all notifications as read', error: e, tag: 'PaymentNotificationService');
+      AppLogger.e('Error marking all notifications as read',
+          error: e, tag: 'PaymentNotificationService');
     }
   }
 

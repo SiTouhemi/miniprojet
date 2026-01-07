@@ -1,9 +1,9 @@
 /// Dialog components for safe and reliable dialog rendering
-/// 
+///
 /// This library provides error-resistant dialog components that prevent
 /// the "Cannot hit test a render box with no size" crashes and other
 /// layout-related rendering issues.
-/// 
+///
 /// Key components:
 /// - [SafeAlertDialog]: Error-safe AlertDialog with fallback strategies
 /// - [DialogErrorBoundary]: Error boundary for catching rendering exceptions

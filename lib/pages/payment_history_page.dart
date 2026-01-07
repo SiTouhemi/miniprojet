@@ -28,19 +28,20 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
 
   Future<void> _loadPaymentData() async {
     setState(() => isLoading = true);
-    
+
     try {
       final [paymentHistory, paymentStats] = await Future.wait([
         PaymentHistoryService.instance.getUserPaymentHistory(widget.user.uid),
         PaymentHistoryService.instance.getUserPaymentStats(widget.user.uid),
       ]);
-      
+
       setState(() {
         payments = paymentHistory as List<Map<String, dynamic>>;
         stats = paymentStats as Map<String, dynamic>;
       });
     } catch (e) {
-      AppLogger.e('Error loading payment data', error: e, tag: 'PaymentHistoryPage');
+      AppLogger.e('Error loading payment data',
+          error: e, tag: 'PaymentHistoryPage');
     } finally {
       setState(() => isLoading = false);
     }
@@ -62,7 +63,7 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
                 slivers: [
                   // Stats section
                   SliverToBoxAdapter(child: _buildStatsSection()),
-                  
+
                   // Payment list
                   payments.isEmpty
                       ? SliverFillRemaining(
@@ -70,7 +71,8 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.payment, size: 64, color: Colors.grey),
+                                Icon(Icons.payment,
+                                    size: 64, color: Colors.grey),
                                 SizedBox(height: 16),
                                 Text(
                                   'No payment history',
@@ -85,7 +87,8 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
                         )
                       : SliverList(
                           delegate: SliverChildBuilderDelegate(
-                            (context, index) => _buildPaymentTile(payments[index]),
+                            (context, index) =>
+                                _buildPaymentTile(payments[index]),
                             childCount: payments.length,
                           ),
                         ),
@@ -94,6 +97,7 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
             ),
     );
   }
+
   Widget _buildStatsSection() {
     return Container(
       margin: EdgeInsets.all(16),
@@ -169,7 +173,8 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+      String title, String value, IconData icon, Color color) {
     return Container(
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -211,7 +216,7 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
 
     Color statusColor;
     IconData statusIcon;
-    
+
     switch (status) {
       case 'completed':
         statusColor = Colors.green;
@@ -241,7 +246,9 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
           leading: CircleAvatar(
             backgroundColor: statusColor.withOpacity(0.1),
             child: Icon(
-              paymentMethod == 'd17' ? Icons.qr_code : Icons.account_balance_wallet,
+              paymentMethod == 'd17'
+                  ? Icons.qr_code
+                  : Icons.account_balance_wallet,
               color: statusColor,
             ),
           ),
@@ -289,16 +296,20 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDetailRow('Amount', '${payment['amount'].toStringAsFixed(3)} TND'),
-            _buildDetailRow('Method', payment['paymentMethod'].toString().toUpperCase()),
-            _buildDetailRow('Status', payment['status'].toString().toUpperCase()),
+            _buildDetailRow(
+                'Amount', '${payment['amount'].toStringAsFixed(3)} TND'),
+            _buildDetailRow(
+                'Method', payment['paymentMethod'].toString().toUpperCase()),
+            _buildDetailRow(
+                'Status', payment['status'].toString().toUpperCase()),
             _buildDetailRow('Order ID', payment['orderId'] ?? 'N/A'),
             if (payment['transactionId'] != null)
               _buildDetailRow('Transaction ID', payment['transactionId']),
             if (payment['createdAt'] != null)
               _buildDetailRow('Created', _formatDateTime(payment['createdAt'])),
             if (payment['completedAt'] != null)
-              _buildDetailRow('Completed', _formatDateTime(payment['completedAt'])),
+              _buildDetailRow(
+                  'Completed', _formatDateTime(payment['completedAt'])),
           ],
         ),
         actions: [

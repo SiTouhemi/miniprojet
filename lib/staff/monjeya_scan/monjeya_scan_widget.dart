@@ -33,10 +33,10 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => MonjeyaScanModel());
-    
+
     // Initialize the scanner
     _model.initializeScanner();
-    
+
     // Set up state change callback
     _model.onStateChanged = () {
       if (mounted) {
@@ -99,7 +99,7 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(height: 20.0),
-                  
+
                   // Welcome message
                   Container(
                     width: double.infinity,
@@ -140,17 +140,17 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
                               .bodyLarge
                               .override(
                                 fontFamily: 'Inter',
-                                color: FlutterFlowTheme.of(context)
-                                    .secondaryText,
+                                color:
+                                    FlutterFlowTheme.of(context).secondaryText,
                                 letterSpacing: 0.0,
                               ),
                         ),
                       ],
                     ),
                   ),
-                  
+
                   SizedBox(height: 40.0),
-                  
+
                   // QR Scanner Frame
                   Container(
                     width: 300.0,
@@ -205,9 +205,9 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
                             ),
                     ),
                   ),
-                  
+
                   SizedBox(height: 40.0),
-                  
+
                   // Activate Scanner Button
                   Container(
                     width: double.infinity,
@@ -222,7 +222,8 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
                         backgroundColor: Color(0xFF1C1284),
                         foregroundColor: Colors.white,
                         elevation: 4.0,
-                        padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 24.0),
+                        padding: EdgeInsets.symmetric(
+                            vertical: 20.0, horizontal: 24.0),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16.0),
                         ),
@@ -248,39 +249,52 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
                       ),
                     ),
                   ),
-                  
+
                   SizedBox(height: 40.0),
-                  
+
                   // Scan Result Display
-                  if (_model.successMessage != null || _model.errorMessage != null)
+                  if (_model.successMessage != null ||
+                      _model.errorMessage != null)
                     Container(
                       width: double.infinity,
                       margin: EdgeInsets.only(bottom: 20.0),
                       padding: EdgeInsets.all(16.0),
                       decoration: BoxDecoration(
-                        color: _model.successMessage != null ? Colors.green.shade50 : Colors.red.shade50,
+                        color: _model.successMessage != null
+                            ? Colors.green.shade50
+                            : Colors.red.shade50,
                         borderRadius: BorderRadius.circular(12.0),
                         border: Border.all(
-                          color: _model.successMessage != null ? Colors.green : Colors.red,
+                          color: _model.successMessage != null
+                              ? Colors.green
+                              : Colors.red,
                           width: 2.0,
                         ),
                       ),
                       child: Column(
                         children: [
                           Icon(
-                            _model.successMessage != null ? Icons.check_circle : Icons.error,
-                            color: _model.successMessage != null ? Colors.green : Colors.red,
+                            _model.successMessage != null
+                                ? Icons.check_circle
+                                : Icons.error,
+                            color: _model.successMessage != null
+                                ? Colors.green
+                                : Colors.red,
                             size: 48.0,
                           ),
                           SizedBox(height: 12.0),
                           Text(
                             _model.successMessage ?? _model.errorMessage ?? '',
                             textAlign: TextAlign.center,
-                            style: FlutterFlowTheme.of(context).titleMedium.override(
-                              fontFamily: 'Inter Tight',
-                              color: _model.successMessage != null ? Colors.green.shade700 : Colors.red.shade700,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: FlutterFlowTheme.of(context)
+                                .titleMedium
+                                .override(
+                                  fontFamily: 'Inter Tight',
+                                  color: _model.successMessage != null
+                                      ? Colors.green.shade700
+                                      : Colors.red.shade700,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                           if (_model.validationResult != null) ...[
                             SizedBox(height: 12.0),
@@ -296,7 +310,7 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
                         ],
                       ),
                     ),
-                  
+
                   // Recent Scans Section - Real Data
                   Text(
                     'Scans Récents',
@@ -307,17 +321,19 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
                           fontWeight: FontWeight.w600,
                         ),
                   ),
-                  
+
                   SizedBox(height: 20.0),
-                  
+
                   // Real Recent Scans from Database
                   StreamBuilder<List<ReservationRecord>>(
                     stream: queryReservationRecord(
                       queryBuilder: (query) {
                         final now = DateTime.now();
-                        final startOfDay = DateTime(now.year, now.month, now.day);
+                        final startOfDay =
+                            DateTime(now.year, now.month, now.day);
                         return query
-                            .where('creneaux', isGreaterThanOrEqualTo: startOfDay)
+                            .where('creneaux',
+                                isGreaterThanOrEqualTo: startOfDay)
                             .where('status', whereIn: ['confirmed', 'used'])
                             .orderBy('creneaux', descending: true)
                             .limit(5);
@@ -338,21 +354,23 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
                               SizedBox(height: 12.0),
                               Text(
                                 'Aucun scan récent',
-                                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                  fontFamily: 'Inter',
-                                  color: Colors.grey,
-                                ),
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      fontFamily: 'Inter',
+                                      color: Colors.grey,
+                                    ),
                               ),
                             ],
                           ),
                         );
                       }
-                      
+
                       return Column(
                         children: snapshot.data!.map((reservation) {
                           final isUsed = reservation.status == 'used';
                           final date = reservation.creneaux ?? DateTime.now();
-                          
+
                           return Container(
                             width: double.infinity,
                             margin: EdgeInsets.only(bottom: 12.0),
@@ -367,37 +385,51 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
                               ],
                               borderRadius: BorderRadius.circular(16.0),
                               border: Border.all(
-                                color: isUsed ? Colors.orange.shade200 : Colors.green.shade200,
+                                color: isUsed
+                                    ? Colors.orange.shade200
+                                    : Colors.green.shade200,
                                 width: 1.0,
                               ),
                             ),
                             child: Padding(
                               padding: EdgeInsets.all(16.0),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          reservation.type.isNotEmpty ? reservation.type : 'Repas',
-                                          style: FlutterFlowTheme.of(context).titleMedium.override(
-                                            fontFamily: 'Inter Tight',
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                          reservation.type.isNotEmpty
+                                              ? reservation.type
+                                              : 'Repas',
+                                          style: FlutterFlowTheme.of(context)
+                                              .titleMedium
+                                              .override(
+                                                fontFamily: 'Inter Tight',
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                         ),
                                         SizedBox(height: 4.0),
                                         Row(
                                           children: [
-                                            Icon(Icons.access_time, size: 14, color: Color(0xFF666666)),
+                                            Icon(Icons.access_time,
+                                                size: 14,
+                                                color: Color(0xFF666666)),
                                             SizedBox(width: 4.0),
                                             Text(
                                               DateFormat('HH:mm').format(date),
-                                              style: FlutterFlowTheme.of(context).bodySmall.override(
-                                                fontFamily: 'Inter',
-                                                color: Color(0xFF666666),
-                                              ),
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodySmall
+                                                      .override(
+                                                        fontFamily: 'Inter',
+                                                        color:
+                                                            Color(0xFF666666),
+                                                      ),
                                             ),
                                           ],
                                         ),
@@ -405,18 +437,23 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
                                     ),
                                   ),
                                   Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 12.0, vertical: 6.0),
                                     decoration: BoxDecoration(
-                                      color: isUsed ? Color(0xFFFF5722) : Colors.green,
+                                      color: isUsed
+                                          ? Color(0xFFFF5722)
+                                          : Colors.green,
                                       borderRadius: BorderRadius.circular(16.0),
                                     ),
                                     child: Text(
                                       isUsed ? 'UTILISÉ' : 'VALIDE',
-                                      style: FlutterFlowTheme.of(context).bodySmall.override(
-                                        fontFamily: 'Inter',
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodySmall
+                                          .override(
+                                            fontFamily: 'Inter',
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                     ),
                                   ),
                                 ],
@@ -427,7 +464,7 @@ class _MonjeyaScanWidgetState extends State<MonjeyaScanWidget> {
                       );
                     },
                   ),
-                  
+
                   SizedBox(height: 40.0),
                 ],
               ),

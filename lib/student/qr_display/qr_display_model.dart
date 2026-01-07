@@ -5,7 +5,7 @@ import '/utils/app_logger.dart';
 
 class QRDisplayModel extends ChangeNotifier {
   final QRService _qrService = QRService.instance;
-  
+
   ReservationRecord? _reservation;
   String? _qrCode;
   Map<String, dynamic>? _qrData;
@@ -23,7 +23,8 @@ class QRDisplayModel extends ChangeNotifier {
   bool get isGenerating => _isGenerating;
   String? get errorMessage => _errorMessage;
   int get minutesUntilExpiry => _minutesUntilExpiry;
-  bool get isExpired => _expiresAt != null && DateTime.now().isAfter(_expiresAt!);
+  bool get isExpired =>
+      _expiresAt != null && DateTime.now().isAfter(_expiresAt!);
   bool get hasQRCode => _qrCode != null && _qrCode!.isNotEmpty;
 
   void setReservation(ReservationRecord reservation) {
@@ -42,7 +43,7 @@ class QRDisplayModel extends ChangeNotifier {
       // Check if reservation already has a QR code
       if (_reservation!.qrCode.isNotEmpty) {
         _qrCode = _reservation!.qrCode;
-        
+
         // Parse QR data
         try {
           final qrData = await _qrService.checkQRCode(_qrCode!);
@@ -55,7 +56,8 @@ class QRDisplayModel extends ChangeNotifier {
             return;
           }
         } catch (e) {
-          AppLogger.w('Error parsing existing QR code', error: e, tag: 'QRDisplayModel');
+          AppLogger.w('Error parsing existing QR code',
+              error: e, tag: 'QRDisplayModel');
           await generateQRCode();
           return;
         }

@@ -25,32 +25,32 @@ class LoginModel extends FlutterFlowModel<LoginWidget> {
   @override
   void initState(BuildContext context) {
     passwordVisibility = false;
-    
+
     // Enhanced email validation with better French messages
     textController1Validator = (context, val) {
       if (val == null || val.isEmpty) {
         return 'L\'adresse e-mail est requise';
       }
-      
+
       final trimmedVal = val.trim();
       if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(trimmedVal)) {
         return 'Veuillez entrer une adresse e-mail valide (ex: nom@isetcom.tn)';
       }
-      
+
       return null;
     };
-    
+
     // Enhanced password validation using AuthService standards
     textController2Validator = (context, val) {
       if (val == null || val.isEmpty) {
         return 'Le mot de passe est requis';
       }
-      
+
       // Use AuthService validation for consistency
       if (!authService.isPasswordStrong(val)) {
         return authService.getPasswordStrengthMessage(val);
       }
-      
+
       return null;
     };
   }

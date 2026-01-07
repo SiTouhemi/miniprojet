@@ -23,13 +23,15 @@ class DataConsistencyValidator extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<DataConsistencyValidator> createState() => _DataConsistencyValidatorState();
+  State<DataConsistencyValidator> createState() =>
+      _DataConsistencyValidatorState();
 }
 
 class _DataConsistencyValidatorState extends State<DataConsistencyValidator> {
-  final DataValidationService _validationService = DataValidationService.instance;
+  final DataValidationService _validationService =
+      DataValidationService.instance;
   final ErrorHandler _errorHandler = ErrorHandler.instance;
-  
+
   ValidationStatus _validationStatus = ValidationStatus.unknown;
   String? _lastValidationError;
   DateTime? _lastValidationTime;
@@ -51,7 +53,7 @@ class _DataConsistencyValidatorState extends State<DataConsistencyValidator> {
     _validationTimer = Timer.periodic(widget.validationInterval, (_) {
       _validateData();
     });
-    
+
     // Run initial validation
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _validateData();
@@ -60,7 +62,7 @@ class _DataConsistencyValidatorState extends State<DataConsistencyValidator> {
 
   Future<void> _validateData() async {
     final appState = Provider.of<FFAppState>(context, listen: false);
-    
+
     if (appState.currentUser == null) {
       setState(() {
         _validationStatus = ValidationStatus.noData;
@@ -83,7 +85,8 @@ class _DataConsistencyValidatorState extends State<DataConsistencyValidator> {
       );
 
       // Comprehensive validation
-      final comprehensiveValidation = await _validationService.validateAllUserData(
+      final comprehensiveValidation =
+          await _validationService.validateAllUserData(
         appState.currentUser,
         appState.userReservations,
         appState.todaysMenu,
@@ -92,7 +95,9 @@ class _DataConsistencyValidatorState extends State<DataConsistencyValidator> {
       );
 
       setState(() {
-        if (comprehensiveValidation.isValid && userValidation.isValid && hardcodedValidation.isValid) {
+        if (comprehensiveValidation.isValid &&
+            userValidation.isValid &&
+            hardcodedValidation.isValid) {
           _validationStatus = ValidationStatus.valid;
           _lastValidationError = null;
         } else {
@@ -108,16 +113,17 @@ class _DataConsistencyValidatorState extends State<DataConsistencyValidator> {
 
       // Log validation issues for debugging
       if (!comprehensiveValidation.isValid) {
-        AppLogger.w('Data validation issues detected:', tag: 'DataConsistencyValidator');
+        AppLogger.w('Data validation issues detected:',
+            tag: 'DataConsistencyValidator');
         for (final error in comprehensiveValidation.allErrors) {
           AppLogger.d('  - $error', tag: 'DataConsistencyValidator');
         }
       }
-
     } catch (e) {
       setState(() {
         _validationStatus = ValidationStatus.error;
-        _lastValidationError = _errorHandler.handleError(e, context: 'data_validation');
+        _lastValidationError =
+            _errorHandler.handleError(e, context: 'data_validation');
         _lastValidationTime = DateTime.now();
       });
     }
@@ -129,23 +135,23 @@ class _DataConsistencyValidatorState extends State<DataConsistencyValidator> {
     ComprehensiveValidationResult comprehensiveValidation,
   ) {
     final errors = <String>[];
-    
+
     if (!userValidation.isValid) {
       errors.add('Inconsistent user data');
     }
-    
+
     if (!hardcodedValidation.isValid) {
       errors.add('Hardcoded data detected');
     }
-    
+
     if (!comprehensiveValidation.reservationValidation.isValid) {
       errors.add('Inconsistent reservations');
     }
-    
+
     if (!comprehensiveValidation.menuValidation.isValid) {
       errors.add('Menu incohérent');
     }
-    
+
     if (!comprehensiveValidation.timeSlotValidation.isValid) {
       errors.add('Inconsistent time slots');
     }
@@ -241,12 +247,14 @@ class HardcodedDataChecker extends StatelessWidget {
       return fallback ?? _buildNoDataFallback(context);
     }
 
-    final validation = DataValidationService.instance.validateNoHardcodedData(user);
-    
+    final validation =
+        DataValidationService.instance.validateNoHardcodedData(user);
+
     if (!validation.isValid) {
       // Log the hardcoded data detection
-      AppLogger.w('Hardcoded data detected: ${validation.errors}', tag: 'DataConsistencyValidator');
-      
+      AppLogger.w('Hardcoded data detected: ${validation.errors}',
+          tag: 'DataConsistencyValidator');
+
       // In debug mode, show warning
       if (kDebugMode) {
         return Stack(
@@ -279,27 +287,28 @@ class HardcodedDataChecker extends StatelessWidget {
   }
 
   Widget _buildNoDataFallback(BuildContext context) {
-    return fallback ?? Container(
-      padding: EdgeInsets.all(16),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.person_outline,
-            size: 48,
-            color: Colors.grey[400],
+    return fallback ??
+        Container(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.person_outline,
+                size: 48,
+                color: Colors.grey[400],
+              ),
+              SizedBox(height: 8),
+              Text(
+                'No user data available',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 16,
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 8),
-          Text(
-            'No user data available',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 16,
-            ),
-          ),
-        ],
-      ),
-    );
+        );
   }
 }
 
@@ -322,16 +331,18 @@ class OptionalDataDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (data == null || data!.isEmpty) {
-      return fallback ?? Text(
-        '$label: Non spécifié',
-        style: style?.copyWith(
-          color: Colors.grey[600],
-          fontStyle: FontStyle.italic,
-        ) ?? TextStyle(
-          color: Colors.grey[600],
-          fontStyle: FontStyle.italic,
-        ),
-      );
+      return fallback ??
+          Text(
+            '$label: Non spécifié',
+            style: style?.copyWith(
+                  color: Colors.grey[600],
+                  fontStyle: FontStyle.italic,
+                ) ??
+                TextStyle(
+                  color: Colors.grey[600],
+                  fontStyle: FontStyle.italic,
+                ),
+          );
     }
 
     return Text(
@@ -354,7 +365,8 @@ class RealTimeUpdateValidator extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<RealTimeUpdateValidator> createState() => _RealTimeUpdateValidatorState();
+  State<RealTimeUpdateValidator> createState() =>
+      _RealTimeUpdateValidatorState();
 }
 
 class _RealTimeUpdateValidatorState extends State<RealTimeUpdateValidator> {
@@ -378,7 +390,7 @@ class _RealTimeUpdateValidatorState extends State<RealTimeUpdateValidator> {
   void _startUpdateMonitoring() {
     _updateTimer = Timer.periodic(Duration(seconds: 1), (_) {
       final now = DateTime.now();
-      if (_lastUpdateTime != null && 
+      if (_lastUpdateTime != null &&
           now.difference(_lastUpdateTime!) > widget.updateTimeout) {
         if (!_isStale) {
           setState(() {

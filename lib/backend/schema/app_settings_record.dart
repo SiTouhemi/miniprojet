@@ -24,7 +24,8 @@ class AppSettingsRecord extends FirestoreRecord {
 
   // "welcome_message" field.
   String? _welcomeMessage;
-  String get welcomeMessage => _welcomeMessage ?? 'Welcome to our restaurant reservation system';
+  String get welcomeMessage =>
+      _welcomeMessage ?? 'Welcome to our restaurant reservation system';
   bool hasWelcomeMessage() => _welcomeMessage != null;
 
   // "contact_email" field.
@@ -110,8 +111,10 @@ class AppSettingsRecord extends FirestoreRecord {
     _lunchEndTime = snapshotData['lunch_end_time'] as String?;
     _dinnerStartTime = snapshotData['dinner_start_time'] as String?;
     _dinnerEndTime = snapshotData['dinner_end_time'] as String?;
-    _maxReservationsPerUser = castToType<int>(snapshotData['max_reservations_per_user']);
-    _reservationDeadlineHours = castToType<int>(snapshotData['reservation_deadline_hours']);
+    _maxReservationsPerUser =
+        castToType<int>(snapshotData['max_reservations_per_user']);
+    _reservationDeadlineHours =
+        castToType<int>(snapshotData['reservation_deadline_hours']);
     _d17ApiKey = snapshotData['d17_api_key'] as String?;
     _notificationEnabled = snapshotData['notification_enabled'] as bool?;
   }

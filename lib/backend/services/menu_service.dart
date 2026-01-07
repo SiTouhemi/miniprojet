@@ -15,7 +15,7 @@ class MenuService {
     try {
       final today = DateTime.now();
       final dayOfWeek = today.weekday; // 1=Monday, 7=Sunday
-      
+
       // Sunday (7) has no meals
       if (dayOfWeek == 7) {
         AppLogger.i('Sunday - no meals available', tag: 'MenuService');
@@ -29,8 +29,9 @@ class MenuService {
           .orderBy('meal_type')
           .get();
 
-      AppLogger.i('Found ${snapshot.docs.length} menus for day $dayOfWeek', tag: 'MenuService');
-      
+      AppLogger.i('Found ${snapshot.docs.length} menus for day $dayOfWeek',
+          tag: 'MenuService');
+
       return snapshot.docs
           .map((doc) => DailyMenuRecord.fromSnapshot(doc))
           .toList();
@@ -45,7 +46,7 @@ class MenuService {
   Future<List<DailyMenuRecord>> getMenuForDate(DateTime date) async {
     try {
       final dayOfWeek = date.weekday; // 1=Monday, 7=Sunday
-      
+
       // Sunday (7) has no meals
       if (dayOfWeek == 7) {
         AppLogger.i('Sunday - no meals available', tag: 'MenuService');
@@ -73,7 +74,7 @@ class MenuService {
   Stream<List<DailyMenuRecord>> getTodaysMenuStream() {
     final today = DateTime.now();
     final dayOfWeek = today.weekday; // 1=Monday, 7=Sunday
-    
+
     // Sunday (7) has no meals
     if (dayOfWeek == 7) {
       return Stream.value([]);
@@ -94,7 +95,7 @@ class MenuService {
   /// Uses day of week (1=Monday, 2=Tuesday, ..., 6=Saturday, 7=Sunday)
   Stream<List<DailyMenuRecord>> getMenuForDateStream(DateTime date) {
     final dayOfWeek = date.weekday; // 1=Monday, 7=Sunday
-    
+
     // Sunday (7) has no meals
     if (dayOfWeek == 7) {
       return Stream.value([]);
@@ -120,9 +121,7 @@ class MenuService {
           .orderBy('nom')
           .get();
 
-      return snapshot.docs
-          .map((doc) => PlatRecord.fromSnapshot(doc))
-          .toList();
+      return snapshot.docs.map((doc) => PlatRecord.fromSnapshot(doc)).toList();
     } catch (e) {
       AppLogger.e('Error fetching menu items', error: e, tag: 'MenuService');
       return [];
@@ -149,7 +148,8 @@ class MenuService {
           .map((doc) => DailyMenuRecord.fromSnapshot(doc))
           .toList();
     } catch (e) {
-      AppLogger.e('Error fetching menu for day of week', error: e, tag: 'MenuService');
+      AppLogger.e('Error fetching menu for day of week',
+          error: e, tag: 'MenuService');
       return [];
     }
   }
@@ -158,13 +158,13 @@ class MenuService {
   Future<Map<int, List<DailyMenuRecord>>> getWeeklyMenu() async {
     try {
       final weeklyMenu = <int, List<DailyMenuRecord>>{};
-      
+
       // Get menus for Monday (1) to Saturday (6)
       for (int dayOfWeek = 1; dayOfWeek <= 6; dayOfWeek++) {
         final dayMenu = await getMenuForDayOfWeek(dayOfWeek);
         weeklyMenu[dayOfWeek] = dayMenu;
       }
-      
+
       return weeklyMenu;
     } catch (e) {
       AppLogger.e('Error fetching weekly menu', error: e, tag: 'MenuService');
@@ -177,36 +177,60 @@ class MenuService {
     switch (locale) {
       case 'fr':
         switch (dayOfWeek) {
-          case 1: return 'Lundi';
-          case 2: return 'Mardi';
-          case 3: return 'Mercredi';
-          case 4: return 'Jeudi';
-          case 5: return 'Vendredi';
-          case 6: return 'Samedi';
-          case 7: return 'Dimanche';
-          default: return 'Inconnu';
+          case 1:
+            return 'Lundi';
+          case 2:
+            return 'Mardi';
+          case 3:
+            return 'Mercredi';
+          case 4:
+            return 'Jeudi';
+          case 5:
+            return 'Vendredi';
+          case 6:
+            return 'Samedi';
+          case 7:
+            return 'Dimanche';
+          default:
+            return 'Inconnu';
         }
       case 'en':
         switch (dayOfWeek) {
-          case 1: return 'Monday';
-          case 2: return 'Tuesday';
-          case 3: return 'Wednesday';
-          case 4: return 'Thursday';
-          case 5: return 'Friday';
-          case 6: return 'Saturday';
-          case 7: return 'Sunday';
-          default: return 'Unknown';
+          case 1:
+            return 'Monday';
+          case 2:
+            return 'Tuesday';
+          case 3:
+            return 'Wednesday';
+          case 4:
+            return 'Thursday';
+          case 5:
+            return 'Friday';
+          case 6:
+            return 'Saturday';
+          case 7:
+            return 'Sunday';
+          default:
+            return 'Unknown';
         }
       case 'ar':
         switch (dayOfWeek) {
-          case 1: return 'الاثنين';
-          case 2: return 'الثلاثاء';
-          case 3: return 'الأربعاء';
-          case 4: return 'الخميس';
-          case 5: return 'الجمعة';
-          case 6: return 'السبت';
-          case 7: return 'الأحد';
-          default: return 'غير معروف';
+          case 1:
+            return 'الاثنين';
+          case 2:
+            return 'الثلاثاء';
+          case 3:
+            return 'الأربعاء';
+          case 4:
+            return 'الخميس';
+          case 5:
+            return 'الجمعة';
+          case 6:
+            return 'السبت';
+          case 7:
+            return 'الأحد';
+          default:
+            return 'غير معروف';
         }
       default:
         return getDayName(dayOfWeek, locale: 'en');
@@ -258,14 +282,14 @@ class MenuService {
   }) async {
     try {
       final updateData = <String, dynamic>{};
-      
+
       if (mainDish != null) updateData['main_dish'] = mainDish;
       if (accompaniments != null) updateData['accompaniments'] = accompaniments;
       if (description != null) updateData['description'] = description;
       if (price != null) updateData['price'] = price;
       if (available != null) updateData['available'] = available;
       if (imageUrl != null) updateData['image_url'] = imageUrl;
-      
+
       updateData['updated_at'] = FieldValue.serverTimestamp();
 
       await FirebaseFirestore.instance
@@ -305,14 +329,18 @@ class MenuService {
           .where('available', isEqualTo: true)
           .get();
 
-      final menus = snapshot.docs.map((doc) => DailyMenuRecord.fromSnapshot(doc)).toList();
-      
+      final menus = snapshot.docs
+          .map((doc) => DailyMenuRecord.fromSnapshot(doc))
+          .toList();
+
       final totalMenus = menus.length;
       final availableMenus = menus.where((menu) => menu.available).length;
       final lunchMenus = menus.where((menu) => menu.mealType == 'lunch').length;
-      final dinnerMenus = menus.where((menu) => menu.mealType == 'dinner').length;
-      final averagePrice = menus.isNotEmpty 
-          ? menus.map((menu) => menu.price).reduce((a, b) => a + b) / menus.length
+      final dinnerMenus =
+          menus.where((menu) => menu.mealType == 'dinner').length;
+      final averagePrice = menus.isNotEmpty
+          ? menus.map((menu) => menu.price).reduce((a, b) => a + b) /
+              menus.length
           : 0.0;
 
       return {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// A dialog title widget that uses Column layout instead of Row
 /// to prevent rendering issues with RenderIntrinsicWidth calculations.
-/// 
+///
 /// This widget replaces the problematic Row-based title layout that causes
 /// "Cannot hit test a render box with no size" errors.
 class DialogTitle extends StatelessWidget {
@@ -34,7 +34,9 @@ class DialogTitle extends StatelessWidget {
     }
 
     // Use Column layout by default for safety, Row as fallback option
-    return useRowLayout ? _buildRowLayout(context) : _buildColumnLayout(context);
+    return useRowLayout
+        ? _buildRowLayout(context)
+        : _buildColumnLayout(context);
   }
 
   /// Builds title without icon
@@ -108,13 +110,14 @@ class DialogTitle extends StatelessWidget {
   /// Gets the default title text style
   TextStyle _getDefaultTitleStyle(BuildContext context) {
     return Theme.of(context).textTheme.titleLarge?.copyWith(
-      fontWeight: FontWeight.w600,
-      color: const Color(0xFF005BAA),
-    ) ?? const TextStyle(
-      fontSize: 20.0,
-      fontWeight: FontWeight.w600,
-      color: Color(0xFF005BAA),
-    );
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF005BAA),
+            ) ??
+        const TextStyle(
+          fontSize: 20.0,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF005BAA),
+        );
   }
 }
 
@@ -133,14 +136,16 @@ class SimpleDialogTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: style ?? Theme.of(context).textTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.w600,
-        color: const Color(0xFF005BAA),
-      ) ?? const TextStyle(
-        fontSize: 20.0,
-        fontWeight: FontWeight.w600,
-        color: Color(0xFF005BAA),
-      ),
+      style: style ??
+          Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF005BAA),
+              ) ??
+          const TextStyle(
+            fontSize: 20.0,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF005BAA),
+          ),
       textAlign: TextAlign.center,
     );
   }
@@ -188,14 +193,16 @@ class SafeIconDialogTitle extends StatelessWidget {
         SizedBox(height: spacing ?? 8.0),
         Text(
           title,
-          style: titleStyle ?? Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF005BAA),
-          ) ?? const TextStyle(
-            fontSize: 20.0,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF005BAA),
-          ),
+          style: titleStyle ??
+              Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF005BAA),
+                  ) ??
+              const TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF005BAA),
+              ),
           textAlign: TextAlign.center,
         ),
       ],

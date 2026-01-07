@@ -47,12 +47,12 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => ReservationconfirmeModel());
-    
+
     // Load reservation data if ID is provided
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final reservationId = widget.reservationId ?? 
-                           ModalRoute.of(context)?.settings.arguments as String?;
-      
+      final reservationId = widget.reservationId ??
+          ModalRoute.of(context)?.settings.arguments as String?;
+
       if (reservationId != null && reservationId.isNotEmpty) {
         _model.loadReservationData(reservationId).then((_) {
           if (mounted) setState(() {});
@@ -127,7 +127,8 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                     context: context,
                     builder: (context) => AlertDialog(
                       title: Text('Partager le ticket'),
-                      content: Text('Vous pouvez prendre une capture d\'écran de votre QR code pour le partager.'),
+                      content: Text(
+                          'Vous pouvez prendre une capture d\'écran de votre QR code pour le partager.'),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
@@ -258,7 +259,8 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                                   alignment: AlignmentDirectional(0.0, 0.0),
                                   child: _model.isLoading
                                       ? CircularProgressIndicator(
-                                          color: FlutterFlowTheme.of(context).primary,
+                                          color: FlutterFlowTheme.of(context)
+                                              .primary,
                                         )
                                       : _model.hasQRCode()
                                           ? QrImageView(
@@ -267,10 +269,12 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                                               size: 180.0,
                                               backgroundColor: Colors.white,
                                               foregroundColor: Colors.black,
-                                              errorCorrectionLevel: QrErrorCorrectLevel.M,
+                                              errorCorrectionLevel:
+                                                  QrErrorCorrectLevel.M,
                                             )
                                           : Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
                                               children: [
                                                 Icon(
                                                   Icons.qr_code,
@@ -548,7 +552,8 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                                     8.0, 4.0, 8.0, 4.0),
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: _model.getPaymentStatusColor(context),
+                                    color:
+                                        _model.getPaymentStatusColor(context),
                                     borderRadius: BorderRadius.circular(12.0),
                                   ),
                                   child: Padding(
@@ -584,7 +589,7 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                     ),
                   ),
                 ),
-                
+
                 // Price and Balance Information
                 Padding(
                   padding: EdgeInsets.all(16.0),
@@ -614,7 +619,8 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                                     .bodyMedium
                                     .override(
                                       fontFamily: 'Inter',
-                                      color: FlutterFlowTheme.of(context).secondaryText,
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
                                       letterSpacing: 0.0,
                                     ),
                               ),
@@ -641,7 +647,8 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                               final user = appState.currentUser;
                               return Row(
                                 mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'Solde restant',
@@ -649,19 +656,21 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                                         .bodyMedium
                                         .override(
                                           fontFamily: 'Inter',
-                                          color: FlutterFlowTheme.of(context).secondaryText,
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryText,
                                           letterSpacing: 0.0,
                                         ),
                                   ),
                                   Text(
-                                    user != null 
-                                      ? '${user.pocket.toStringAsFixed(2)} DT'
-                                      : '0.00 DT',
+                                    user != null
+                                        ? '${user.pocket.toStringAsFixed(2)} DT'
+                                        : '0.00 DT',
                                     style: FlutterFlowTheme.of(context)
                                         .bodyMedium
                                         .override(
                                           fontFamily: 'Inter',
-                                          color: FlutterFlowTheme.of(context).primary,
+                                          color: FlutterFlowTheme.of(context)
+                                              .primary,
                                           letterSpacing: 0.0,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -759,7 +768,8 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Téléchargement du QR code en cours...'),
+                              content:
+                                  Text('Téléchargement du QR code en cours...'),
                               duration: Duration(seconds: 2),
                             ),
                           );

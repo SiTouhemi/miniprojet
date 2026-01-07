@@ -1394,8 +1394,7 @@ class _CreateUserWidgetState extends State<CreateUserWidget> {
                                 // Show success message
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content:
-                                        Text('User created successfully'),
+                                    content: Text('User created successfully'),
                                     backgroundColor: Colors.green,
                                   ),
                                 );

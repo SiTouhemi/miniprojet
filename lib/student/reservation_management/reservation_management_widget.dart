@@ -18,13 +18,15 @@ class ReservationManagementWidget extends StatefulWidget {
   const ReservationManagementWidget({Key? key}) : super(key: key);
 
   @override
-  State<ReservationManagementWidget> createState() => _ReservationManagementWidgetState();
+  State<ReservationManagementWidget> createState() =>
+      _ReservationManagementWidgetState();
 }
 
-class _ReservationManagementWidgetState extends State<ReservationManagementWidget> {
+class _ReservationManagementWidgetState
+    extends State<ReservationManagementWidget> {
   final ReservationService _reservationService = ReservationService.instance;
   final TimeSlotService _timeSlotService = TimeSlotService.instance;
-  
+
   List<ReservationRecord> _userReservations = [];
   List<TimeSlotRecord> _availableTimeSlots = [];
   bool _isLoading = true;
@@ -48,8 +50,9 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
 
     try {
       final userId = currentUser!.uid;
-      final reservations = await _reservationService.getUpcomingReservations(userId);
-      
+      final reservations =
+          await _reservationService.getUpcomingReservations(userId);
+
       setState(() {
         _userReservations = reservations;
         _isLoading = false;
@@ -66,12 +69,13 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
     try {
       final tomorrow = DateTime.now().add(const Duration(days: 1));
       final timeSlots = await _timeSlotService.getAvailableTimeSlots(tomorrow);
-      
+
       setState(() {
         _availableTimeSlots = timeSlots;
       });
     } catch (e) {
-      AppLogger.e('Error loading time slots', error: e, tag: 'ReservationManagementWidget');
+      AppLogger.e('Error loading time slots',
+          error: e, tag: 'ReservationManagementWidget');
     }
   }
 
@@ -109,7 +113,7 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
           _successMessage = 'Reservation cancelled successfully';
           _isProcessing = false;
         });
-        
+
         // Reload reservations
         await _loadUserReservations();
       } else {
@@ -142,7 +146,8 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
     await _loadAvailableTimeSlots();
 
     if (_availableTimeSlots.isEmpty) {
-      _showErrorDialog('No Available Slots', 'No alternative time slots are available for modification.');
+      _showErrorDialog('No Available Slots',
+          'No alternative time slots are available for modification.');
       return;
     }
 
@@ -168,7 +173,7 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
           _successMessage = 'Reservation modified successfully';
           _isProcessing = false;
         });
-        
+
         // Reload reservations
         await _loadUserReservations();
       } else {
@@ -187,43 +192,46 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
 
   Future<bool> _showCancellationDialog(ReservationRecord reservation) async {
     return await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Cancel Reservation'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Are you sure you want to cancel this reservation?'),
-            const SizedBox(height: 16),
-            Text('Time: ${DateFormat('MMM dd, yyyy - HH:mm').format(reservation.creneaux!)}'),
-            Text('Price: ${reservation.prix} TND'),
-            const SizedBox(height: 16),
-            const Text(
-              'Note: Cancellations must be made at least 2 hours before the meal time.',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Cancel Reservation'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Are you sure you want to cancel this reservation?'),
+                const SizedBox(height: 16),
+                Text(
+                    'Time: ${DateFormat('MMM dd, yyyy - HH:mm').format(reservation.creneaux!)}'),
+                Text(
+                    'Price: ${(reservation.prix / 1000.0).toStringAsFixed(2)} TND'),
+                const SizedBox(height: 16),
+                const Text(
+                  'Note: Cancellations must be made at least 2 hours before the meal time.',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Keep Reservation'),
-          ),
-          FFButtonWidget(
-            onPressed: () => Navigator.of(context).pop(true),
-            text: 'Cancel Reservation',
-            options: FFButtonOptions(
-              color: FlutterFlowTheme.of(context).error,
-              textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                fontFamily: 'Readex Pro',
-                color: Colors.white,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Keep Reservation'),
               ),
-            ),
+              FFButtonWidget(
+                onPressed: () => Navigator.of(context).pop(true),
+                text: 'Cancel Reservation',
+                options: FFButtonOptions(
+                  color: FlutterFlowTheme.of(context).error,
+                  textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                        fontFamily: 'Readex Pro',
+                        color: Colors.white,
+                      ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
   }
 
   Future<TimeSlotRecord?> _showTimeSlotSelectionDialog() async {
@@ -238,18 +246,21 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
             itemCount: _availableTimeSlots.length,
             itemBuilder: (context, index) {
               final timeSlot = _availableTimeSlots[index];
-              final availableSpots = timeSlot.maxCapacity - timeSlot.currentReservations;
-              
+              final availableSpots =
+                  timeSlot.maxCapacity - timeSlot.currentReservations;
+
               return ListTile(
-                title: Text(DateFormat('MMM dd, yyyy - HH:mm').format(timeSlot.startTime!)),
-                subtitle: Text('Available: $availableSpots/${timeSlot.maxCapacity} - ${timeSlot.price} TND'),
-                trailing: availableSpots > 0 
-                  ? const Icon(Icons.check_circle, color: Colors.green)
-                  : const Icon(Icons.cancel, color: Colors.red),
+                title: Text(DateFormat('MMM dd, yyyy - HH:mm')
+                    .format(timeSlot.startTime!)),
+                subtitle: Text(
+                    'Available: $availableSpots/${timeSlot.maxCapacity} - ${timeSlot.price} TND'),
+                trailing: availableSpots > 0
+                    ? const Icon(Icons.check_circle, color: Colors.green)
+                    : const Icon(Icons.cancel, color: Colors.red),
                 enabled: availableSpots > 0,
-                onTap: availableSpots > 0 
-                  ? () => Navigator.of(context).pop(timeSlot)
-                  : null,
+                onTap: availableSpots > 0
+                    ? () => Navigator.of(context).pop(timeSlot)
+                    : null,
               );
             },
           ),
@@ -288,15 +299,17 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
     );
   }
 
-  Widget _buildReservationCard(ReservationRecord reservation, AppLocalizations l10n) {
+  Widget _buildReservationCard(
+      ReservationRecord reservation, AppLocalizations l10n) {
     final now = DateTime.now();
     final hoursUntilMeal = reservation.creneaux?.difference(now).inHours ?? 0;
-    final canModifyOrCancel = hoursUntilMeal >= 2 && 
-                              reservation.creneaux!.isAfter(now) &&
-                              (reservation.status == 'confirmed' || reservation.status == 'pending');
+    final canModifyOrCancel = hoursUntilMeal >= 2 &&
+        reservation.creneaux!.isAfter(now) &&
+        (reservation.status == 'confirmed' || reservation.status == 'pending');
 
     return Card(
-      margin: AppSpacing.marginMD.copyWith(top: AppSpacing.sm, bottom: AppSpacing.sm),
+      margin: AppSpacing.marginMD
+          .copyWith(top: AppSpacing.sm, bottom: AppSpacing.sm),
       child: Padding(
         padding: AppSpacing.paddingMD,
         child: Column(
@@ -318,7 +331,8 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
                     borderRadius: AppBorders.borderMD,
                   ),
                   child: Text(
-                    l10n.translate('status_${reservation.status.toLowerCase()}'),
+                    l10n.translate(
+                        'status_${reservation.status.toLowerCase()}'),
                     style: AppTypography.caption.copyWith(
                       color: AppColors.textOnPrimary,
                       fontWeight: AppTypography.bold,
@@ -335,7 +349,7 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
               ),
             ),
             Text(
-              '${l10n.translate('price_label')}: ${AppConfig.formatPrice(reservation.prix.toDouble())}',
+              '${l10n.translate('price_label')}: ${AppConfig.formatPrice(reservation.prix / 1000.0)}',
               style: AppTypography.bodyLarge.copyWith(
                 color: AppColors.textPrimary,
               ),
@@ -351,7 +365,9 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
             Text(
               '${l10n.translate('hours_until_meal')}: $hoursUntilMeal',
               style: AppTypography.bodySmall.copyWith(
-                color: hoursUntilMeal < 2 ? AppColors.error : AppColors.textSecondary,
+                color: hoursUntilMeal < 2
+                    ? AppColors.error
+                    : AppColors.textSecondary,
               ),
             ),
             // Show QR button for confirmed reservations
@@ -379,7 +395,9 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
                 children: [
                   Expanded(
                     child: FFButtonWidget(
-                      onPressed: _isProcessing ? null : () => _modifyReservation(reservation),
+                      onPressed: _isProcessing
+                          ? null
+                          : () => _modifyReservation(reservation),
                       text: l10n.translate('modify'),
                       icon: Icon(Icons.edit, size: AppIconSizes.sm),
                       options: FFButtonOptions(
@@ -393,7 +411,9 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
                   AppSpacing.horizontalMD,
                   Expanded(
                     child: FFButtonWidget(
-                      onPressed: _isProcessing ? null : () => _cancelReservation(reservation),
+                      onPressed: _isProcessing
+                          ? null
+                          : () => _cancelReservation(reservation),
                       text: l10n.cancel,
                       icon: Icon(Icons.cancel, size: AppIconSizes.sm),
                       options: FFButtonOptions(
@@ -443,7 +463,8 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
     }
   }
 
-  String _getRestrictionMessage(ReservationRecord reservation, int hoursUntilMeal, AppLocalizations l10n) {
+  String _getRestrictionMessage(ReservationRecord reservation,
+      int hoursUntilMeal, AppLocalizations l10n) {
     if (reservation.status == 'cancelled') {
       return l10n.translate('reservation_cancelled_status');
     }
@@ -462,7 +483,7 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.primary,
@@ -584,7 +605,8 @@ class _ReservationManagementWidgetState extends State<ReservationManagementWidge
                     : ListView.builder(
                         itemCount: _userReservations.length,
                         itemBuilder: (context, index) {
-                          return _buildReservationCard(_userReservations[index], l10n);
+                          return _buildReservationCard(
+                              _userReservations[index], l10n);
                         },
                       ),
           ),

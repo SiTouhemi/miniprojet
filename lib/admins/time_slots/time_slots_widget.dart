@@ -470,7 +470,7 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
     } catch (e) {
       // Close loading dialog if still open
       Navigator.pop(context);
-      
+
       // Show error dialog
       showDialog(
         context: context,

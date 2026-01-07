@@ -10,7 +10,8 @@ import '/utils/app_logger.dart';
 /// Service for validating data consistency between Firestore and UI display
 /// Implements requirements 2.4, 5.1, 5.2, 5.3, 5.6 for real-time data synchronization
 class DataValidationService {
-  static final DataValidationService _instance = DataValidationService._internal();
+  static final DataValidationService _instance =
+      DataValidationService._internal();
   factory DataValidationService() => _instance;
   DataValidationService._internal();
 
@@ -18,13 +19,12 @@ class DataValidationService {
 
   /// Validate user data consistency between Firestore and local cache
   /// Requirement 2.1, 2.2, 2.3: Ensure displayed data matches Firestore
-  Future<ValidationResult> validateUserData(UserRecord localUser, String uid) async {
+  Future<ValidationResult> validateUserData(
+      UserRecord localUser, String uid) async {
     try {
       // Fetch fresh data from Firestore
-      final doc = await FirebaseFirestore.instance
-          .collection('user')
-          .doc(uid)
-          .get();
+      final doc =
+          await FirebaseFirestore.instance.collection('user').doc(uid).get();
 
       if (!doc.exists) {
         return ValidationResult(
@@ -40,36 +40,46 @@ class DataValidationService {
 
       // Validate critical fields match
       if (localUser.nom != firestoreUser.nom) {
-        errors.add('Name mismatch: local="${localUser.nom}", firestore="${firestoreUser.nom}"');
+        errors.add(
+            'Name mismatch: local="${localUser.nom}", firestore="${firestoreUser.nom}"');
       }
 
       if (localUser.email != firestoreUser.email) {
-        errors.add('Email mismatch: local="${localUser.email}", firestore="${firestoreUser.email}"');
+        errors.add(
+            'Email mismatch: local="${localUser.email}", firestore="${firestoreUser.email}"');
       }
 
       if (localUser.pocket != firestoreUser.pocket) {
-        errors.add('Balance mismatch: local=${localUser.pocket}, firestore=${firestoreUser.pocket}');
+        errors.add(
+            'Balance mismatch: local=${localUser.pocket}, firestore=${firestoreUser.pocket}');
       }
 
       if (localUser.tickets != firestoreUser.tickets) {
-        errors.add('Tickets mismatch: local=${localUser.tickets}, firestore=${firestoreUser.tickets}');
+        errors.add(
+            'Tickets mismatch: local=${localUser.tickets}, firestore=${firestoreUser.tickets}');
       }
 
       if (localUser.role != firestoreUser.role) {
-        errors.add('Role mismatch: local="${localUser.role}", firestore="${firestoreUser.role}"');
+        errors.add(
+            'Role mismatch: local="${localUser.role}", firestore="${firestoreUser.role}"');
       }
 
       // Check for missing optional fields
-      if (firestoreUser.classe.isNotEmpty && localUser.classe != firestoreUser.classe) {
-        errors.add('Class mismatch: local="${localUser.classe}", firestore="${firestoreUser.classe}"');
+      if (firestoreUser.classe.isNotEmpty &&
+          localUser.classe != firestoreUser.classe) {
+        errors.add(
+            'Class mismatch: local="${localUser.classe}", firestore="${firestoreUser.classe}"');
       }
 
       if (localUser.language != firestoreUser.language) {
-        errors.add('Language mismatch: local="${localUser.language}", firestore="${firestoreUser.language}"');
+        errors.add(
+            'Language mismatch: local="${localUser.language}", firestore="${firestoreUser.language}"');
       }
 
-      if (localUser.notificationsEnabled != firestoreUser.notificationsEnabled) {
-        errors.add('Notifications setting mismatch: local=${localUser.notificationsEnabled}, firestore=${firestoreUser.notificationsEnabled}');
+      if (localUser.notificationsEnabled !=
+          firestoreUser.notificationsEnabled) {
+        errors.add(
+            'Notifications setting mismatch: local=${localUser.notificationsEnabled}, firestore=${firestoreUser.notificationsEnabled}');
       }
 
       return ValidationResult(
@@ -78,7 +88,6 @@ class DataValidationService {
         missingFields: missingFields,
         firestoreData: firestoreUser,
       );
-
     } catch (e) {
       return ValidationResult(
         isValid: false,
@@ -90,7 +99,8 @@ class DataValidationService {
 
   /// Validate reservation data consistency
   /// Requirement 5.2: Ensure reservation data is synchronized
-  Future<ValidationResult> validateReservationData(List<ReservationRecord> localReservations, String userId) async {
+  Future<ValidationResult> validateReservationData(
+      List<ReservationRecord> localReservations, String userId) async {
     try {
       // Fetch fresh reservations from Firestore
       final query = await FirebaseFirestore.instance
@@ -99,27 +109,31 @@ class DataValidationService {
           .orderBy('createdAt', descending: true)
           .get();
 
-      final firestoreReservations = query.docs
-          .map((doc) => ReservationRecord.fromSnapshot(doc))
-          .toList();
+      final firestoreReservations =
+          query.docs.map((doc) => ReservationRecord.fromSnapshot(doc)).toList();
 
       final errors = <String>[];
 
       // Check count consistency
       if (localReservations.length != firestoreReservations.length) {
-        errors.add('Reservation count mismatch: local=${localReservations.length}, firestore=${firestoreReservations.length}');
+        errors.add(
+            'Reservation count mismatch: local=${localReservations.length}, firestore=${firestoreReservations.length}');
       }
 
       // Check individual reservations
-      for (int i = 0; i < localReservations.length && i < firestoreReservations.length; i++) {
+      for (int i = 0;
+          i < localReservations.length && i < firestoreReservations.length;
+          i++) {
         final local = localReservations[i];
         final firestore = firestoreReservations[i];
 
         if (local.status != firestore.status) {
-          errors.add('Reservation ${i} status mismatch: local="${local.status}", firestore="${firestore.status}"');
+          errors.add(
+              'Reservation ${i} status mismatch: local="${local.status}", firestore="${firestore.status}"');
         }
 
-        if (local.creneaux?.millisecondsSinceEpoch != firestore.creneaux?.millisecondsSinceEpoch) {
+        if (local.creneaux?.millisecondsSinceEpoch !=
+            firestore.creneaux?.millisecondsSinceEpoch) {
           errors.add('Reservation ${i} time slot mismatch');
         }
       }
@@ -129,7 +143,6 @@ class DataValidationService {
         errors: errors,
         missingFields: [],
       );
-
     } catch (e) {
       return ValidationResult(
         isValid: false,
@@ -141,7 +154,8 @@ class DataValidationService {
 
   /// Validate menu data consistency
   /// Requirement 5.3: Ensure menu data is synchronized
-  Future<ValidationResult> validateMenuData(List<DailyMenuRecord> localMenu, DateTime date) async {
+  Future<ValidationResult> validateMenuData(
+      List<DailyMenuRecord> localMenu, DateTime date) async {
     try {
       final startOfDay = DateTime(date.year, date.month, date.day);
       final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
@@ -153,15 +167,15 @@ class DataValidationService {
           .where('available', isEqualTo: true)
           .get();
 
-      final firestoreMenus = query.docs
-          .map((doc) => DailyMenuRecord.fromSnapshot(doc))
-          .toList();
+      final firestoreMenus =
+          query.docs.map((doc) => DailyMenuRecord.fromSnapshot(doc)).toList();
 
       final errors = <String>[];
 
       // Check count consistency
       if (localMenu.length != firestoreMenus.length) {
-        errors.add('Menu count mismatch: local=${localMenu.length}, firestore=${firestoreMenus.length}');
+        errors.add(
+            'Menu count mismatch: local=${localMenu.length}, firestore=${firestoreMenus.length}');
       }
 
       // Check individual menu items
@@ -170,15 +184,18 @@ class DataValidationService {
         final firestore = firestoreMenus[i];
 
         if (local.mainDish != firestore.mainDish) {
-          errors.add('Menu item ${i} name mismatch: local="${local.mainDish}", firestore="${firestore.mainDish}"');
+          errors.add(
+              'Menu item ${i} name mismatch: local="${local.mainDish}", firestore="${firestore.mainDish}"');
         }
 
         if (local.price != firestore.price) {
-          errors.add('Menu item ${i} price mismatch: local=${local.price}, firestore=${firestore.price}');
+          errors.add(
+              'Menu item ${i} price mismatch: local=${local.price}, firestore=${firestore.price}');
         }
 
         if (local.mealType != firestore.mealType) {
-          errors.add('Menu item ${i} meal type mismatch: local="${local.mealType}", firestore="${firestore.mealType}"');
+          errors.add(
+              'Menu item ${i} meal type mismatch: local="${local.mealType}", firestore="${firestore.mealType}"');
         }
       }
 
@@ -187,7 +204,6 @@ class DataValidationService {
         errors: errors,
         missingFields: [],
       );
-
     } catch (e) {
       return ValidationResult(
         isValid: false,
@@ -199,7 +215,8 @@ class DataValidationService {
 
   /// Validate time slot data consistency
   /// Requirement 5.1: Ensure time slot data is synchronized
-  Future<ValidationResult> validateTimeSlotData(List<TimeSlotRecord> localSlots, DateTime date) async {
+  Future<ValidationResult> validateTimeSlotData(
+      List<TimeSlotRecord> localSlots, DateTime date) async {
     try {
       final startOfDay = DateTime(date.year, date.month, date.day);
       final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
@@ -211,15 +228,15 @@ class DataValidationService {
           .where('is_active', isEqualTo: true)
           .get();
 
-      final firestoreSlots = query.docs
-          .map((doc) => TimeSlotRecord.fromSnapshot(doc))
-          .toList();
+      final firestoreSlots =
+          query.docs.map((doc) => TimeSlotRecord.fromSnapshot(doc)).toList();
 
       final errors = <String>[];
 
       // Check count consistency
       if (localSlots.length != firestoreSlots.length) {
-        errors.add('Time slot count mismatch: local=${localSlots.length}, firestore=${firestoreSlots.length}');
+        errors.add(
+            'Time slot count mismatch: local=${localSlots.length}, firestore=${firestoreSlots.length}');
       }
 
       // Check individual time slots
@@ -228,15 +245,18 @@ class DataValidationService {
         final firestore = firestoreSlots[i];
 
         if (local.maxCapacity != firestore.maxCapacity) {
-          errors.add('Time slot ${i} capacity mismatch: local=${local.maxCapacity}, firestore=${firestore.maxCapacity}');
+          errors.add(
+              'Time slot ${i} capacity mismatch: local=${local.maxCapacity}, firestore=${firestore.maxCapacity}');
         }
 
         if (local.currentReservations != firestore.currentReservations) {
-          errors.add('Time slot ${i} current reservations mismatch: local=${local.currentReservations}, firestore=${firestore.currentReservations}');
+          errors.add(
+              'Time slot ${i} current reservations mismatch: local=${local.currentReservations}, firestore=${firestore.currentReservations}');
         }
 
         if (local.isActive != firestore.isActive) {
-          errors.add('Time slot ${i} active status mismatch: local=${local.isActive}, firestore=${firestore.isActive}');
+          errors.add(
+              'Time slot ${i} active status mismatch: local=${local.isActive}, firestore=${firestore.isActive}');
         }
       }
 
@@ -245,7 +265,6 @@ class DataValidationService {
         errors: errors,
         missingFields: [],
       );
-
     } catch (e) {
       return ValidationResult(
         isValid: false,
@@ -257,7 +276,8 @@ class DataValidationService {
 
   /// Check if data is stale and needs refresh
   /// Requirement 5.6: Performance monitoring for sync operations
-  bool isDataStale(DateTime? lastSyncTime, {Duration maxAge = const Duration(minutes: 5)}) {
+  bool isDataStale(DateTime? lastSyncTime,
+      {Duration maxAge = const Duration(minutes: 5)}) {
     if (lastSyncTime == null) return true;
     return DateTime.now().difference(lastSyncTime) > maxAge;
   }
@@ -277,7 +297,9 @@ class DataValidationService {
     }
 
     // Check for common hardcoded values
-    if (user.nom == 'Test User' || user.nom == 'Default User' || user.nom == 'Utilisateur') {
+    if (user.nom == 'Test User' ||
+        user.nom == 'Default User' ||
+        user.nom == 'Utilisateur') {
       errors.add('Potentially hardcoded name detected: "${user.nom}"');
     }
 
@@ -318,10 +340,14 @@ class DataValidationService {
           errors: ['No user data available'],
           missingFields: [],
         ),
-        reservationValidation: ValidationResult(isValid: true, errors: [], missingFields: []),
-        menuValidation: ValidationResult(isValid: true, errors: [], missingFields: []),
-        timeSlotValidation: ValidationResult(isValid: true, errors: [], missingFields: []),
-        hardcodedDataValidation: ValidationResult(isValid: true, errors: [], missingFields: []),
+        reservationValidation:
+            ValidationResult(isValid: true, errors: [], missingFields: []),
+        menuValidation:
+            ValidationResult(isValid: true, errors: [], missingFields: []),
+        timeSlotValidation:
+            ValidationResult(isValid: true, errors: [], missingFields: []),
+        hardcodedDataValidation:
+            ValidationResult(isValid: true, errors: [], missingFields: []),
       );
     }
 

@@ -29,17 +29,18 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => UserManagementModel());
-    
+
     _model.searchController ??= TextEditingController();
     _model.searchFocusNode ??= FocusNode();
-    
+
     // Check admin permissions
     _checkAdminAccess();
   }
 
   Future<void> _checkAdminAccess() async {
     try {
-      await RoleMiddleware.requireRole(UserRole.admin, 'gestion des utilisateurs');
+      await RoleMiddleware.requireRole(
+          UserRole.admin, 'gestion des utilisateurs');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -89,14 +90,14 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
           title: Text(
             'Gestion des Utilisateurs',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
-              font: GoogleFonts.urbanist(
-                fontWeight: FontWeight.bold,
-              ),
-              color: Color(0xFF0B191E),
-              fontSize: 24.0,
-              letterSpacing: 0.0,
-              fontWeight: FontWeight.bold,
-            ),
+                  font: GoogleFonts.urbanist(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  color: Color(0xFF0B191E),
+                  fontSize: 24.0,
+                  letterSpacing: 0.0,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           actions: [
             Padding(
@@ -115,7 +116,7 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
                   _model.searchController?.clear();
                   _model.selectedRoleFilter = '';
                   setState(() {});
-                  
+
                   // Show refresh feedback
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -177,16 +178,20 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
                         ),
                         Expanded(
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 0.0, 0.0),
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                12.0, 0.0, 0.0, 0.0),
                             child: TextFormField(
                               controller: _model.searchController,
                               focusNode: _model.searchFocusNode,
                               onChanged: (_) => setState(() {}),
                               decoration: InputDecoration(
-                                hintText: 'Rechercher par nom, email, classe, rôle...',
-                                hintStyle: FlutterFlowTheme.of(context).bodyMedium.override(
-                                  color: Color(0xFF6B7280),
-                                ),
+                                hintText:
+                                    'Rechercher par nom, email, classe, rôle...',
+                                hintStyle: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      color: Color(0xFF6B7280),
+                                    ),
                                 border: InputBorder.none,
                                 enabledBorder: InputBorder.none,
                                 focusedBorder: InputBorder.none,
@@ -226,12 +231,18 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
                       stream: queryUserRecord(),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) return SizedBox.shrink();
-                        
+
                         final allUsers = snapshot.data!;
-                        final studentCount = allUsers.where((u) => u.role.toLowerCase() == 'student').length;
-                        final staffCount = allUsers.where((u) => u.role.toLowerCase() == 'staff').length;
-                        final adminCount = allUsers.where((u) => u.role.toLowerCase() == 'admin').length;
-                        
+                        final studentCount = allUsers
+                            .where((u) => u.role.toLowerCase() == 'student')
+                            .length;
+                        final staffCount = allUsers
+                            .where((u) => u.role.toLowerCase() == 'staff')
+                            .length;
+                        final adminCount = allUsers
+                            .where((u) => u.role.toLowerCase() == 'admin')
+                            .length;
+
                         return Container(
                           width: double.infinity,
                           padding: EdgeInsets.all(16.0),
@@ -246,17 +257,21 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              _buildStatItem('Total', allUsers.length, Color(0xFF6B7280)),
-                              _buildStatItem('Étudiants', studentCount, Color(0xFF4B986C)),
-                              _buildStatItem('Personnel', staffCount, Color(0xFF928163)),
-                              _buildStatItem('Admins', adminCount, Color(0xFFC4454D)),
+                              _buildStatItem(
+                                  'Total', allUsers.length, Color(0xFF6B7280)),
+                              _buildStatItem(
+                                  'Étudiants', studentCount, Color(0xFF4B986C)),
+                              _buildStatItem(
+                                  'Personnel', staffCount, Color(0xFF928163)),
+                              _buildStatItem(
+                                  'Admins', adminCount, Color(0xFFC4454D)),
                             ],
                           ),
                         );
                       },
                     ),
                     SizedBox(height: 16.0),
-                    
+
                     // Filter chips
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -275,17 +290,19 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
                   ],
                 ),
               ),
-              
+
               // Users List
               Expanded(
                 child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 16.0),
+                  padding:
+                      EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 16.0),
                   child: StreamBuilder<List<UserRecord>>(
                     stream: queryUserRecord(
                       queryBuilder: (userRecord) {
                         // Load all users without Firestore-level filtering
                         // We'll do client-side filtering for better search experience
-                        return userRecord.orderBy('created_time', descending: true);
+                        return userRecord.orderBy('created_time',
+                            descending: true);
                       },
                     ),
                     builder: (context, snapshot) {
@@ -303,36 +320,45 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
                           ),
                         );
                       }
-                      
+
                       List<UserRecord> users = snapshot.data!;
-                      
+
                       // Apply comprehensive client-side filtering
-                      if (_model.searchController.text.isNotEmpty || _model.selectedRoleFilter.isNotEmpty) {
-                        final searchText = _model.searchController.text.toLowerCase().trim();
+                      if (_model.searchController.text.isNotEmpty ||
+                          _model.selectedRoleFilter.isNotEmpty) {
+                        final searchText =
+                            _model.searchController.text.toLowerCase().trim();
                         users = users.where((user) {
                           // Role filter
-                          bool matchesRole = _model.selectedRoleFilter.isEmpty || 
-                                           user.role.toLowerCase() == _model.selectedRoleFilter.toLowerCase();
-                          
+                          bool matchesRole =
+                              _model.selectedRoleFilter.isEmpty ||
+                                  user.role.toLowerCase() ==
+                                      _model.selectedRoleFilter.toLowerCase();
+
                           // Text search filter
                           bool matchesSearch = true;
                           if (searchText.isNotEmpty) {
-                            final name = (user.nom.isNotEmpty ? user.nom : user.displayName).toLowerCase();
+                            final name = (user.nom.isNotEmpty
+                                    ? user.nom
+                                    : user.displayName)
+                                .toLowerCase();
                             final email = user.email.toLowerCase();
                             final classe = user.classe.toLowerCase();
                             final role = user.role.toLowerCase();
-                            
+
                             matchesSearch = name.contains(searchText) ||
-                                          email.contains(searchText) ||
-                                          classe.contains(searchText) ||
-                                          role.contains(searchText) ||
-                                          _getRoleDisplayName(user.role).toLowerCase().contains(searchText);
+                                email.contains(searchText) ||
+                                classe.contains(searchText) ||
+                                role.contains(searchText) ||
+                                _getRoleDisplayName(user.role)
+                                    .toLowerCase()
+                                    .contains(searchText);
                           }
-                          
+
                           return matchesRole && matchesSearch;
                         }).toList();
                       }
-                      
+
                       if (users.isEmpty) {
                         return Center(
                           child: Column(
@@ -345,21 +371,27 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
                               ),
                               SizedBox(height: 16.0),
                               Text(
-                                _model.searchController.text.isNotEmpty || _model.selectedRoleFilter.isNotEmpty
+                                _model.searchController.text.isNotEmpty ||
+                                        _model.selectedRoleFilter.isNotEmpty
                                     ? 'Aucun utilisateur trouvé pour les critères sélectionnés'
                                     : 'Aucun utilisateur trouvé',
-                                style: FlutterFlowTheme.of(context).headlineSmall.override(
-                                  color: Color(0xFF6B7280),
-                                ),
+                                style: FlutterFlowTheme.of(context)
+                                    .headlineSmall
+                                    .override(
+                                      color: Color(0xFF6B7280),
+                                    ),
                                 textAlign: TextAlign.center,
                               ),
-                              if (_model.searchController.text.isNotEmpty || _model.selectedRoleFilter.isNotEmpty) ...[
+                              if (_model.searchController.text.isNotEmpty ||
+                                  _model.selectedRoleFilter.isNotEmpty) ...[
                                 SizedBox(height: 8.0),
                                 Text(
                                   'Essayez de modifier vos critères de recherche',
-                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                    color: Color(0xFF6B7280),
-                                  ),
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        color: Color(0xFF6B7280),
+                                      ),
                                   textAlign: TextAlign.center,
                                 ),
                               ],
@@ -367,21 +399,25 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
                           ),
                         );
                       }
-                      
+
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Results counter
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 16.0),
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 0.0, 0.0, 16.0),
                             child: Text(
-                              _model.searchController.text.isNotEmpty || _model.selectedRoleFilter.isNotEmpty
+                              _model.searchController.text.isNotEmpty ||
+                                      _model.selectedRoleFilter.isNotEmpty
                                   ? '${users.length} utilisateur${users.length > 1 ? 's' : ''} trouvé${users.length > 1 ? 's' : ''}'
                                   : '${users.length} utilisateur${users.length > 1 ? 's' : ''} au total',
-                              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                color: Color(0xFF6B7280),
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    color: Color(0xFF6B7280),
+                                    fontWeight: FontWeight.w500,
+                                  ),
                             ),
                           ),
                           // Users list
@@ -444,75 +480,88 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
                         children: [
                           Text(
                             user.nom.isNotEmpty ? user.nom : user.displayName,
-                            style: FlutterFlowTheme.of(context).titleMedium.override(
-                              font: GoogleFonts.plusJakartaSans(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              color: Color(0xFF0B191E),
-                              fontSize: 18.0,
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: FlutterFlowTheme.of(context)
+                                .titleMedium
+                                .override(
+                                  font: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  color: Color(0xFF0B191E),
+                                  fontSize: 18.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                           SizedBox(height: 4.0),
                           Text(
                             user.email,
-                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              color: Color(0xFF384E58),
-                              fontSize: 14.0,
-                            ),
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  color: Color(0xFF384E58),
+                                  fontSize: 14.0,
+                                ),
                           ),
                           SizedBox(height: 8.0),
                           Row(
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Container(
-                                padding: EdgeInsetsDirectional.fromSTEB(8.0, 4.0, 8.0, 4.0),
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    8.0, 4.0, 8.0, 4.0),
                                 decoration: BoxDecoration(
                                   color: _getRoleColor(user.role),
                                   borderRadius: BorderRadius.circular(12.0),
                                 ),
                                 child: Text(
                                   _getRoleDisplayName(user.role),
-                                  style: FlutterFlowTheme.of(context).labelSmall.override(
-                                    color: Colors.white,
-                                    fontSize: 10.0,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                  style: FlutterFlowTheme.of(context)
+                                      .labelSmall
+                                      .override(
+                                        color: Colors.white,
+                                        fontSize: 10.0,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                 ),
                               ),
                               if (user.classe.isNotEmpty) ...[
                                 SizedBox(width: 8.0),
                                 Container(
-                                  padding: EdgeInsetsDirectional.fromSTEB(8.0, 4.0, 8.0, 4.0),
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      8.0, 4.0, 8.0, 4.0),
                                   decoration: BoxDecoration(
                                     color: Color(0xFF928163),
                                     borderRadius: BorderRadius.circular(12.0),
                                   ),
                                   child: Text(
                                     user.classe,
-                                    style: FlutterFlowTheme.of(context).labelSmall.override(
-                                      color: Colors.white,
-                                      fontSize: 10.0,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                    style: FlutterFlowTheme.of(context)
+                                        .labelSmall
+                                        .override(
+                                          color: Colors.white,
+                                          fontSize: 10.0,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                   ),
                                 ),
                               ],
                               SizedBox(width: 8.0),
                               Container(
-                                padding: EdgeInsetsDirectional.fromSTEB(8.0, 4.0, 8.0, 4.0),
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    8.0, 4.0, 8.0, 4.0),
                                 decoration: BoxDecoration(
                                   color: Color(0xFF6D604A),
                                   borderRadius: BorderRadius.circular(12.0),
                                 ),
                                 child: Text(
                                   '${user.pocket.toStringAsFixed(2)} TND',
-                                  style: FlutterFlowTheme.of(context).labelSmall.override(
-                                    color: Colors.white,
-                                    fontSize: 10.0,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                  style: FlutterFlowTheme.of(context)
+                                      .labelSmall
+                                      .override(
+                                        color: Colors.white,
+                                        fontSize: 10.0,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                 ),
                               ),
                             ],
@@ -588,10 +637,10 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
         child: Text(
           label,
           style: FlutterFlowTheme.of(context).bodySmall.override(
-            color: isSelected ? Colors.white : Color(0xFF384E58),
-            fontSize: 12.0,
-            fontWeight: FontWeight.w500,
-          ),
+                color: isSelected ? Colors.white : Color(0xFF384E58),
+                fontSize: 12.0,
+                fontWeight: FontWeight.w500,
+              ),
         ),
       ),
     );
@@ -604,19 +653,19 @@ class _UserManagementWidgetState extends State<UserManagementWidget> {
         Text(
           count.toString(),
           style: FlutterFlowTheme.of(context).headlineSmall.override(
-            color: color,
-            fontSize: 20.0,
-            fontWeight: FontWeight.bold,
-          ),
+                color: color,
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              ),
         ),
         SizedBox(height: 4.0),
         Text(
           label,
           style: FlutterFlowTheme.of(context).bodySmall.override(
-            color: Color(0xFF6B7280),
-            fontSize: 11.0,
-            fontWeight: FontWeight.w500,
-          ),
+                color: Color(0xFF6B7280),
+                fontSize: 11.0,
+                fontWeight: FontWeight.w500,
+              ),
         ),
       ],
     );
@@ -675,8 +724,8 @@ class _EditUserDialogState extends State<EditUserDialog> {
       title: Text(
         'Modifier Utilisateur',
         style: FlutterFlowTheme.of(context).headlineSmall.override(
-          fontWeight: FontWeight.bold,
-        ),
+              fontWeight: FontWeight.bold,
+            ),
       ),
       content: SingleChildScrollView(
         child: Column(
@@ -693,7 +742,7 @@ class _EditUserDialogState extends State<EditUserDialog> {
               ),
             ),
             SizedBox(height: 16.0),
-            
+
             // Email Field (read-only)
             TextFormField(
               controller: _emailController,
@@ -706,7 +755,7 @@ class _EditUserDialogState extends State<EditUserDialog> {
               ),
             ),
             SizedBox(height: 16.0),
-            
+
             // Class Field
             TextFormField(
               controller: _classeController,
@@ -718,7 +767,7 @@ class _EditUserDialogState extends State<EditUserDialog> {
               ),
             ),
             SizedBox(height: 16.0),
-            
+
             // Role Dropdown
             DropdownButtonFormField<String>(
               value: _selectedRole,
@@ -740,7 +789,7 @@ class _EditUserDialogState extends State<EditUserDialog> {
               },
             ),
             SizedBox(height: 16.0),
-            
+
             // Current Balance Display
             Container(
               width: double.infinity,
@@ -752,12 +801,12 @@ class _EditUserDialogState extends State<EditUserDialog> {
               child: Text(
                 'Solde actuel: ${widget.user.pocket.toStringAsFixed(2)} TND',
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  fontWeight: FontWeight.w600,
-                ),
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ),
             SizedBox(height: 16.0),
-            
+
             // Add Money Field
             TextFormField(
               controller: _addMoneyController,
@@ -777,31 +826,37 @@ class _EditUserDialogState extends State<EditUserDialog> {
       actions: [
         // Reset Password Button
         TextButton(
-          onPressed: _isLoading ? null : () async {
-            await _resetPassword();
-          },
+          onPressed: _isLoading
+              ? null
+              : () async {
+                  await _resetPassword();
+                },
           child: Text(
             'Réinitialiser MDP',
             style: TextStyle(color: Color(0xFF928163)),
           ),
         ),
-        
+
         // Cancel Button
         TextButton(
-          onPressed: _isLoading ? null : () {
-            Navigator.of(context).pop();
-          },
+          onPressed: _isLoading
+              ? null
+              : () {
+                  Navigator.of(context).pop();
+                },
           child: Text(
             'Annuler',
             style: TextStyle(color: Color(0xFF6B7280)),
           ),
         ),
-        
+
         // Save Button
         ElevatedButton(
-          onPressed: _isLoading ? null : () async {
-            await _saveChanges();
-          },
+          onPressed: _isLoading
+              ? null
+              : () async {
+                  await _saveChanges();
+                },
           style: ElevatedButton.styleFrom(
             backgroundColor: Color(0xFF4B986C),
             foregroundColor: Colors.white,
@@ -828,11 +883,12 @@ class _EditUserDialogState extends State<EditUserDialog> {
       });
 
       await authService.resetPassword(widget.user.email);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Email de réinitialisation envoyé à ${widget.user.email}'),
+            content:
+                Text('Email de réinitialisation envoyé à ${widget.user.email}'),
             backgroundColor: Color(0xFF4B986C),
           ),
         );
@@ -863,22 +919,23 @@ class _EditUserDialogState extends State<EditUserDialog> {
 
       // Prepare update data
       Map<String, dynamic> updateData = {};
-      
+
       if (_nameController.text != widget.user.nom) {
         updateData['nom'] = _nameController.text;
         updateData['display_name'] = _nameController.text;
       }
-      
+
       if (_classeController.text != widget.user.classe) {
         updateData['classe'] = _classeController.text;
       }
-      
+
       if (_selectedRole != widget.user.role) {
         updateData['role'] = _selectedRole;
         // Also update custom claims
-        await authService.setUserRole(widget.user.uid, _parseUserRole(_selectedRole));
+        await authService.setUserRole(
+            widget.user.uid, _parseUserRole(_selectedRole));
       }
-      
+
       // Add money if specified
       if (_addMoneyController.text.isNotEmpty) {
         final addAmount = double.tryParse(_addMoneyController.text);
@@ -886,12 +943,12 @@ class _EditUserDialogState extends State<EditUserDialog> {
           updateData['pocket'] = widget.user.pocket + addAmount;
         }
       }
-      
+
       // Update user document if there are changes
       if (updateData.isNotEmpty) {
         await widget.user.reference.update(updateData);
       }
-      
+
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(

@@ -4,11 +4,13 @@ import '/utils/app_logger.dart';
 
 class PaymentHistoryService {
   static PaymentHistoryService? _instance;
-  static PaymentHistoryService get instance => _instance ??= PaymentHistoryService._();
+  static PaymentHistoryService get instance =>
+      _instance ??= PaymentHistoryService._();
   PaymentHistoryService._();
 
   /// Get user's payment history
-  Future<List<Map<String, dynamic>>> getUserPaymentHistory(String userId) async {
+  Future<List<Map<String, dynamic>>> getUserPaymentHistory(
+      String userId) async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('payment_requests')
@@ -18,7 +20,7 @@ class PaymentHistoryService {
           .get();
 
       final payments = <Map<String, dynamic>>[];
-      
+
       for (final doc in querySnapshot.docs) {
         final data = doc.data();
         payments.add({
@@ -37,7 +39,8 @@ class PaymentHistoryService {
 
       return payments;
     } catch (e) {
-      AppLogger.e('Error fetching payment history', error: e, tag: 'PaymentHistoryService');
+      AppLogger.e('Error fetching payment history',
+          error: e, tag: 'PaymentHistoryService');
       return [];
     }
   }
@@ -59,11 +62,11 @@ class PaymentHistoryService {
       for (final doc in querySnapshot.docs) {
         final data = doc.data();
         totalTransactions++;
-        
+
         if (data['status'] == 'completed') {
           successfulPayments++;
           totalSpent += (data['amount'] as num).toDouble();
-          
+
           if (data['paymentMethod'] == 'd17') {
             d17Payments++;
           } else if (data['paymentMethod'] == 'wallet') {
@@ -76,12 +79,15 @@ class PaymentHistoryService {
         'totalSpent': totalSpent,
         'totalTransactions': totalTransactions,
         'successfulPayments': successfulPayments,
-        'successRate': totalTransactions > 0 ? (successfulPayments / totalTransactions) * 100 : 0,
+        'successRate': totalTransactions > 0
+            ? (successfulPayments / totalTransactions) * 100
+            : 0,
         'd17Payments': d17Payments,
         'walletPayments': walletPayments,
       };
     } catch (e) {
-      AppLogger.e('Error calculating payment stats', error: e, tag: 'PaymentHistoryService');
+      AppLogger.e('Error calculating payment stats',
+          error: e, tag: 'PaymentHistoryService');
       return {
         'totalSpent': 0.0,
         'totalTransactions': 0,
@@ -104,18 +110,18 @@ class PaymentHistoryService {
           .get();
 
       final payments = <Map<String, dynamic>>[];
-      
+
       for (final doc in querySnapshot.docs) {
         final data = doc.data();
         final expiresAt = (data['expiresAt'] as Timestamp?)?.toDate();
-        
+
         // Check if expired
         if (expiresAt != null && DateTime.now().isAfter(expiresAt)) {
           // Update status to expired
           await doc.reference.update({'status': 'expired'});
           continue;
         }
-        
+
         payments.add({
           'id': doc.id,
           'amount': data['amount'],
@@ -130,7 +136,8 @@ class PaymentHistoryService {
 
       return payments;
     } catch (e) {
-      AppLogger.e('Error fetching pending payments', error: e, tag: 'PaymentHistoryService');
+      AppLogger.e('Error fetching pending payments',
+          error: e, tag: 'PaymentHistoryService');
       return [];
     }
   }
@@ -143,9 +150,8 @@ class PaymentHistoryService {
     required String orderId,
   }) async {
     try {
-      final docRef = await FirebaseFirestore.instance
-          .collection('payment_requests')
-          .add({
+      final docRef =
+          await FirebaseFirestore.instance.collection('payment_requests').add({
         'userId': userId,
         'amount': amount,
         'currency': 'TND',
@@ -160,7 +166,8 @@ class PaymentHistoryService {
 
       return docRef.id;
     } catch (e) {
-      AppLogger.e('Error creating wallet payment record', error: e, tag: 'PaymentHistoryService');
+      AppLogger.e('Error creating wallet payment record',
+          error: e, tag: 'PaymentHistoryService');
       return null;
     }
   }

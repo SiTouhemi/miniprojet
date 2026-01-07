@@ -22,7 +22,7 @@ class _AdminPaymentDashboardState extends State<AdminPaymentDashboard> {
 
   Future<void> _loadPendingPayments() async {
     setState(() => isLoading = true);
-    
+
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('payment_requests')
@@ -32,17 +32,17 @@ class _AdminPaymentDashboardState extends State<AdminPaymentDashboard> {
           .get();
 
       final payments = <Map<String, dynamic>>[];
-      
+
       for (final doc in querySnapshot.docs) {
         final data = doc.data();
         final expiresAt = (data['expiresAt'] as Timestamp?)?.toDate();
-        
+
         // Check if expired
         if (expiresAt != null && DateTime.now().isAfter(expiresAt)) {
           await doc.reference.update({'status': 'expired'});
           continue;
         }
-        
+
         // Get user info
         String userName = 'Unknown User';
         try {
@@ -52,12 +52,14 @@ class _AdminPaymentDashboardState extends State<AdminPaymentDashboard> {
               .get();
           if (userDoc.exists) {
             final userData = userDoc.data()!;
-            userName = userData['display_name'] ?? userData['nom'] ?? 'Unknown User';
+            userName =
+                userData['display_name'] ?? userData['nom'] ?? 'Unknown User';
           }
         } catch (e) {
-          AppLogger.w('Error fetching user data', error: e, tag: 'AdminPaymentDashboard');
+          AppLogger.w('Error fetching user data',
+              error: e, tag: 'AdminPaymentDashboard');
         }
-        
+
         payments.add({
           'id': doc.id,
           'userId': data['userId'],
@@ -75,7 +77,8 @@ class _AdminPaymentDashboardState extends State<AdminPaymentDashboard> {
         pendingPayments = payments;
       });
     } catch (e) {
-      AppLogger.e('Error loading pending payments', error: e, tag: 'AdminPaymentDashboard');
+      AppLogger.e('Error loading pending payments',
+          error: e, tag: 'AdminPaymentDashboard');
     } finally {
       setState(() => isLoading = false);
     }
@@ -117,15 +120,17 @@ class _AdminPaymentDashboardState extends State<AdminPaymentDashboard> {
               : ListView.builder(
                   padding: EdgeInsets.all(16),
                   itemCount: pendingPayments.length,
-                  itemBuilder: (context, index) => _buildPaymentCard(pendingPayments[index]),
+                  itemBuilder: (context, index) =>
+                      _buildPaymentCard(pendingPayments[index]),
                 ),
     );
   }
+
   Widget _buildPaymentCard(Map<String, dynamic> payment) {
     final createdAt = payment['createdAt'] as DateTime?;
     final expiresAt = payment['expiresAt'] as DateTime?;
     final timeRemaining = expiresAt?.difference(DateTime.now());
-    
+
     return Card(
       margin: EdgeInsets.only(bottom: 12),
       child: Padding(
@@ -282,8 +287,9 @@ class _AdminPaymentDashboardState extends State<AdminPaymentDashboard> {
 
     if (confirmed == true) {
       try {
-        final transactionId = 'd17_admin_${DateTime.now().millisecondsSinceEpoch}';
-        
+        final transactionId =
+            'd17_admin_${DateTime.now().millisecondsSinceEpoch}';
+
         final result = await D17PaymentService.instance.confirmPayment(
           paymentRequestId: payment['id'],
           transactionId: transactionId,
@@ -301,7 +307,8 @@ class _AdminPaymentDashboardState extends State<AdminPaymentDashboard> {
           throw Exception(result['error']);
         }
       } catch (e) {
-        AppLogger.e('Error confirming payment', error: e, tag: 'AdminPaymentDashboard');
+        AppLogger.e('Error confirming payment',
+            error: e, tag: 'AdminPaymentDashboard');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to confirm payment: ${e.toString()}'),
@@ -317,7 +324,8 @@ class _AdminPaymentDashboardState extends State<AdminPaymentDashboard> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Reject Payment'),
-        content: Text('Are you sure you want to reject this payment? This action cannot be undone.'),
+        content: Text(
+            'Are you sure you want to reject this payment? This action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -351,7 +359,8 @@ class _AdminPaymentDashboardState extends State<AdminPaymentDashboard> {
         );
         _loadPendingPayments(); // Refresh list
       } catch (e) {
-        AppLogger.e('Error rejecting payment', error: e, tag: 'AdminPaymentDashboard');
+        AppLogger.e('Error rejecting payment',
+            error: e, tag: 'AdminPaymentDashboard');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to reject payment: ${e.toString()}'),

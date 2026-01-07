@@ -4,6 +4,8 @@ import '/backend/cloud_functions/cloud_functions.dart';
 import '/backend/services/payment_service.dart';
 import '/backend/services/app_service.dart';
 import '/backend/services/qr_service.dart';
+import '/backend/services/daily_reservation_counter_service.dart';
+import '/config/reservation_config.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/utils/app_logger.dart';
 
@@ -12,6 +14,10 @@ class ReservationService {
   static ReservationService get instance =>
       _instance ??= ReservationService._();
   ReservationService._();
+
+  // Use configuration from ReservationConfig
+  static bool get useCounterBasedValidation =>
+      ReservationConfigHelper.useCounterBasedValidation;
 
   // Create a new reservation with wallet deduction
   Future<Map<String, dynamic>> createReservation({
@@ -25,6 +31,31 @@ class ReservationService {
     int capacity = 1,
   }) async {
     try {
+      // FIRST: Check if user already has a reservation for this meal type today
+      // Use the configured validation method
+      Map<String, dynamic> existingReservationCheck;
+
+      if (useCounterBasedValidation) {
+        // Use the new counter-based approach (no complex Firestore queries)
+        existingReservationCheck = await DailyReservationCounterService.instance
+            .canMakeReservation(userId, mealType);
+
+        if (!existingReservationCheck['canReserve']) {
+          return {
+            'success': false,
+            'error': existingReservationCheck['error'],
+            'errorCode': existingReservationCheck['errorCode']
+          };
+        }
+      } else {
+        // Use the fixed query-based approach
+        existingReservationCheck =
+            await _checkExistingMealReservation(userId, mealType);
+        if (!existingReservationCheck['success']) {
+          return existingReservationCheck;
+        }
+      }
+
       // Get the correct meal price from app settings if not provided
       double reservationAmount;
       if (amount != null) {
@@ -33,13 +64,13 @@ class ReservationService {
         final appSettings = await AppService.instance.getAppSettings();
         reservationAmount = appSettings.defaultMealPrice;
       }
-      
+
       // First validate user has sufficient balance
       final paymentValidation = await PaymentService.instance.validatePayment(
         userId: userId,
         amount: reservationAmount,
       );
-      
+
       if (!paymentValidation['success']) {
         return {
           'success': false,
@@ -47,13 +78,15 @@ class ReservationService {
           'errorCode': 'INSUFFICIENT_FUNDS'
         };
       }
-      
+
       // Use Firestore transaction to ensure atomicity
-      final transactionResult = await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final transactionResult =
+          await FirebaseFirestore.instance.runTransaction((transaction) async {
         // Get user document
-        final userRef = FirebaseFirestore.instance.collection('user').doc(userId);
+        final userRef =
+            FirebaseFirestore.instance.collection('user').doc(userId);
         final userDoc = await transaction.get(userRef);
-        
+
         if (!userDoc.exists) {
           return {
             'success': false,
@@ -61,41 +94,90 @@ class ReservationService {
             'errorCode': 'USER_NOT_FOUND'
           };
         }
-        
+
         final userData = userDoc.data() as Map<String, dynamic>;
         final currentBalance = (userData['pocket'] as num?)?.toDouble() ?? 0.0;
-        
+
         // Double-check balance in transaction
         if (currentBalance < reservationAmount) {
           return {
             'success': false,
-            'error': 'Insufficient balance. Required: ${reservationAmount.toStringAsFixed(2)} TND, Available: ${currentBalance.toStringAsFixed(2)} TND',
+            'error':
+                'Insufficient balance. Required: ${reservationAmount.toStringAsFixed(2)} TND, Available: ${currentBalance.toStringAsFixed(2)} TND',
             'errorCode': 'INSUFFICIENT_FUNDS'
           };
         }
-        
-        // Deduct from user balance
+
+        // Get time slot to get the creneaux (start time)
+        final timeSlotRef =
+            FirebaseFirestore.instance.collection('time_slots').doc(timeSlotId);
+        final timeSlotDoc = await transaction.get(timeSlotRef);
+
+        if (!timeSlotDoc.exists) {
+          return {
+            'success': false,
+            'error': 'Time slot not found',
+            'errorCode': 'TIME_SLOT_NOT_FOUND'
+          };
+        }
+
+        final timeSlotData = timeSlotDoc.data() as Map<String, dynamic>;
+        final creneaux = timeSlotData['start_time'] as Timestamp?;
+        final currentReservations =
+            (timeSlotData['current_reservations'] as num?)?.toInt() ?? 0;
+        final maxCapacity =
+            (timeSlotData['max_capacity'] as num?)?.toInt() ?? 0;
+
+        if (creneaux == null) {
+          return {
+            'success': false,
+            'error': 'Invalid time slot data',
+            'errorCode': 'INVALID_TIME_SLOT'
+          };
+        }
+
+        // Check if there's still capacity available
+        if (currentReservations + capacity > maxCapacity) {
+          return {
+            'success': false,
+            'error': 'This time slot is full. No more places available.',
+            'errorCode': 'SLOT_FULL'
+          };
+        }
+
+        // Deduct from user balance (from pocket, not D17)
         transaction.update(userRef, {
           'pocket': FieldValue.increment(-reservationAmount),
         });
-        
+
+        // Update time slot capacity
+        transaction.update(timeSlotRef, {
+          'current_reservations': FieldValue.increment(capacity),
+        });
+
         // Create reservation document
-        final reservationRef = FirebaseFirestore.instance.collection('reservation').doc();
+        final reservationRef =
+            FirebaseFirestore.instance.collection('reservation').doc();
         transaction.set(reservationRef, {
           'user_id': userId,
           'time_slot_id': timeSlotId,
           'meal_type': mealType,
           'capacity': capacity,
-          'total': reservationAmount,
+          'total':
+              (reservationAmount * 1000).round(), // Convert to millimes (int)
+          'prix': (reservationAmount * 1000)
+              .round(), // Individual price in millimes (int)
+          'creneaux': creneaux, // Use the time slot's start time
           'status': 'confirmed',
           'payment_method': 'wallet',
           'payment_id': 'wallet_${DateTime.now().millisecondsSinceEpoch}',
           'created_at': FieldValue.serverTimestamp(),
           'qr_code': '', // Will be generated after reservation creation
         });
-        
+
         // Log the transaction
-        final transactionLogRef = FirebaseFirestore.instance.collection('payment_transactions').doc();
+        final transactionLogRef =
+            FirebaseFirestore.instance.collection('payment_transactions').doc();
         transaction.set(transactionLogRef, {
           'user_id': userId,
           'reservation_id': reservationRef.id,
@@ -106,16 +188,23 @@ class ReservationService {
           'balance_before': currentBalance,
           'balance_after': currentBalance - reservationAmount,
         });
-        
+
         return {
           'success': true,
           'reservationId': reservationRef.id,
           'amount': reservationAmount,
           'newBalance': currentBalance - reservationAmount,
-          'message': 'Reservation created successfully. ${reservationAmount.toStringAsFixed(2)} TND deducted from wallet.',
+          'message':
+              'Reservation created successfully. ${reservationAmount.toStringAsFixed(2)} TND deducted from wallet.',
         };
       });
-      
+
+      // If using counter-based validation, increment the counter after successful reservation
+      if (useCounterBasedValidation && transactionResult['success'] == true) {
+        await DailyReservationCounterService.instance
+            .incrementCounter(userId, mealType);
+      }
+
       // Generate QR code after successful reservation creation
       if (transactionResult['success'] == true) {
         await _generateQRCodeForReservation(
@@ -124,9 +213,8 @@ class ReservationService {
           mealType: mealType,
         );
       }
-      
+
       return transactionResult;
-      
     } catch (e) {
       AppLogger.e('Error creating reservation',
           error: e, tag: 'ReservationService');
@@ -136,7 +224,104 @@ class ReservationService {
       };
     }
   }
-  
+
+  /// Check if user already has a reservation for this meal type today
+  /// Only 1 reservation per meal type per day is allowed
+  /// FIXED: Simplified query to avoid Firestore composite index requirement
+  Future<Map<String, dynamic>> _checkExistingMealReservation(
+      String userId, String mealType) async {
+    try {
+      final today = DateTime.now();
+      final startOfDay = DateTime(today.year, today.month, today.day);
+      final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
+
+      // SOLUTION: Use simpler query and filter client-side to avoid composite index
+      // This approach trades some performance for reliability
+      final existingReservations = await FirebaseFirestore.instance
+          .collection('reservation')
+          .where('user_id', isEqualTo: userId)
+          .where('meal_type', isEqualTo: mealType)
+          .where('creneaux', isGreaterThanOrEqualTo: startOfDay)
+          .where('creneaux', isLessThan: endOfDay)
+          .get();
+
+      // Client-side filtering for status to avoid composite index requirement
+      final validReservations = existingReservations.docs.where((doc) {
+        final data = doc.data();
+        final status = data['status'] as String?;
+        return status == 'confirmed' || status == 'pending';
+      }).toList();
+
+      if (validReservations.isNotEmpty) {
+        final mealTypeDisplay = mealType == 'lunch' ? 'déjeuner' : 'dîner';
+        return {
+          'success': false,
+          'error':
+              'Vous avez déjà une réservation pour le $mealTypeDisplay aujourd\'hui. Une seule réservation par repas par jour est autorisée.',
+          'errorCode': 'DUPLICATE_MEAL_RESERVATION'
+        };
+      }
+
+      return {'success': true};
+    } catch (e) {
+      AppLogger.e('Error checking existing meal reservation',
+          error: e, tag: 'ReservationService');
+
+      // FALLBACK: If the query still fails, try an even simpler approach
+      try {
+        AppLogger.w('Attempting fallback query for existing reservations',
+            tag: 'ReservationService');
+
+        // Ultra-simple query - just user_id and meal_type
+        final fallbackReservations = await FirebaseFirestore.instance
+            .collection('reservation')
+            .where('user_id', isEqualTo: userId)
+            .where('meal_type', isEqualTo: mealType)
+            .get();
+
+        // Filter client-side for today's date and valid status
+        final today = DateTime.now();
+        final startOfDay = DateTime(today.year, today.month, today.day);
+        final endOfDay =
+            DateTime(today.year, today.month, today.day, 23, 59, 59);
+
+        final todaysValidReservations = fallbackReservations.docs.where((doc) {
+          final data = doc.data();
+          final status = data['status'] as String?;
+          final creneaux = (data['creneaux'] as Timestamp?)?.toDate();
+
+          if (creneaux == null) return false;
+          if (status != 'confirmed' && status != 'pending') return false;
+
+          return creneaux.isAfter(startOfDay) && creneaux.isBefore(endOfDay);
+        }).toList();
+
+        if (todaysValidReservations.isNotEmpty) {
+          final mealTypeDisplay = mealType == 'lunch' ? 'déjeuner' : 'dîner';
+          return {
+            'success': false,
+            'error':
+                'Vous avez déjà une réservation pour le $mealTypeDisplay aujourd\'hui. Une seule réservation par repas par jour est autorisée.',
+            'errorCode': 'DUPLICATE_MEAL_RESERVATION'
+          };
+        }
+
+        return {'success': true};
+      } catch (fallbackError) {
+        AppLogger.e('Fallback query also failed',
+            error: fallbackError, tag: 'ReservationService');
+
+        // If all queries fail, allow the reservation but log the issue
+        // This prevents blocking users when there are database issues
+        return {
+          'success': true, // Allow reservation to proceed
+          'warning':
+              'Could not verify existing reservations due to database issues. Please check manually.',
+        };
+      }
+    }
+  }
+
   // Generate QR code for a reservation using QRService
   Future<void> _generateQRCodeForReservation({
     required String reservationId,
@@ -149,14 +334,14 @@ class ReservationService {
           .collection('reservation')
           .doc(reservationId)
           .get();
-      
+
       if (!reservationDoc.exists) return;
-      
+
       final reservation = ReservationRecord.fromSnapshot(reservationDoc);
-      
+
       // Import QRService
       final qrService = QRService.instance;
-      
+
       // Generate QR code
       await qrService.generateQRCode(
         reservationId: reservationId,
@@ -164,13 +349,15 @@ class ReservationService {
         creneaux: reservation.creneaux!,
         mealType: mealType,
       );
-      
-      AppLogger.i('QR code generated for reservation $reservationId', tag: 'ReservationService');
+
+      AppLogger.i('QR code generated for reservation $reservationId',
+          tag: 'ReservationService');
     } catch (e) {
-      AppLogger.e('Error generating QR code for reservation', error: e, tag: 'ReservationService');
+      AppLogger.e('Error generating QR code for reservation',
+          error: e, tag: 'ReservationService');
     }
   }
-  
+
   // Old simple QR generation method - replaced by QRService
 
   // Validate QR code for staff
@@ -216,7 +403,10 @@ class ReservationService {
       String timeSlotId) async {
     try {
       // First get the time slot to get its start time
-      final timeSlotDoc = await TimeSlotRecord.collection.doc(timeSlotId).get();
+      final timeSlotDoc = await FirebaseFirestore.instance
+          .collection('time_slots')
+          .doc(timeSlotId)
+          .get();
       if (!timeSlotDoc.exists) return [];
 
       final timeSlot = TimeSlotRecord.fromSnapshot(timeSlotDoc);
@@ -281,10 +471,12 @@ class ReservationService {
   }) async {
     try {
       // Use Firestore transaction for atomic operations
-      return await FirebaseFirestore.instance
+      final result = await FirebaseFirestore.instance
           .runTransaction<Map<String, dynamic>>((transaction) async {
         // Get current reservation
-        final reservationRef = ReservationRecord.collection.doc(reservationId);
+        final reservationRef = FirebaseFirestore.instance
+            .collection('reservation')
+            .doc(reservationId);
         final reservationDoc = await transaction.get(reservationRef);
 
         if (!reservationDoc.exists) {
@@ -378,7 +570,8 @@ class ReservationService {
         });
 
         // Bug Fix: Refund the ticket to the user
-        final userRef = UserRecord.collection.doc(userId);
+        final userRef =
+            FirebaseFirestore.instance.collection('user').doc(userId);
         transaction.update(userRef, {
           'tickets': FieldValue.increment(
               reservation.capacity), // Assuming 1 ticket per person capacity
@@ -389,8 +582,25 @@ class ReservationService {
           'message': 'Reservation cancelled successfully',
           'reservationId': reservationId,
           'cancelledAt': DateTime.now().toIso8601String(),
+          'mealType':
+              reservation.type, // Include meal type for counter decrement
+          'reservationDate': reservation.creneaux?.toIso8601String(),
         };
       });
+
+      // If using counter-based validation and cancellation was successful, decrement the counter
+      if (useCounterBasedValidation && result['success'] == true) {
+        final mealType = result['mealType'] as String?;
+        final reservationDateStr = result['reservationDate'] as String?;
+
+        if (mealType != null && reservationDateStr != null) {
+          final reservationDate = DateTime.parse(reservationDateStr);
+          await DailyReservationCounterService.instance
+              .decrementCounter(userId, mealType, reservationDate);
+        }
+      }
+
+      return result;
     } catch (e) {
       AppLogger.e('Error cancelling reservation',
           error: e, tag: 'ReservationService');
@@ -414,7 +624,9 @@ class ReservationService {
       return await FirebaseFirestore.instance
           .runTransaction<Map<String, dynamic>>((transaction) async {
         // Get current reservation
-        final reservationRef = ReservationRecord.collection.doc(reservationId);
+        final reservationRef = FirebaseFirestore.instance
+            .collection('reservation')
+            .doc(reservationId);
         final reservationDoc = await transaction.get(reservationRef);
 
         if (!reservationDoc.exists) {
@@ -470,7 +682,9 @@ class ReservationService {
         }
 
         // Get new time slot
-        final newTimeSlotRef = TimeSlotRecord.collection.doc(newTimeSlotId);
+        final newTimeSlotRef = FirebaseFirestore.instance
+            .collection('time_slots')
+            .doc(newTimeSlotId);
         final newTimeSlotDoc = await transaction.get(newTimeSlotRef);
 
         if (!newTimeSlotDoc.exists) {
@@ -521,13 +735,15 @@ class ReservationService {
         final oldTimeSlot = oldTimeSlotQuery.first;
 
         // NEW: Handle price difference
-        final double oldTotal = reservation.total.toDouble();
+        final double oldTotal =
+            (reservation.total / 1000.0); // Convert from millimes to TND
         final double newTotal = newTimeSlot.price *
             1; // Assuming capacity is 1 for individual reservations
         final double priceDiff = newTotal - oldTotal;
 
         if (priceDiff != 0) {
-          final userRef = UserRecord.collection.doc(userId);
+          final userRef =
+              FirebaseFirestore.instance.collection('user').doc(userId);
           final userDoc = await transaction.get(userRef);
 
           if (!userDoc.exists) {
@@ -562,8 +778,10 @@ class ReservationService {
         // Update reservation with new time slot details
         transaction.update(reservationRef, {
           'creneaux': newTimeSlot.startTime,
-          'prix': newTimeSlot.price,
-          'total': newTimeSlot.price * reservation.capacity,
+          'prix':
+              (newTimeSlot.price * 1000).round(), // Convert to millimes (int)
+          'total': (newTimeSlot.price * reservation.capacity * 1000)
+              .round(), // Convert to millimes (int)
           'modified_at': FieldValue.serverTimestamp(),
         });
 
@@ -607,8 +825,10 @@ class ReservationService {
     required String userId,
   }) async {
     try {
-      final reservationDoc =
-          await ReservationRecord.collection.doc(reservationId).get();
+      final reservationDoc = await FirebaseFirestore.instance
+          .collection('reservation')
+          .doc(reservationId)
+          .get();
 
       if (!reservationDoc.exists) {
         return {
@@ -687,8 +907,10 @@ class ReservationService {
     required String userId,
   }) async {
     try {
-      final reservationDoc =
-          await ReservationRecord.collection.doc(reservationId).get();
+      final reservationDoc = await FirebaseFirestore.instance
+          .collection('reservation')
+          .doc(reservationId)
+          .get();
 
       if (!reservationDoc.exists) {
         return {
@@ -822,8 +1044,10 @@ class ReservationService {
 
       for (final reservation in reservations) {
         try {
-          final userDoc =
-              await UserRecord.collection.doc(reservation.userId).get();
+          final userDoc = await FirebaseFirestore.instance
+              .collection('user')
+              .doc(reservation.userId)
+              .get();
           final user = userDoc.exists ? UserRecord.fromSnapshot(userDoc) : null;
 
           enrichedReservations.add({
@@ -874,7 +1098,7 @@ class ReservationService {
       );
 
       final totalCapacity =
-          timeSlots.fold<int>(0, (sum, slot) => sum + slot.maxCapacity);
+          timeSlots.fold<int>(0, (total, slot) => total + slot.maxCapacity);
       final totalReservations = reservations.length;
       final occupancyRate =
           totalCapacity > 0 ? (totalReservations / totalCapacity) * 100 : 0.0;

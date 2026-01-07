@@ -7,8 +7,9 @@ import '/utils/app_logger.dart';
 /// NavigationService provides role-aware navigation and route management
 /// Implements authorization guards for protected routes (Requirements 1.2, 1.3, 1.4)
 class NavigationService {
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   /// Get the current navigation context
   static BuildContext? get currentContext => navigatorKey.currentContext;
 
@@ -20,16 +21,17 @@ class NavigationService {
     try {
       // Check authentication first
       await RoleMiddleware.requireAuthentication();
-      
+
       // Check route permissions
       final canAccess = await RoleMiddleware.canAccessRoute(routeName);
       if (!canAccess) {
         // Redirect to appropriate default route based on role
         final role = await RoleMiddleware.getCurrentUserRole();
         final defaultRoute = _getDefaultRouteForRole(role);
-        
+
         _showUnauthorizedMessage(context);
-        Navigator.pushReplacementNamed(context, defaultRoute, arguments: arguments);
+        Navigator.pushReplacementNamed(context, defaultRoute,
+            arguments: arguments);
         return;
       }
 
@@ -49,20 +51,22 @@ class NavigationService {
   }
 
   /// Replace current route with new route (with permission checking)
-  static Future<void> navigateAndReplace(String routeName, {Object? arguments}) async {
+  static Future<void> navigateAndReplace(String routeName,
+      {Object? arguments}) async {
     final context = currentContext;
     if (context == null) return;
 
     try {
       await RoleMiddleware.requireAuthentication();
-      
+
       final canAccess = await RoleMiddleware.canAccessRoute(routeName);
       if (!canAccess) {
         final role = await RoleMiddleware.getCurrentUserRole();
         final defaultRoute = _getDefaultRouteForRole(role);
-        
+
         _showUnauthorizedMessage(context);
-        Navigator.pushReplacementNamed(context, defaultRoute, arguments: arguments);
+        Navigator.pushReplacementNamed(context, defaultRoute,
+            arguments: arguments);
         return;
       }
 
@@ -76,24 +80,28 @@ class NavigationService {
   }
 
   /// Navigate and clear all previous routes
-  static Future<void> navigateAndClearStack(String routeName, {Object? arguments}) async {
+  static Future<void> navigateAndClearStack(String routeName,
+      {Object? arguments}) async {
     final context = currentContext;
     if (context == null) return;
 
     try {
       await RoleMiddleware.requireAuthentication();
-      
+
       final canAccess = await RoleMiddleware.canAccessRoute(routeName);
       if (!canAccess) {
         final role = await RoleMiddleware.getCurrentUserRole();
         final defaultRoute = _getDefaultRouteForRole(role);
-        
+
         _showUnauthorizedMessage(context);
-        Navigator.pushNamedAndRemoveUntil(context, defaultRoute, (route) => false, arguments: arguments);
+        Navigator.pushNamedAndRemoveUntil(
+            context, defaultRoute, (route) => false,
+            arguments: arguments);
         return;
       }
 
-      Navigator.pushNamedAndRemoveUntil(context, routeName, (route) => false, arguments: arguments);
+      Navigator.pushNamedAndRemoveUntil(context, routeName, (route) => false,
+          arguments: arguments);
     } on UnauthenticatedException catch (e) {
       _showAuthenticationError(context, e.message);
       Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
@@ -108,21 +116,23 @@ class NavigationService {
       await RoleMiddleware.requireAuthentication();
       final role = await RoleMiddleware.getCurrentUserRole();
       final homeRoute = _getDefaultRouteForRole(role);
-      
+
       // Validate that the target route is accessible
       final canAccess = await RoleMiddleware.canAccessRoute(homeRoute);
       if (!canAccess) {
-        throw UnauthorizedException('Accès non autorisé à la page d\'accueil pour le rôle: ${role?.name ?? "inconnu"}');
+        throw UnauthorizedException(
+            'Accès non autorisé à la page d\'accueil pour le rôle: ${role?.name ?? "inconnu"}');
       }
-      
+
       await navigateAndClearStack(homeRoute);
     } catch (e) {
       // If role-based navigation fails, redirect to login
       await navigateAndClearStack('/login');
-      
+
       final context = currentContext;
       if (context != null) {
-        _showAuthenticationError(context, 'Erreur de navigation: ${e.toString()}');
+        _showAuthenticationError(
+            context, 'Erreur de navigation: ${e.toString()}');
       }
     }
   }
@@ -135,25 +145,27 @@ class NavigationService {
     try {
       // Ensure user is authenticated
       await RoleMiddleware.requireAuthentication();
-      
+
       // Get user role
       final role = await RoleMiddleware.getCurrentUserRole();
       if (role == null) {
-        throw Exception('Rôle utilisateur non défini. Veuillez vous reconnecter.');
+        throw Exception(
+            'Rôle utilisateur non défini. Veuillez vous reconnecter.');
       }
-      
+
       // Get appropriate home route
       final homeRoute = _getDefaultRouteForRole(role);
-      
+
       // Validate route access
       final canAccess = await RoleMiddleware.canAccessRoute(homeRoute);
       if (!canAccess) {
-        throw UnauthorizedException('Accès non autorisé à la page d\'accueil pour le rôle: ${role.name}');
+        throw UnauthorizedException(
+            'Accès non autorisé à la page d\'accueil pour le rôle: ${role.name}');
       }
-      
+
       // Navigate to home
       await navigateAndClearStack(homeRoute);
-      
+
       // Show welcome message
       final welcomeMessage = _getWelcomeMessageForRole(role);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -163,7 +175,6 @@ class NavigationService {
           duration: Duration(seconds: 2),
         ),
       );
-      
     } on UnauthenticatedException catch (e) {
       _showAuthenticationError(context, e.message);
       await navigateAndClearStack('/login');
@@ -218,12 +229,12 @@ class NavigationService {
   static Future<bool> validateUserRoleForRoute(String routeName) async {
     try {
       await RoleMiddleware.requireAuthentication();
-      
+
       final role = await RoleMiddleware.getCurrentUserRole();
       if (role == null) {
         return false;
       }
-      
+
       // Check if user can access the requested route
       final canAccess = await RoleMiddleware.canAccessRoute(routeName);
       if (!canAccess) {
@@ -232,7 +243,7 @@ class NavigationService {
         await navigateAndReplace(homeRoute);
         return false;
       }
-      
+
       return true;
     } catch (e) {
       return false;
@@ -240,7 +251,8 @@ class NavigationService {
   }
 
   /// Show unauthorized access message
-  static void _showUnauthorizedMessage(BuildContext context, [String? customMessage]) {
+  static void _showUnauthorizedMessage(BuildContext context,
+      [String? customMessage]) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(customMessage ?? 'Accès non autorisé à cette section'),
@@ -273,7 +285,8 @@ class NavigationService {
   }
 
   /// Handle role validation errors and redirect appropriately
-  static Future<void> handleRoleValidationError(BuildContext context, dynamic error) async {
+  static Future<void> handleRoleValidationError(
+      BuildContext context, dynamic error) async {
     if (error is UnauthenticatedException) {
       _showAuthenticationError(context, error.message);
       await navigateAndClearStack('/login');
@@ -302,19 +315,19 @@ class NavigationService {
     try {
       await RoleMiddleware.requireAuthentication();
       final role = await RoleMiddleware.getCurrentUserRole();
-      
+
       if (role == null) {
         throw Exception('Rôle utilisateur non défini');
       }
-      
+
       final expectedHomeRoute = _getDefaultRouteForRole(role);
       final currentRoute = GoRouterState.of(context).uri.toString();
-      
+
       // If user is not on their appropriate home screen, redirect them
-      if (currentRoute != expectedHomeRoute && 
+      if (currentRoute != expectedHomeRoute &&
           !await RoleMiddleware.canAccessRoute(currentRoute)) {
         await navigateAndReplace(expectedHomeRoute);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Redirection vers votre page d\'accueil appropriée'),
@@ -356,7 +369,8 @@ class AuthorizedRouteGenerator {
   }
 
   /// Build unauthorized access page
-  static Widget _buildUnauthorizedPage(BuildContext context, String? routeName) {
+  static Widget _buildUnauthorizedPage(
+      BuildContext context, String? routeName) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Accès non autorisé'),
@@ -433,15 +447,17 @@ class RoutePermissionMiddleware extends NavigatorObserver {
       final canAccess = await NavigationService.canAccessRoute(routeName);
       if (!canAccess) {
         // Log unauthorized access attempt
-        AppLogger.w('Unauthorized access attempt to route: $routeName', tag: 'NavigationService');
-        
+        AppLogger.w('Unauthorized access attempt to route: $routeName',
+            tag: 'NavigationService');
+
         // Optionally redirect to appropriate page
         WidgetsBinding.instance.addPostFrameCallback((_) async {
           await NavigationService.navigateToRoleBasedHome();
         });
       }
     } catch (e) {
-      AppLogger.e('Error checking route permissions for $routeName', error: e, tag: 'NavigationService');
+      AppLogger.e('Error checking route permissions for $routeName',
+          error: e, tag: 'NavigationService');
     }
   }
 }

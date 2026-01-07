@@ -55,7 +55,8 @@ class _TicketPurchaseExampleState extends State<TicketPurchaseExample> {
                     SizedBox(height: 12),
                     Row(
                       children: [
-                        Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                        Icon(Icons.access_time,
+                            size: 16, color: Colors.grey[600]),
                         SizedBox(width: 8),
                         Text(
                           '${widget.timeSlot.startTime?.toString().substring(11, 16)} - ${widget.timeSlot.endTime?.toString().substring(11, 16)}',
@@ -66,7 +67,8 @@ class _TicketPurchaseExampleState extends State<TicketPurchaseExample> {
                     SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.restaurant, size: 16, color: Colors.grey[600]),
+                        Icon(Icons.restaurant,
+                            size: 16, color: Colors.grey[600]),
                         SizedBox(width: 8),
                         Text(
                           widget.timeSlot.mealType ?? 'Meal',
@@ -77,7 +79,8 @@ class _TicketPurchaseExampleState extends State<TicketPurchaseExample> {
                     SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.attach_money, size: 16, color: Colors.grey[600]),
+                        Icon(Icons.attach_money,
+                            size: 16, color: Colors.grey[600]),
                         SizedBox(width: 8),
                         Text(
                           '${widget.timeSlot.price.toStringAsFixed(3)} TND',
@@ -110,16 +113,18 @@ class _TicketPurchaseExampleState extends State<TicketPurchaseExample> {
                       ),
                     ),
                     SizedBox(height: 12),
-                    Text('Name: ${widget.user.displayName ?? widget.user.nom ?? 'Unknown'}'),
+                    Text(
+                        'Name: ${widget.user.displayName ?? widget.user.nom ?? 'Unknown'}'),
                     Text('Class: ${widget.user.classe ?? 'N/A'}'),
-                    Text('Wallet Balance: ${widget.user.pocket.toStringAsFixed(3)} TND'),
+                    Text(
+                        'Wallet Balance: ${widget.user.pocket.toStringAsFixed(3)} TND'),
                   ],
                 ),
               ),
             ),
-            
+
             Spacer(),
-            
+
             // Purchase button
             ElevatedButton(
               onPressed: isProcessing ? null : _showPaymentOptions,
@@ -142,7 +147,8 @@ class _TicketPurchaseExampleState extends State<TicketPurchaseExample> {
                     )
                   : Text(
                       'Purchase Ticket - ${widget.timeSlot.price.toStringAsFixed(3)} TND',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
             ),
           ],
@@ -172,9 +178,10 @@ class _TicketPurchaseExampleState extends State<TicketPurchaseExample> {
     );
   }
 
-  Future<void> _handlePaymentComplete(Map<String, dynamic> paymentResult) async {
+  Future<void> _handlePaymentComplete(
+      Map<String, dynamic> paymentResult) async {
     Navigator.of(context).pop(); // Close payment modal
-    
+
     if (!paymentResult['success']) {
       _showErrorDialog('Payment failed: ${paymentResult['error']}');
       return;
@@ -184,7 +191,8 @@ class _TicketPurchaseExampleState extends State<TicketPurchaseExample> {
 
     try {
       // Create reservation with payment info
-      final reservationResult = await ReservationService.instance.createReservation(
+      final reservationResult =
+          await ReservationService.instance.createReservation(
         userId: widget.user.uid,
         timeSlotId: widget.timeSlot.reference.id,
         mealType: widget.timeSlot.mealType ?? 'meal',
@@ -193,17 +201,17 @@ class _TicketPurchaseExampleState extends State<TicketPurchaseExample> {
       );
 
       if (reservationResult['success']) {
-        _showSuccessDialog(
-          'Ticket purchased successfully!\n\n'
-          'Payment Method: ${paymentResult['paymentMethod']}\n'
-          'Amount: ${paymentResult['amount'].toStringAsFixed(3)} TND\n'
-          'Transaction ID: ${paymentResult['transactionId']}'
-        );
+        _showSuccessDialog('Ticket purchased successfully!\n\n'
+            'Payment Method: ${paymentResult['paymentMethod']}\n'
+            'Amount: ${paymentResult['amount'].toStringAsFixed(3)} TND\n'
+            'Transaction ID: ${paymentResult['transactionId']}');
       } else {
-        _showErrorDialog('Failed to create reservation: ${reservationResult['error']}');
+        _showErrorDialog(
+            'Failed to create reservation: ${reservationResult['error']}');
       }
     } catch (e) {
-      AppLogger.e('Error processing ticket purchase', error: e, tag: 'TicketPurchaseExample');
+      AppLogger.e('Error processing ticket purchase',
+          error: e, tag: 'TicketPurchaseExample');
       _showErrorDialog('An error occurred while processing your purchase.');
     } finally {
       setState(() => isProcessing = false);

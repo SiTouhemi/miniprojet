@@ -28,7 +28,7 @@ class _MenuAndSlotsWidgetState extends State<MenuAndSlotsWidget>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<FFAppState>().loadTimeSlots(selectedDate);
     });
@@ -80,7 +80,7 @@ class _MenuAndSlotsWidgetState extends State<MenuAndSlotsWidget>
           children: [
             // Date and filter selector
             _buildDateAndFilterSelector(),
-            
+
             // Tab content
             Expanded(
               child: TabBarView(
@@ -95,7 +95,7 @@ class _MenuAndSlotsWidgetState extends State<MenuAndSlotsWidget>
                       context.read<FFAppState>().refreshMenu();
                     },
                   ),
-                  
+
                   // Time slots tab
                   _buildTimeSlotsTab(),
                 ],
@@ -150,8 +150,10 @@ class _MenuAndSlotsWidgetState extends State<MenuAndSlotsWidget>
                   text: DateFormat('MMM dd, yyyy').format(selectedDate),
                   options: FFButtonOptions(
                     height: 40.0,
-                    padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                    iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                    padding:
+                        EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                    iconPadding:
+                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                     color: FlutterFlowTheme.of(context).primary,
                     textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                           fontFamily: 'Readex Pro',
@@ -167,9 +169,9 @@ class _MenuAndSlotsWidgetState extends State<MenuAndSlotsWidget>
                 ),
               ],
             ),
-            
+
             SizedBox(height: 12.0),
-            
+
             // Meal type filter (only show on menu tab)
             if (_tabController.index == 0) ...[
               Row(
@@ -196,7 +198,8 @@ class _MenuAndSlotsWidgetState extends State<MenuAndSlotsWidget>
                       }
                     },
                     style: FlutterFlowTheme.of(context).bodyMedium,
-                    dropdownColor: FlutterFlowTheme.of(context).secondaryBackground,
+                    dropdownColor:
+                        FlutterFlowTheme.of(context).secondaryBackground,
                   ),
                 ],
               ),
@@ -235,8 +238,8 @@ class _MenuAndSlotsWidgetState extends State<MenuAndSlotsWidget>
                 Text(
                   'Error Loading Time Slots',
                   style: FlutterFlowTheme.of(context).headlineSmall.override(
-                    color: Colors.red,
-                  ),
+                        color: Colors.red,
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 8.0),
@@ -253,8 +256,10 @@ class _MenuAndSlotsWidgetState extends State<MenuAndSlotsWidget>
                   text: 'Retry',
                   options: FFButtonOptions(
                     height: 40.0,
-                    padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                    iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                    padding:
+                        EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                    iconPadding:
+                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                     color: Colors.red,
                     textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                           fontFamily: 'Readex Pro',
@@ -303,8 +308,10 @@ class _MenuAndSlotsWidgetState extends State<MenuAndSlotsWidget>
                   text: 'Refresh',
                   options: FFButtonOptions(
                     height: 40.0,
-                    padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                    iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                    padding:
+                        EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                    iconPadding:
+                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                     color: FlutterFlowTheme.of(context).primary,
                     textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                           fontFamily: 'Readex Pro',
@@ -340,15 +347,16 @@ class _MenuAndSlotsWidgetState extends State<MenuAndSlotsWidget>
     );
   }
 
-  Widget _buildTimeSlotCard(BuildContext context, TimeSlotRecord timeSlot, FFAppState appState) {
+  Widget _buildTimeSlotCard(
+      BuildContext context, TimeSlotRecord timeSlot, FFAppState appState) {
     final availableSpots = timeSlot.maxCapacity - timeSlot.currentReservations;
-    final occupancyRate = timeSlot.maxCapacity > 0 
-        ? (timeSlot.currentReservations / timeSlot.maxCapacity) * 100 
+    final occupancyRate = timeSlot.maxCapacity > 0
+        ? (timeSlot.currentReservations / timeSlot.maxCapacity) * 100
         : 0.0;
-    
+
     final isInPast = timeSlot.startTime?.isBefore(DateTime.now()) ?? false;
     final canReserve = !isInPast && availableSpots > 0;
-    
+
     Color occupancyColor;
     if (occupancyRate < 60) {
       occupancyColor = Colors.green;
@@ -378,23 +386,27 @@ class _MenuAndSlotsWidgetState extends State<MenuAndSlotsWidget>
                   children: [
                     Text(
                       '${DateFormat('HH:mm').format(timeSlot.startTime!)} - ${DateFormat('HH:mm').format(timeSlot.endTime!)}',
-                      style: FlutterFlowTheme.of(context).headlineSmall.override(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style:
+                          FlutterFlowTheme.of(context).headlineSmall.override(
+                                fontWeight: FontWeight.w600,
+                              ),
                     ),
                     Text(
                       timeSlot.mealType.toUpperCase(),
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        color: FlutterFlowTheme.of(context).primary,
-                        fontWeight: FontWeight.w500,
-                      ),
+                            color: FlutterFlowTheme.of(context).primary,
+                            fontWeight: FontWeight.w500,
+                          ),
                     ),
                   ],
                 ),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
                   decoration: BoxDecoration(
-                    color: isInPast ? Colors.grey : (canReserve ? Colors.green : Colors.red),
+                    color: isInPast
+                        ? Colors.grey
+                        : (canReserve ? Colors.green : Colors.red),
                     borderRadius: BorderRadius.circular(20.0),
                   ),
                   child: Text(
@@ -408,9 +420,9 @@ class _MenuAndSlotsWidgetState extends State<MenuAndSlotsWidget>
                 ),
               ],
             ),
-            
+
             SizedBox(height: 16.0),
-            
+
             // Occupancy information
             Row(
               children: [
@@ -421,14 +433,15 @@ class _MenuAndSlotsWidgetState extends State<MenuAndSlotsWidget>
                       Text(
                         'Occupancy',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          fontWeight: FontWeight.w500,
-                        ),
+                              fontWeight: FontWeight.w500,
+                            ),
                       ),
                       SizedBox(height: 4.0),
                       LinearProgressIndicator(
                         value: occupancyRate / 100,
                         backgroundColor: Colors.grey[300],
-                        valueColor: AlwaysStoppedAnimation<Color>(occupancyColor),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(occupancyColor),
                       ),
                       SizedBox(height: 4.0),
                       Text(
@@ -445,21 +458,21 @@ class _MenuAndSlotsWidgetState extends State<MenuAndSlotsWidget>
                     Text(
                       'Price',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        fontWeight: FontWeight.w500,
-                      ),
+                            fontWeight: FontWeight.w500,
+                          ),
                     ),
                     Text(
                       '${timeSlot.price.toStringAsFixed(3)} TND',
                       style: FlutterFlowTheme.of(context).titleMedium.override(
-                        color: Colors.green,
-                        fontWeight: FontWeight.w600,
-                      ),
+                            color: Colors.green,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ],
                 ),
               ],
             ),
-            
+
             if (canReserve) ...[
               SizedBox(height: 16.0),
               SizedBox(
@@ -478,7 +491,8 @@ class _MenuAndSlotsWidgetState extends State<MenuAndSlotsWidget>
                   options: FFButtonOptions(
                     height: 44.0,
                     padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                    iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                    iconPadding:
+                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                     color: FlutterFlowTheme.of(context).primary,
                     textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                           fontFamily: 'Readex Pro',

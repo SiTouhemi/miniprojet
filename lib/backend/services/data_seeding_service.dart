@@ -8,7 +8,8 @@ import '/utils/app_logger.dart';
 /// the database with menus, time slots, and user data
 class DataSeedingService {
   static DataSeedingService? _instance;
-  static DataSeedingService get instance => _instance ??= DataSeedingService._();
+  static DataSeedingService get instance =>
+      _instance ??= DataSeedingService._();
   DataSeedingService._();
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -17,16 +18,17 @@ class DataSeedingService {
   Future<bool> seedAllData() async {
     try {
       AppLogger.i('Starting database seeding...', tag: 'DataSeeding');
-      
+
       // Check if data already exists
       final existingMenus = await _firestore
           .collection('daily_menu')
           .where('created_by', isEqualTo: 'system')
           .limit(1)
           .get();
-      
+
       if (existingMenus.docs.isNotEmpty) {
-        AppLogger.i('Sample data already exists, skipping seeding', tag: 'DataSeeding');
+        AppLogger.i('Sample data already exists, skipping seeding',
+            tag: 'DataSeeding');
         return true;
       }
 
@@ -42,7 +44,8 @@ class DataSeedingService {
         throw Exception('Failed to seed time slots');
       }
 
-      AppLogger.i('Database seeding completed successfully', tag: 'DataSeeding');
+      AppLogger.i('Database seeding completed successfully',
+          tag: 'DataSeeding');
       return true;
     } catch (e) {
       AppLogger.e('Error seeding database', error: e, tag: 'DataSeeding');
@@ -54,7 +57,7 @@ class DataSeedingService {
   Future<bool> _seedWeeklyMenus() async {
     try {
       AppLogger.i('Seeding weekly menus...', tag: 'DataSeeding');
-      
+
       final weeklyMenus = [
         // Monday (1)
         {
@@ -62,7 +65,8 @@ class DataSeedingService {
           'meal_type': 'lunch',
           'main_dish': 'Couscous aux légumes',
           'accompaniments': ['Salade verte', 'Pain', 'Olives'],
-          'description': 'Couscous traditionnel tunisien avec légumes de saison',
+          'description':
+              'Couscous traditionnel tunisien avec légumes de saison',
           'price': 0.2,
           'available': true,
           'image_url': '',
@@ -81,7 +85,7 @@ class DataSeedingService {
           'created_by': 'system',
           'created_at': FieldValue.serverTimestamp(),
         },
-        
+
         // Tuesday (2)
         {
           'day_of_week': 2,
@@ -107,7 +111,7 @@ class DataSeedingService {
           'created_by': 'system',
           'created_at': FieldValue.serverTimestamp(),
         },
-        
+
         // Wednesday (3)
         {
           'day_of_week': 3,
@@ -133,7 +137,7 @@ class DataSeedingService {
           'created_by': 'system',
           'created_at': FieldValue.serverTimestamp(),
         },
-        
+
         // Thursday (4)
         {
           'day_of_week': 4,
@@ -159,14 +163,15 @@ class DataSeedingService {
           'created_by': 'system',
           'created_at': FieldValue.serverTimestamp(),
         },
-        
+
         // Friday (5)
         {
           'day_of_week': 5,
           'meal_type': 'lunch',
           'main_dish': 'Kefta aux œufs',
           'accompaniments': ['Pain frais', 'Salade de tomates', 'Harissa'],
-          'description': 'Kefta traditionnelle avec œufs et sauce tomate épicée',
+          'description':
+              'Kefta traditionnelle avec œufs et sauce tomate épicée',
           'price': 0.2,
           'available': true,
           'image_url': '',
@@ -185,7 +190,7 @@ class DataSeedingService {
           'created_by': 'system',
           'created_at': FieldValue.serverTimestamp(),
         },
-        
+
         // Saturday (6)
         {
           'day_of_week': 6,
@@ -219,9 +224,10 @@ class DataSeedingService {
         final docRef = _firestore.collection('daily_menu').doc();
         batch.set(docRef, menu);
       }
-      
+
       await batch.commit();
-      AppLogger.i('Added ${weeklyMenus.length} weekly menu items', tag: 'DataSeeding');
+      AppLogger.i('Added ${weeklyMenus.length} weekly menu items',
+          tag: 'DataSeeding');
       return true;
     } catch (e) {
       AppLogger.e('Error seeding menus', error: e, tag: 'DataSeeding');
@@ -233,17 +239,17 @@ class DataSeedingService {
   Future<bool> _seedTimeSlots() async {
     try {
       AppLogger.i('Seeding time slots...', tag: 'DataSeeding');
-      
+
       final timeSlots = <Map<String, dynamic>>[];
       final now = DateTime.now();
-      
+
       // Generate slots for next 7 days
       for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
         final currentDate = DateTime(now.year, now.month, now.day + dayOffset);
-        
+
         // Skip Sundays (weekday 7)
         if (currentDate.weekday == 7) continue;
-        
+
         // Lunch slots (12:00-14:00)
         final lunchSlots = [
           {'start': 12, 'startMin': 0, 'end': 12, 'endMin': 30, 'capacity': 25},
@@ -251,7 +257,7 @@ class DataSeedingService {
           {'start': 13, 'startMin': 0, 'end': 13, 'endMin': 30, 'capacity': 25},
           {'start': 13, 'startMin': 30, 'end': 14, 'endMin': 0, 'capacity': 25},
         ];
-        
+
         // Dinner slots (19:00-21:00)
         final dinnerSlots = [
           {'start': 19, 'startMin': 0, 'end': 19, 'endMin': 30, 'capacity': 30},
@@ -259,12 +265,14 @@ class DataSeedingService {
           {'start': 20, 'startMin': 0, 'end': 20, 'endMin': 30, 'capacity': 30},
           {'start': 20, 'startMin': 30, 'end': 21, 'endMin': 0, 'capacity': 30},
         ];
-        
+
         // Create lunch time slots
         for (final slot in lunchSlots) {
-          final startTime = DateTime(currentDate.year, currentDate.month, currentDate.day, slot['start'] as int, slot['startMin'] as int);
-          final endTime = DateTime(currentDate.year, currentDate.month, currentDate.day, slot['end'] as int, slot['endMin'] as int);
-          
+          final startTime = DateTime(currentDate.year, currentDate.month,
+              currentDate.day, slot['start'] as int, slot['startMin'] as int);
+          final endTime = DateTime(currentDate.year, currentDate.month,
+              currentDate.day, slot['end'] as int, slot['endMin'] as int);
+
           timeSlots.add({
             'date': Timestamp.fromDate(currentDate),
             'start_time': Timestamp.fromDate(startTime),
@@ -276,12 +284,14 @@ class DataSeedingService {
             'is_active': true,
           });
         }
-        
+
         // Create dinner time slots
         for (final slot in dinnerSlots) {
-          final startTime = DateTime(currentDate.year, currentDate.month, currentDate.day, slot['start'] as int, slot['startMin'] as int);
-          final endTime = DateTime(currentDate.year, currentDate.month, currentDate.day, slot['end'] as int, slot['endMin'] as int);
-          
+          final startTime = DateTime(currentDate.year, currentDate.month,
+              currentDate.day, slot['start'] as int, slot['startMin'] as int);
+          final endTime = DateTime(currentDate.year, currentDate.month,
+              currentDate.day, slot['end'] as int, slot['endMin'] as int);
+
           timeSlots.add({
             'date': Timestamp.fromDate(currentDate),
             'start_time': Timestamp.fromDate(startTime),
@@ -294,21 +304,21 @@ class DataSeedingService {
           });
         }
       }
-      
+
       // Add time slots in batches (Firestore limit is 500 operations per batch)
       const batchSize = 500;
       for (int i = 0; i < timeSlots.length; i += batchSize) {
         final batch = _firestore.batch();
         final batchSlots = timeSlots.skip(i).take(batchSize);
-        
+
         for (final slot in batchSlots) {
           final docRef = _firestore.collection('time_slots').doc();
           batch.set(docRef, slot);
         }
-        
+
         await batch.commit();
       }
-      
+
       AppLogger.i('Added ${timeSlots.length} time slots', tag: 'DataSeeding');
       return true;
     } catch (e) {
@@ -325,12 +335,10 @@ class DataSeedingService {
           .where('created_by', isEqualTo: 'system')
           .limit(1)
           .get();
-      
-      final slotsQuery = await _firestore
-          .collection('time_slots')
-          .limit(1)
-          .get();
-      
+
+      final slotsQuery =
+          await _firestore.collection('time_slots').limit(1).get();
+
       return menuQuery.docs.isNotEmpty && slotsQuery.docs.isNotEmpty;
     } catch (e) {
       AppLogger.e('Error checking sample data', error: e, tag: 'DataSeeding');
@@ -342,36 +350,34 @@ class DataSeedingService {
   Future<bool> clearSampleData() async {
     try {
       AppLogger.i('Clearing sample data...', tag: 'DataSeeding');
-      
+
       // Clear sample menus
       final menuQuery = await _firestore
           .collection('daily_menu')
           .where('created_by', isEqualTo: 'system')
           .get();
-      
+
       final menuBatch = _firestore.batch();
       for (final doc in menuQuery.docs) {
         menuBatch.delete(doc.reference);
       }
       await menuBatch.commit();
-      
+
       // Clear time slots (be careful - this clears ALL time slots)
-      final slotsQuery = await _firestore
-          .collection('time_slots')
-          .get();
-      
+      final slotsQuery = await _firestore.collection('time_slots').get();
+
       const batchSize = 500;
       for (int i = 0; i < slotsQuery.docs.length; i += batchSize) {
         final batch = _firestore.batch();
         final batchDocs = slotsQuery.docs.skip(i).take(batchSize);
-        
+
         for (final doc in batchDocs) {
           batch.delete(doc.reference);
         }
-        
+
         await batch.commit();
       }
-      
+
       AppLogger.i('Sample data cleared', tag: 'DataSeeding');
       return true;
     } catch (e) {

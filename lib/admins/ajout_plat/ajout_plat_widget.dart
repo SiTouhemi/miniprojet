@@ -799,29 +799,35 @@ class _AjoutPlatWidgetState extends State<AjoutPlatWidget> {
                                     !_model.formKey.currentState!.validate()) {
                                   return;
                                 }
-                                
+
                                 // Get form values
                                 final nom = _model.textController1?.text ?? '';
-                                final description = _model.textController2?.text ?? '';
-                                final ingredients = _model.textController3?.text ?? '';
-                                final prixStr = _model.textController4?.text ?? '0';
-                                final categorie = _model.dropDownValue ?? 'Déjeuner';
-                                
+                                final description =
+                                    _model.textController2?.text ?? '';
+                                final ingredients =
+                                    _model.textController3?.text ?? '';
+                                final prixStr =
+                                    _model.textController4?.text ?? '0';
+                                final categorie =
+                                    _model.dropDownValue ?? 'Déjeuner';
+
                                 // Validate required fields
                                 if (nom.isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text('Veuillez entrer le nom du plat'),
+                                      content: Text(
+                                          'Veuillez entrer le nom du plat'),
                                       backgroundColor: Colors.red,
                                     ),
                                   );
                                   return;
                                 }
-                                
+
                                 // Parse price
                                 double prix = 0.0;
                                 try {
-                                  prix = double.parse(prixStr.replaceAll(',', '.'));
+                                  prix = double.parse(
+                                      prixStr.replaceAll(',', '.'));
                                 } catch (e) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
@@ -831,7 +837,7 @@ class _AjoutPlatWidgetState extends State<AjoutPlatWidget> {
                                   );
                                   return;
                                 }
-                                
+
                                 // Show loading indicator
                                 showDialog(
                                   context: context,
@@ -840,10 +846,12 @@ class _AjoutPlatWidgetState extends State<AjoutPlatWidget> {
                                     child: CircularProgressIndicator(),
                                   ),
                                 );
-                                
+
                                 try {
                                   // Add plat to Firestore
-                                  await FirebaseFirestore.instance.collection('plat').add({
+                                  await FirebaseFirestore.instance
+                                      .collection('plat')
+                                      .add({
                                     'nom': nom,
                                     'description': description,
                                     'ingredients': ingredients,
@@ -852,10 +860,10 @@ class _AjoutPlatWidgetState extends State<AjoutPlatWidget> {
                                     'is_available': _model.switchValue ?? true,
                                     'created_at': FieldValue.serverTimestamp(),
                                   });
-                                  
+
                                   // Close loading dialog
                                   Navigator.of(context).pop();
-                                  
+
                                   // Show success message
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
@@ -863,7 +871,7 @@ class _AjoutPlatWidgetState extends State<AjoutPlatWidget> {
                                       backgroundColor: Colors.green,
                                     ),
                                   );
-                                  
+
                                   // Clear form
                                   _model.textController1?.clear();
                                   _model.textController2?.clear();
@@ -872,11 +880,10 @@ class _AjoutPlatWidgetState extends State<AjoutPlatWidget> {
                                   setState(() {
                                     _model.switchValue = true;
                                   });
-                                  
                                 } catch (e) {
                                   // Close loading dialog
                                   Navigator.of(context).pop();
-                                  
+
                                   // Show error message
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
@@ -1254,7 +1261,9 @@ class _AjoutPlatWidgetState extends State<AjoutPlatWidget> {
                                                   size: 18.0,
                                                 ),
                                                 onPressed: () {
-                                                  AppLogger.d('IconButton pressed', tag: 'UI');
+                                                  AppLogger.d(
+                                                      'IconButton pressed',
+                                                      tag: 'UI');
                                                 },
                                               ),
                                               FlutterFlowIconButton(
@@ -1269,7 +1278,9 @@ class _AjoutPlatWidgetState extends State<AjoutPlatWidget> {
                                                   size: 18.0,
                                                 ),
                                                 onPressed: () {
-                                                  AppLogger.d('IconButton pressed', tag: 'UI');
+                                                  AppLogger.d(
+                                                      'IconButton pressed',
+                                                      tag: 'UI');
                                                 },
                                               ),
                                               FlutterFlowIconButton(
@@ -1284,7 +1295,9 @@ class _AjoutPlatWidgetState extends State<AjoutPlatWidget> {
                                                   size: 18.0,
                                                 ),
                                                 onPressed: () {
-                                                  AppLogger.d('IconButton pressed', tag: 'UI');
+                                                  AppLogger.d(
+                                                      'IconButton pressed',
+                                                      tag: 'UI');
                                                 },
                                               ),
                                             ].divide(SizedBox(width: 8.0)),
@@ -1523,7 +1536,9 @@ class _AjoutPlatWidgetState extends State<AjoutPlatWidget> {
                                                   size: 18.0,
                                                 ),
                                                 onPressed: () {
-                                                  AppLogger.d('IconButton pressed', tag: 'UI');
+                                                  AppLogger.d(
+                                                      'IconButton pressed',
+                                                      tag: 'UI');
                                                 },
                                               ),
                                               FlutterFlowIconButton(
@@ -1538,7 +1553,9 @@ class _AjoutPlatWidgetState extends State<AjoutPlatWidget> {
                                                   size: 18.0,
                                                 ),
                                                 onPressed: () {
-                                                  AppLogger.d('IconButton pressed', tag: 'UI');
+                                                  AppLogger.d(
+                                                      'IconButton pressed',
+                                                      tag: 'UI');
                                                 },
                                               ),
                                               FlutterFlowIconButton(
@@ -1553,7 +1570,9 @@ class _AjoutPlatWidgetState extends State<AjoutPlatWidget> {
                                                   size: 18.0,
                                                 ),
                                                 onPressed: () {
-                                                  AppLogger.d('IconButton pressed', tag: 'UI');
+                                                  AppLogger.d(
+                                                      'IconButton pressed',
+                                                      tag: 'UI');
                                                 },
                                               ),
                                             ].divide(SizedBox(width: 8.0)),
@@ -1786,7 +1805,9 @@ class _AjoutPlatWidgetState extends State<AjoutPlatWidget> {
                                                   Icons.add_rounded,
                                                 ),
                                                 onPressed: () {
-                                                  AppLogger.d('IconButton pressed', tag: 'UI');
+                                                  AppLogger.d(
+                                                      'IconButton pressed',
+                                                      tag: 'UI');
                                                 },
                                               ),
                                             ].divide(SizedBox(width: 8.0)),

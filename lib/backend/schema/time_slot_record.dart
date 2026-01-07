@@ -61,7 +61,8 @@ class TimeSlotRecord extends FirestoreRecord {
     _startTime = snapshotData['start_time'] as DateTime?;
     _endTime = snapshotData['end_time'] as DateTime?;
     _maxCapacity = castToType<int>(snapshotData['max_capacity']);
-    _currentReservations = castToType<int>(snapshotData['current_reservations']);
+    _currentReservations =
+        castToType<int>(snapshotData['current_reservations']);
     _price = castToType<double>(snapshotData['price']);
     _isActive = snapshotData['is_active'] as bool?;
     _mealType = snapshotData['meal_type'] as String?;

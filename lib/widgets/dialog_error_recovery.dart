@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'dialog_error_boundary.dart';
 
 /// Utility class for managing dialog error recovery strategies
-/// 
+///
 /// This class provides methods to handle different types of dialog errors
 /// and implement appropriate recovery strategies based on the error type
 /// and context.
 class DialogErrorRecovery {
   /// Shows a dialog with error recovery capabilities
-  /// 
+  ///
   /// This method wraps the dialog in error boundaries and provides
   /// fallback strategies if the main dialog fails to render.
   static Future<T?> showSafeDialog<T>({
@@ -47,7 +47,7 @@ class DialogErrorRecovery {
         message: e.toString(),
         context: {'barrierDismissible': barrierDismissible},
       );
-      
+
       return await _showFallbackDialog<T>(context);
     }
   }

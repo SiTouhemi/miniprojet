@@ -6,14 +6,14 @@ import '/config/app_config.dart';
 enum LogLevel { debug, info, warning, error, critical }
 
 /// Centralized logging service for the ISET Restaurant application.
-/// 
+///
 /// Features:
 /// - Multiple log levels (debug, info, warning, error, critical)
 /// - Automatic environment-based filtering (debug logs disabled in production)
 /// - Timestamps, class/method names, and line numbers
 /// - Emoji-based formatting for development readability
 /// - Optional remote error reporting (Firebase Crashlytics integration ready)
-/// 
+///
 /// Usage:
 /// ```dart
 /// AppLogger.d('Debug message');
@@ -26,21 +26,21 @@ class AppLogger {
   static AppLogger? _instance;
   static late Logger _logger;
   static bool _initialized = false;
-  
+
   // Configuration
   static bool _enableRemoteLogging = false;
   static bool _enableFileLogging = false;
   static LogLevel _minimumLevel = LogLevel.debug;
-  
+
   AppLogger._internal() {
     _initializeLogger();
   }
-  
+
   factory AppLogger() {
     _instance ??= AppLogger._internal();
     return _instance!;
   }
-  
+
   /// Initialize the logger with custom configuration
   static void initialize({
     bool enableRemoteLogging = false,
@@ -52,31 +52,31 @@ class AppLogger {
     _minimumLevel = minimumLevel;
     _initializeLogger();
   }
-  
+
   static void _initializeLogger() {
     if (_initialized) return;
-    
+
     _logger = Logger(
       filter: _AppLogFilter(),
       printer: _AppLogPrinter(),
       output: _AppLogOutput(),
       level: AppConfig.isProduction ? Level.info : Level.debug,
     );
-    
+
     _initialized = true;
   }
-  
+
   /// Ensure logger is initialized
   static void _ensureInitialized() {
     if (!_initialized) {
       _instance ??= AppLogger._internal();
     }
   }
-  
+
   // ============================================
   // PUBLIC LOGGING METHODS
   // ============================================
-  
+
   /// Debug log - for development debugging
   /// Automatically disabled in production
   static void d(
@@ -91,7 +91,7 @@ class AppLogger {
       _logger.d(formattedMessage, error: error, stackTrace: stackTrace);
     }
   }
-  
+
   /// Info log - for general information
   static void i(
     String message, {
@@ -105,7 +105,7 @@ class AppLogger {
       _logger.i(formattedMessage, error: error, stackTrace: stackTrace);
     }
   }
-  
+
   /// Warning log - for potential issues
   static void w(
     String message, {
@@ -119,7 +119,7 @@ class AppLogger {
       _logger.w(formattedMessage, error: error, stackTrace: stackTrace);
     }
   }
-  
+
   /// Error log - for errors and exceptions
   static void e(
     String message, {
@@ -131,14 +131,14 @@ class AppLogger {
     if (_shouldLog(LogLevel.error)) {
       final formattedMessage = _formatMessage(message, tag: tag);
       _logger.e(formattedMessage, error: error, stackTrace: stackTrace);
-      
+
       // Send to remote logging if enabled
       if (_enableRemoteLogging) {
         _sendToRemote(LogLevel.error, message, error, stackTrace);
       }
     }
   }
-  
+
   /// Critical log - for critical errors that need immediate attention
   /// Always sent to remote logging if enabled
   static void critical(
@@ -150,17 +150,17 @@ class AppLogger {
     _ensureInitialized();
     final formattedMessage = _formatMessage(message, tag: tag);
     _logger.f(formattedMessage, error: error, stackTrace: stackTrace);
-    
+
     // Always send critical errors to remote logging
     if (_enableRemoteLogging) {
       _sendToRemote(LogLevel.critical, message, error, stackTrace);
     }
   }
-  
+
   // ============================================
   // SPECIALIZED LOGGING METHODS
   // ============================================
-  
+
   /// Log authentication events
   static void auth(String message, {bool success = true, String? userId}) {
     final emoji = success ? '🔐' : '❌';
@@ -171,7 +171,7 @@ class AppLogger {
       w('$emoji $message', tag: tag);
     }
   }
-  
+
   /// Log network/API events
   static void network(String message, {bool success = true, int? statusCode}) {
     final emoji = success ? '🌐' : '📡';
@@ -183,9 +183,10 @@ class AppLogger {
       w('$emoji $message$statusInfo', tag: tag);
     }
   }
-  
+
   /// Log database/Firestore events
-  static void database(String message, {String? collection, String? operation}) {
+  static void database(String message,
+      {String? collection, String? operation}) {
     final tag = 'DATABASE';
     final details = [
       if (collection != null) 'collection: $collection',
@@ -193,14 +194,14 @@ class AppLogger {
     ].join(', ');
     d('🗄️ $message${details.isNotEmpty ? ' ($details)' : ''}', tag: tag);
   }
-  
+
   /// Log user actions
   static void userAction(String action, {Map<String, dynamic>? params}) {
     final tag = 'USER_ACTION';
     final paramsStr = params != null ? ' $params' : '';
     d('👤 $action$paramsStr', tag: tag);
   }
-  
+
   /// Log performance metrics
   static void performance(String metric, {Duration? duration, int? value}) {
     final tag = 'PERFORMANCE';
@@ -210,7 +211,7 @@ class AppLogger {
     ].join(', ');
     d('⚡ $metric${details.isNotEmpty ? ' ($details)' : ''}', tag: tag);
   }
-  
+
   /// Log sync operations
   static void sync(String message, {bool success = true, int? recordCount}) {
     final emoji = success ? '🔄' : '⚠️';
@@ -222,32 +223,32 @@ class AppLogger {
       w('$emoji $message$countInfo', tag: tag);
     }
   }
-  
+
   /// Log navigation events
   static void navigation(String route, {String? from}) {
     final tag = 'NAV';
     final fromInfo = from != null ? ' (from: $from)' : '';
     d('🧭 Navigating to: $route$fromInfo', tag: tag);
   }
-  
+
   // ============================================
   // HELPER METHODS
   // ============================================
-  
+
   static bool _shouldLog(LogLevel level) {
     if (AppConfig.isProduction && level == LogLevel.debug) {
       return false;
     }
     return level.index >= _minimumLevel.index;
   }
-  
+
   static String _formatMessage(String message, {String? tag}) {
     if (tag != null) {
       return '[$tag] $message';
     }
     return message;
   }
-  
+
   /// Send error to remote logging service (Firebase Crashlytics)
   static Future<void> _sendToRemote(
     LogLevel level,
@@ -268,17 +269,17 @@ class AppLogger {
     //   await FirebaseCrashlytics.instance.log(message);
     // }
   }
-  
+
   /// Enable/disable remote logging at runtime
   static void setRemoteLogging(bool enabled) {
     _enableRemoteLogging = enabled;
   }
-  
+
   /// Set minimum log level at runtime
   static void setMinimumLevel(LogLevel level) {
     _minimumLevel = level;
   }
-  
+
   /// Get current configuration
   static Map<String, dynamic> getConfiguration() {
     return {
@@ -313,7 +314,7 @@ class _AppLogPrinter extends LogPrinter {
     Level.error: '❌',
     Level.fatal: '💀',
   };
-  
+
   static final Map<Level, String> _levelPrefixes = {
     Level.debug: 'DEBUG',
     Level.info: 'INFO',
@@ -328,17 +329,17 @@ class _AppLogPrinter extends LogPrinter {
     final prefix = _levelPrefixes[event.level] ?? 'LOG';
     final timestamp = DateTime.now().toIso8601String().substring(11, 23);
     final message = event.message;
-    
+
     final lines = <String>[];
-    
+
     // Main log line
     lines.add('$emoji [$timestamp] $prefix: $message');
-    
+
     // Add error details if present
     if (event.error != null) {
       lines.add('   └─ Error: ${event.error}');
     }
-    
+
     // Add stack trace for errors (limited lines in production)
     if (event.stackTrace != null && event.level.index >= Level.error.index) {
       final stackLines = event.stackTrace.toString().split('\n');
@@ -352,7 +353,7 @@ class _AppLogPrinter extends LogPrinter {
         lines.add('   └─ ... and ${stackLines.length - maxLines} more lines');
       }
     }
-    
+
     return lines;
   }
 }

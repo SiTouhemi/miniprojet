@@ -39,7 +39,7 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return ChangeNotifierProvider.value(
       value: _model,
       child: Scaffold(
@@ -93,7 +93,7 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
 
   Widget _buildScanner(QRScannerModel model) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Stack(
       children: [
         // Camera view
@@ -105,13 +105,13 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
             }
           },
         ),
-        
+
         // Scanning overlay
         CustomPaint(
           painter: ScannerOverlayPainter(),
           child: Container(),
         ),
-        
+
         // Instructions
         Positioned(
           top: 40,
@@ -132,7 +132,7 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
             ),
           ),
         ),
-        
+
         // Controls
         Positioned(
           bottom: 40,
@@ -154,7 +154,7 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
             ],
           ),
         ),
-        
+
         // Processing indicator
         if (model.isProcessing)
           Container(
@@ -316,7 +316,7 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
 
   void _showScanHistory(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -367,7 +367,7 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
   Widget _buildHistoryItem(Map<String, dynamic> scan, AppLocalizations l10n) {
     final timestamp = scan['timestamp'] as DateTime;
     final success = scan['success'] as bool;
-    
+
     return Card(
       margin: AppSpacing.marginSM.copyWith(bottom: AppSpacing.sm),
       child: ListTile(
@@ -424,26 +424,32 @@ class ScannerOverlayPainter extends CustomPainter {
     final bracketLength = 30.0;
 
     // Top-left
-    canvas.drawLine(Offset(left, top + bracketLength), Offset(left, top), bracketPaint);
-    canvas.drawLine(Offset(left, top), Offset(left + bracketLength, top), bracketPaint);
+    canvas.drawLine(
+        Offset(left, top + bracketLength), Offset(left, top), bracketPaint);
+    canvas.drawLine(
+        Offset(left, top), Offset(left + bracketLength, top), bracketPaint);
 
     // Top-right
-    canvas.drawLine(Offset(left + scanAreaSize - bracketLength, top), 
+    canvas.drawLine(Offset(left + scanAreaSize - bracketLength, top),
         Offset(left + scanAreaSize, top), bracketPaint);
-    canvas.drawLine(Offset(left + scanAreaSize, top), 
+    canvas.drawLine(Offset(left + scanAreaSize, top),
         Offset(left + scanAreaSize, top + bracketLength), bracketPaint);
 
     // Bottom-left
-    canvas.drawLine(Offset(left, top + scanAreaSize - bracketLength), 
+    canvas.drawLine(Offset(left, top + scanAreaSize - bracketLength),
         Offset(left, top + scanAreaSize), bracketPaint);
-    canvas.drawLine(Offset(left, top + scanAreaSize), 
+    canvas.drawLine(Offset(left, top + scanAreaSize),
         Offset(left + bracketLength, top + scanAreaSize), bracketPaint);
 
     // Bottom-right
-    canvas.drawLine(Offset(left + scanAreaSize - bracketLength, top + scanAreaSize), 
-        Offset(left + scanAreaSize, top + scanAreaSize), bracketPaint);
-    canvas.drawLine(Offset(left + scanAreaSize, top + scanAreaSize - bracketLength), 
-        Offset(left + scanAreaSize, top + scanAreaSize), bracketPaint);
+    canvas.drawLine(
+        Offset(left + scanAreaSize - bracketLength, top + scanAreaSize),
+        Offset(left + scanAreaSize, top + scanAreaSize),
+        bracketPaint);
+    canvas.drawLine(
+        Offset(left + scanAreaSize, top + scanAreaSize - bracketLength),
+        Offset(left + scanAreaSize, top + scanAreaSize),
+        bracketPaint);
   }
 
   @override

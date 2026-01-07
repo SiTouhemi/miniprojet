@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// A widget that displays label-value pairs with predictable sizing
 /// to prevent layout calculation failures in dialogs.
-/// 
+///
 /// This widget replaces complex Row layouts with MainAxisAlignment.spaceBetween
 /// that can cause rendering issues when text lengths vary dynamically.
 class ConfirmationRow extends StatelessWidget {
@@ -73,23 +73,25 @@ class ConfirmationRow extends StatelessWidget {
   /// Gets the default label text style
   TextStyle _getDefaultLabelStyle(BuildContext context) {
     return Theme.of(context).textTheme.bodyMedium?.copyWith(
-      color: Colors.grey.shade600,
-    ) ?? TextStyle(
-      color: Colors.grey.shade600,
-      fontSize: 14.0,
-    );
+              color: Colors.grey.shade600,
+            ) ??
+        TextStyle(
+          color: Colors.grey.shade600,
+          fontSize: 14.0,
+        );
   }
 
   /// Gets the default value text style
   TextStyle _getDefaultValueStyle(BuildContext context) {
     return Theme.of(context).textTheme.bodyMedium?.copyWith(
-      fontWeight: FontWeight.w600,
-      color: const Color(0xFF005BAA),
-    ) ?? const TextStyle(
-      fontWeight: FontWeight.w600,
-      color: Color(0xFF005BAA),
-      fontSize: 14.0,
-    );
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF005BAA),
+            ) ??
+        const TextStyle(
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF005BAA),
+          fontSize: 14.0,
+        );
   }
 }
 
@@ -144,22 +146,24 @@ class ConfirmationRowTable extends StatelessWidget {
   /// Gets the default label text style
   TextStyle _getDefaultLabelStyle(BuildContext context) {
     return Theme.of(context).textTheme.bodyMedium?.copyWith(
-      color: Colors.grey.shade600,
-    ) ?? TextStyle(
-      color: Colors.grey.shade600,
-      fontSize: 14.0,
-    );
+              color: Colors.grey.shade600,
+            ) ??
+        TextStyle(
+          color: Colors.grey.shade600,
+          fontSize: 14.0,
+        );
   }
 
   /// Gets the default value text style
   TextStyle _getDefaultValueStyle(BuildContext context) {
     return Theme.of(context).textTheme.bodyMedium?.copyWith(
-      fontWeight: FontWeight.w600,
-      color: const Color(0xFF005BAA),
-    ) ?? const TextStyle(
-      fontWeight: FontWeight.w600,
-      color: Color(0xFF005BAA),
-      fontSize: 14.0,
-    );
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF005BAA),
+            ) ??
+        const TextStyle(
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF005BAA),
+          fontSize: 14.0,
+        );
   }
 }

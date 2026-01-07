@@ -46,9 +46,9 @@ class RoleMiddleware {
       case '/history':
       case '/lastQR':
       case '/profile':
-        return role == UserRole.student || 
-               role == UserRole.staff || 
-               role == UserRole.admin;
+        return role == UserRole.student ||
+            role == UserRole.staff ||
+            role == UserRole.admin;
 
       // Public routes (login, etc.)
       case '/login':
@@ -63,26 +63,26 @@ class RoleMiddleware {
 
   /// Validate user role before performing an operation
   /// Throws exception if user doesn't have required permissions
-  static Future<void> requireRole(UserRole requiredRole, [String? operation]) async {
+  static Future<void> requireRole(UserRole requiredRole,
+      [String? operation]) async {
     final hasRole = await _authService.hasRole(requiredRole);
     if (!hasRole) {
       final operationText = operation != null ? ' pour $operation' : '';
       throw UnauthorizedException(
-        'Accès non autorisé. Rôle ${requiredRole.name} requis$operationText.'
-      );
+          'Accès non autorisé. Rôle ${requiredRole.name} requis$operationText.');
     }
   }
 
   /// Validate user has any of the specified roles
   /// Throws exception if user doesn't have any of the required roles
-  static Future<void> requireAnyRole(List<UserRole> requiredRoles, [String? operation]) async {
+  static Future<void> requireAnyRole(List<UserRole> requiredRoles,
+      [String? operation]) async {
     final hasAnyRole = await _authService.hasAnyRole(requiredRoles);
     if (!hasAnyRole) {
       final roleNames = requiredRoles.map((r) => r.name).join(' ou ');
       final operationText = operation != null ? ' pour $operation' : '';
       throw UnauthorizedException(
-        'Accès non autorisé. Rôle $roleNames requis$operationText.'
-      );
+          'Accès non autorisé. Rôle $roleNames requis$operationText.');
     }
   }
 
@@ -92,8 +92,7 @@ class RoleMiddleware {
     final hasPermission = await _authService.hasPermission(operation);
     if (!hasPermission) {
       throw UnauthorizedException(
-        'Accès non autorisé pour l\'opération: $operation'
-      );
+          'Accès non autorisé pour l\'opération: $operation');
     }
   }
 
@@ -108,7 +107,8 @@ class RoleMiddleware {
     try {
       await _authService.refreshSessionIfNeeded();
     } catch (e) {
-      throw UnauthenticatedException('Session expirée. Veuillez vous reconnecter.');
+      throw UnauthenticatedException(
+          'Session expirée. Veuillez vous reconnecter.');
     }
   }
 
@@ -134,11 +134,8 @@ class RoleMiddleware {
 
   /// Check if current user is student, staff, or admin (any authenticated user)
   static Future<bool> isAuthenticatedUser() async {
-    return await _authService.hasAnyRole([
-      UserRole.student, 
-      UserRole.staff, 
-      UserRole.admin
-    ]);
+    return await _authService
+        .hasAnyRole([UserRole.student, UserRole.staff, UserRole.admin]);
   }
 }
 
@@ -164,9 +161,7 @@ class RouteGuard {
   ) async {
     final canAccess = await canNavigate(routeName);
     if (!canAccess) {
-      throw UnauthorizedException(
-        'Accès non autorisé à la route: $routeName'
-      );
+      throw UnauthorizedException('Accès non autorisé à la route: $routeName');
     }
 
     Navigator.pushNamed(context, routeName);

@@ -15,22 +15,22 @@ class AppService {
   // Get app settings with caching
   Future<AppSettingsRecord> getAppSettings() async {
     // Return cached settings if they're less than 5 minutes old
-    if (_cachedSettings != null && 
-        _lastSettingsFetch != null && 
+    if (_cachedSettings != null &&
+        _lastSettingsFetch != null &&
         DateTime.now().difference(_lastSettingsFetch!).inMinutes < 5) {
       return _cachedSettings!;
     }
 
     try {
       final settingsQuery = await queryAppSettingsRecordOnce(limit: 1);
-      
+
       if (settingsQuery.isNotEmpty) {
         _cachedSettings = settingsQuery.first;
       } else {
         // Create default settings if none exist
         _cachedSettings = await _createDefaultSettings();
       }
-      
+
       _lastSettingsFetch = DateTime.now();
       return _cachedSettings!;
     } catch (e) {
@@ -59,7 +59,8 @@ class AppService {
       final doc = await docRef.get();
       return AppSettingsRecord.fromSnapshot(doc);
     } catch (e) {
-      AppLogger.e('Error creating default settings', error: e, tag: 'AppService');
+      AppLogger.e('Error creating default settings',
+          error: e, tag: 'AppService');
       return _getDefaultSettings();
     }
   }
@@ -110,8 +111,9 @@ class AppService {
       );
 
       // Filter out full slots
-      return timeSlots.where((slot) => 
-        slot.currentReservations < slot.maxCapacity).toList();
+      return timeSlots
+          .where((slot) => slot.currentReservations < slot.maxCapacity)
+          .toList();
     } catch (e) {
       AppLogger.e('Error fetching time slots', error: e, tag: 'AppService');
       return [];
@@ -119,18 +121,24 @@ class AppService {
   }
 
   // Get user's active reservations
-  Future<List<ReservationRecord>> getUserReservations(String userId, {bool activeOnly = false}) async {
+  Future<List<ReservationRecord>> getUserReservations(String userId,
+      {bool activeOnly = false}) async {
     try {
-      Query query = ReservationRecord.collection.where('user_id', isEqualTo: userId);
-      
+      Query query =
+          ReservationRecord.collection.where('user_id', isEqualTo: userId);
+
       if (activeOnly) {
         query = query.where('status', whereIn: ['confirmed', 'pending']);
       }
-      
-      final snapshot = await query.orderBy('created_at', descending: true).get();
-      return snapshot.docs.map((doc) => ReservationRecord.fromSnapshot(doc)).toList();
+
+      final snapshot =
+          await query.orderBy('created_at', descending: true).get();
+      return snapshot.docs
+          .map((doc) => ReservationRecord.fromSnapshot(doc))
+          .toList();
     } catch (e) {
-      AppLogger.e('Error fetching user reservations', error: e, tag: 'AppService');
+      AppLogger.e('Error fetching user reservations',
+          error: e, tag: 'AppService');
       return [];
     }
   }
@@ -139,11 +147,13 @@ class AppService {
   Future<bool> canUserMakeReservation(String userId) async {
     try {
       final settings = await getAppSettings();
-      final activeReservations = await getUserReservations(userId, activeOnly: true);
-      
+      final activeReservations =
+          await getUserReservations(userId, activeOnly: true);
+
       return activeReservations.length < settings.maxReservationsPerUser;
     } catch (e) {
-      AppLogger.e('Error checking reservation limit', error: e, tag: 'AppService');
+      AppLogger.e('Error checking reservation limit',
+          error: e, tag: 'AppService');
       return false;
     }
   }
@@ -151,47 +161,49 @@ class AppService {
   // Cancel reservation
   Future<bool> cancelReservation(String reservationId, String userId) async {
     try {
-      final reservationDoc = await ReservationRecord.collection.doc(reservationId).get();
-      
+      final reservationDoc =
+          await ReservationRecord.collection.doc(reservationId).get();
+
       if (!reservationDoc.exists) {
         return false;
       }
-      
+
       final reservation = ReservationRecord.fromSnapshot(reservationDoc);
-      
+
       // Check if user owns this reservation
       if (reservation.userId != userId) {
         return false;
       }
-      
+
       // Check if cancellation is allowed (not too close to meal time)
       final settings = await getAppSettings();
       final now = DateTime.now();
       final mealTime = reservation.creneaux;
-      
-      if (mealTime != null && 
-          mealTime.difference(now).inHours < settings.reservationDeadlineHours) {
+
+      if (mealTime != null &&
+          mealTime.difference(now).inHours <
+              settings.reservationDeadlineHours) {
         return false; // Too late to cancel
       }
-      
+
       // Update reservation status
       await reservationDoc.reference.update({
         'status': 'cancelled',
         'cancelled_at': FieldValue.serverTimestamp(),
       });
-      
+
       // Update time slot capacity
       final timeSlotQuery = await queryTimeSlotRecordOnce(
         queryBuilder: (query) => query.where('start_time', isEqualTo: mealTime),
         limit: 1,
       );
-      
+
       if (timeSlotQuery.isNotEmpty) {
         await timeSlotQuery.first.reference.update({
           'current_reservations': FieldValue.increment(-1),
         });
       }
-      
+
       return true;
     } catch (e) {
       AppLogger.e('Error cancelling reservation', error: e, tag: 'AppService');
@@ -226,14 +238,14 @@ class AppService {
     try {
       final endDate = DateTime.now();
       final startDate = endDate.subtract(Duration(days: days));
-      
+
       final analytics = await queryAnalyticsRecordOnce(
         queryBuilder: (query) => query
             .where('date', isGreaterThanOrEqualTo: startDate)
             .where('date', isLessThan: endDate)
             .orderBy('date', descending: true),
       );
-      
+
       if (analytics.isEmpty) {
         return {
           'totalReservations': 0,
@@ -243,27 +255,31 @@ class AppService {
           'cancellationRate': 0.0,
         };
       }
-      
-      final totalReservations = analytics.fold<int>(0, (sum, record) => sum + record.totalReservations);
-      final totalRevenue = analytics.fold<double>(0, (sum, record) => sum + record.totalRevenue);
-      final avgOccupancy = analytics.fold<double>(0, (sum, record) => sum + record.averageOccupancy) / analytics.length;
-      
+
+      final totalReservations = analytics.fold<int>(
+          0, (sum, record) => sum + record.totalReservations);
+      final totalRevenue =
+          analytics.fold<double>(0, (sum, record) => sum + record.totalRevenue);
+      final avgOccupancy = analytics.fold<double>(
+              0, (sum, record) => sum + record.averageOccupancy) /
+          analytics.length;
+
       // Find most common peak hour
       final peakHours = <String, int>{};
       for (final record in analytics) {
         peakHours[record.peakHour] = (peakHours[record.peakHour] ?? 0) + 1;
       }
-      
-      final mostCommonPeakHour = peakHours.entries
-          .reduce((a, b) => a.value > b.value ? a : b)
-          .key;
-      
+
+      final mostCommonPeakHour =
+          peakHours.entries.reduce((a, b) => a.value > b.value ? a : b).key;
+
       return {
         'totalReservations': totalReservations,
         'totalRevenue': totalRevenue,
         'averageOccupancy': avgOccupancy,
         'peakHour': mostCommonPeakHour,
-        'cancellationRate': analytics.isNotEmpty ? analytics.last.cancellationRate : 0.0,
+        'cancellationRate':
+            analytics.isNotEmpty ? analytics.last.cancellationRate : 0.0,
         'dailyData': analytics,
       };
     } catch (e) {

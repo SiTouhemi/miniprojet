@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Error boundary widget that catches rendering exceptions and shows fallback UI
-/// 
+///
 /// This widget implements comprehensive error handling for dialog rendering issues,
 /// including layout calculation failures, constraint violations, and hit testing errors.
 /// It provides fallback strategies and detailed error logging for debugging.
@@ -47,11 +47,11 @@ class _DialogErrorBoundaryState extends State<DialogErrorBoundary> {
     if (widget.enableLogging) {
       _logError(details);
     }
-    
+
     if (widget.onError != null) {
       widget.onError!(details);
     }
-    
+
     if (mounted) {
       setState(() {
         _hasError = true;
@@ -69,7 +69,7 @@ class _DialogErrorBoundaryState extends State<DialogErrorBoundary> {
     debugPrint('Context: ${details.context}');
     debugPrint('Library: ${details.library}');
     debugPrint('================================================');
-    
+
     // Also report to Flutter's error reporting system
     FlutterError.reportError(details);
   }
@@ -138,9 +138,9 @@ class _ErrorCatcher extends StatelessWidget {
             library: 'dialog_error_boundary',
             context: ErrorDescription('Error caught in DialogErrorBoundary'),
           );
-          
+
           onError(details);
-          
+
           // Return a simple error widget
           return const Center(
             child: Text(
@@ -193,12 +193,13 @@ class DialogFallbackStrategies {
         constraints: const BoxConstraints(maxWidth: 300),
         child: Text(message),
       ),
-      actions: actions ?? [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('OK'),
-        ),
-      ],
+      actions: actions ??
+          [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
     );
   }
 
@@ -243,7 +244,7 @@ class DialogFallbackStrategies {
 /// Error logging utility for dialog-related errors
 class DialogErrorLogger {
   static final List<DialogErrorRecord> _errorHistory = [];
-  
+
   /// Logs a dialog error with context
   static void logError({
     required String errorType,
@@ -258,14 +259,14 @@ class DialogErrorLogger {
       stackTrace: stackTrace,
       context: context,
     );
-    
+
     _errorHistory.add(record);
-    
+
     // Keep only last 50 errors to prevent memory issues
     if (_errorHistory.length > 50) {
       _errorHistory.removeAt(0);
     }
-    
+
     // Debug print for development
     if (kDebugMode) {
       debugPrint('DialogError [$errorType]: $message');
@@ -274,12 +275,12 @@ class DialogErrorLogger {
       }
     }
   }
-  
+
   /// Gets the error history for debugging
   static List<DialogErrorRecord> getErrorHistory() {
     return List.unmodifiable(_errorHistory);
   }
-  
+
   /// Clears the error history
   static void clearHistory() {
     _errorHistory.clear();

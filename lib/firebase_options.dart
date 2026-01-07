@@ -70,7 +70,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '330643013308',
     projectId: 'mafirstclienta',
     storageBucket: 'mafirstclienta.firebasestorage.app',
-    iosClientId: '330643013308-boghsr95uqu0h7kc2kdlh9e56ql4b6uj.apps.googleusercontent.com',
+    iosClientId:
+        '330643013308-boghsr95uqu0h7kc2kdlh9e56ql4b6uj.apps.googleusercontent.com',
     iosBundleId: 'com.mycompany.miniprojet',
   );
 }

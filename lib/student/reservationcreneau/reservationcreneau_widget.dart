@@ -53,18 +53,18 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
   /// Combines individual slot expiry check with meal period business rules
   bool _isTimeSlotLocked(TimeSlotRecord timeSlot) {
     final now = DateTime.now();
-    
+
     // Check if it's Sunday (restaurant closed)
     if (now.weekday == DateTime.sunday) {
       return true;
     }
-    
+
     // FIRST: Check if this specific time slot has already ended
     // This is the primary check - if the slot's end time has passed, it's locked
     if (timeSlot.endTime != null && timeSlot.endTime!.isBefore(now)) {
       return true;
     }
-    
+
     // SECOND: Check meal period business rules for future slots
     // This prevents booking slots that are outside business hours
     if (timeSlot.mealType == 'lunch') {
@@ -76,7 +76,7 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
       final endOfDay = DateTime(now.year, now.month, now.day, 23, 59);
       return now.isAfter(endOfDay);
     }
-    
+
     // Default: not locked
     return false;
   }
@@ -141,7 +141,7 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: Text(
-                    'Le montant sera débité de votre compte D17. Cette action est irréversible.',
+                    'Confirmer votre réservation pour ce créneau.',
                     style: FlutterFlowTheme.of(context).bodySmall.override(
                           font: GoogleFonts.inter(),
                           color: Color(0xFF005BAA),
@@ -361,12 +361,15 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                           stream: queryTimeSlotRecord(
                             queryBuilder: (timeSlotRecord) {
                               final today = DateTime.now();
-                              final startOfDay = DateTime(today.year, today.month, today.day);
-                              final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
-                              
+                              final startOfDay =
+                                  DateTime(today.year, today.month, today.day);
+                              final endOfDay = DateTime(today.year, today.month,
+                                  today.day, 23, 59, 59);
+
                               return timeSlotRecord
                                   .where('is_active', isEqualTo: true)
-                                  .where('date', isGreaterThanOrEqualTo: startOfDay)
+                                  .where('date',
+                                      isGreaterThanOrEqualTo: startOfDay)
                                   .where('date', isLessThanOrEqualTo: endOfDay)
                                   .orderBy('date')
                                   .orderBy('start_time')
@@ -408,7 +411,8 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                             }
 
                             if (snapshot.connectionState ==
-                                ConnectionState.waiting || _model.isGeneratingSlots) {
+                                    ConnectionState.waiting ||
+                                _model.isGeneratingSlots) {
                               return Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     16.0, 0.0, 16.0, 0.0),
@@ -420,14 +424,15 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                   ),
                                   child: Center(
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         CircularProgressIndicator(
                                           color: Color(0xFF005BAA),
                                         ),
                                         SizedBox(height: 12),
                                         Text(
-                                          _model.isGeneratingSlots 
+                                          _model.isGeneratingSlots
                                               ? 'Generating time slots...'
                                               : 'Loading time slots...',
                                           style: TextStyle(
@@ -502,10 +507,13 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
 
                                 // Check if time slot is locked (past time or Sunday)
                                 final isLocked = _isTimeSlotLocked(timeSlot);
-                                final isSunday = timeSlot.date?.weekday == DateTime.sunday;
-                                
+                                final isSunday =
+                                    timeSlot.date?.weekday == DateTime.sunday;
+
                                 // Determine if slot is selectable
-                                final isSelectable = !isLocked && !isSunday && availableSpots > 0;
+                                final isSelectable = !isLocked &&
+                                    !isSunday &&
+                                    availableSpots > 0;
 
                                 return Padding(
                                   padding: EdgeInsetsDirectional.fromSTEB(
@@ -532,7 +540,8 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                         ),
                                         decoration: BoxDecoration(
                                           color: isLocked || isSunday
-                                              ? Color(0xFFF5F5F5) // Grey for locked slots
+                                              ? Color(
+                                                  0xFFF5F5F5) // Grey for locked slots
                                               : availableSpots > 0
                                                   ? Colors.white
                                                   : Color(0xFFF5F5F5),
@@ -551,13 +560,17 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                               BorderRadius.circular(12.0),
                                           border: Border.all(
                                             color: isLocked || isSunday
-                                                ? Color(0xFFBDBDBD) // Grey border for locked
+                                                ? Color(
+                                                    0xFFBDBDBD) // Grey border for locked
                                                 : availableSpots == 0
                                                     ? Color(0xFFE74C3C)
                                                     : isSelected
                                                         ? Color(0xFF00A4E4)
                                                         : Color(0xFFE0E0E0),
-                                            width: (isLocked || isSunday || availableSpots == 0 || isSelected)
+                                            width: (isLocked ||
+                                                    isSunday ||
+                                                    availableSpots == 0 ||
+                                                    isSelected)
                                                 ? 2.0
                                                 : 1.0,
                                           ),
@@ -578,11 +591,15 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                                     width: 36.0,
                                                     height: 36.0,
                                                     decoration: BoxDecoration(
-                                                      color: isLocked || isSunday
-                                                          ? Color(0xFFBDBDBD) // Grey icon for locked
+                                                      color: isLocked ||
+                                                              isSunday
+                                                          ? Color(
+                                                              0xFFBDBDBD) // Grey icon for locked
                                                           : isSelected
-                                                              ? Color(0xFF00A4E4)
-                                                              : Color(0xFF005BAA),
+                                                              ? Color(
+                                                                  0xFF00A4E4)
+                                                              : Color(
+                                                                  0xFF005BAA),
                                                       shape: BoxShape.circle,
                                                     ),
                                                     child: Align(
@@ -591,7 +608,8 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                                               0.0, 0.0),
                                                       child: Icon(
                                                         isLocked || isSunday
-                                                            ? Icons.lock // Lock icon for locked slots
+                                                            ? Icons
+                                                                .lock // Lock icon for locked slots
                                                             : Icons.schedule,
                                                         color: Colors.white,
                                                         size: 18.0,
@@ -617,9 +635,12 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                                                     FontWeight
                                                                         .w600,
                                                               ),
-                                                              color: isLocked || isSunday
-                                                                  ? Color(0xFF9E9E9E) // Grey text for locked
-                                                                  : Color(0xFF005BAA),
+                                                              color: isLocked ||
+                                                                      isSunday
+                                                                  ? Color(
+                                                                      0xFF9E9E9E) // Grey text for locked
+                                                                  : Color(
+                                                                      0xFF005BAA),
                                                               fontSize: 16.0,
                                                               letterSpacing:
                                                                   0.0,
@@ -633,30 +654,41 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                                             ? 'Expired'
                                                             : isSunday
                                                                 ? 'Closed (Sunday)'
-                                                                : availableSpots > 0
+                                                                : availableSpots >
+                                                                        0
                                                                     ? '${availableSpots} places available'
                                                                     : 'Full',
-                                                        style: FlutterFlowTheme
-                                                                .of(context)
-                                                            .bodySmall
-                                                            .override(
-                                                              font: GoogleFonts
-                                                                  .inter(),
-                                                              color: isLocked || isSunday
-                                                                  ? Color(0xFF9E9E9E) // Grey text for locked
-                                                                  : availableSpots > 5
-                                                                      ? Color(0xFF00A855)
-                                                                      : availableSpots > 0
-                                                                          ? Color(0xFFFF6B35)
-                                                                          : Color(0xFFE74C3C),
-                                                              fontSize: 12.0,
-                                                              letterSpacing:
-                                                                  0.0,
-                                                              fontWeight:
-                                                                  (isLocked || isSunday || availableSpots == 0)
-                                                                      ? FontWeight.bold
-                                                                      : FontWeight.normal,
-                                                            ),
+                                                        style:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .bodySmall
+                                                                .override(
+                                                                  font: GoogleFonts
+                                                                      .inter(),
+                                                                  color: isLocked ||
+                                                                          isSunday
+                                                                      ? Color(
+                                                                          0xFF9E9E9E) // Grey text for locked
+                                                                      : availableSpots >
+                                                                              5
+                                                                          ? Color(
+                                                                              0xFF00A855)
+                                                                          : availableSpots > 0
+                                                                              ? Color(0xFFFF6B35)
+                                                                              : Color(0xFFE74C3C),
+                                                                  fontSize:
+                                                                      12.0,
+                                                                  letterSpacing:
+                                                                      0.0,
+                                                                  fontWeight: (isLocked ||
+                                                                          isSunday ||
+                                                                          availableSpots ==
+                                                                              0)
+                                                                      ? FontWeight
+                                                                          .bold
+                                                                      : FontWeight
+                                                                          .normal,
+                                                                ),
                                                       ),
                                                     ],
                                                   ),
@@ -678,16 +710,20 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                                             fontWeight:
                                                                 FontWeight.w600,
                                                           ),
-                                                          color: isLocked || isSunday
-                                                              ? Color(0xFF9E9E9E) // Grey text for locked
-                                                              : Color(0xFF005BAA),
+                                                          color: isLocked ||
+                                                                  isSunday
+                                                              ? Color(
+                                                                  0xFF9E9E9E) // Grey text for locked
+                                                              : Color(
+                                                                  0xFF005BAA),
                                                           fontSize: 14.0,
                                                           letterSpacing: 0.0,
                                                           fontWeight:
                                                               FontWeight.w600,
                                                         ),
                                                   ),
-                                                  if (isSelected && isSelectable)
+                                                  if (isSelected &&
+                                                      isSelectable)
                                                     Container(
                                                       padding:
                                                           EdgeInsets.symmetric(

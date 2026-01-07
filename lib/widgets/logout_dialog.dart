@@ -36,7 +36,7 @@ class LogoutDialog {
   /// Shows confirmation dialog and performs logout if confirmed
   static Future<void> handleLogout(BuildContext context) async {
     final shouldLogout = await show(context);
-    
+
     if (shouldLogout == true) {
       try {
         await signOut();

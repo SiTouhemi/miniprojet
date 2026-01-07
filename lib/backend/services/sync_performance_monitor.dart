@@ -5,7 +5,8 @@ import '/utils/performance_monitor.dart';
 /// Performance monitoring service for real-time data synchronization
 /// Implements requirement 5.6: Add performance monitoring for sync operations
 class SyncPerformanceMonitor {
-  static final SyncPerformanceMonitor _instance = SyncPerformanceMonitor._internal();
+  static final SyncPerformanceMonitor _instance =
+      SyncPerformanceMonitor._internal();
   factory SyncPerformanceMonitor() => _instance;
   SyncPerformanceMonitor._internal();
 
@@ -23,8 +24,10 @@ class SyncPerformanceMonitor {
   static const Duration staleDataThreshold = Duration(minutes: 5);
 
   /// Record a sync operation start
-  String startSyncOperation(String operationType, {Map<String, dynamic>? metadata}) {
-    final operationId = '${operationType}_${DateTime.now().millisecondsSinceEpoch}';
+  String startSyncOperation(String operationType,
+      {Map<String, dynamic>? metadata}) {
+    final operationId =
+        '${operationType}_${DateTime.now().millisecondsSinceEpoch}';
     final metric = SyncMetric(
       operationId: operationId,
       operationType: operationType,
@@ -44,7 +47,8 @@ class SyncPerformanceMonitor {
   }
 
   /// Record a sync operation completion
-  void completeSyncOperation(String operationId, {
+  void completeSyncOperation(
+    String operationId, {
     bool success = true,
     String? errorMessage,
     int? recordsProcessed,
@@ -52,7 +56,7 @@ class SyncPerformanceMonitor {
   }) {
     final operationType = operationId.split('_')[0];
     final metrics = _syncMetrics[operationType];
-    
+
     if (metrics != null) {
       final metric = metrics.firstWhere(
         (m) => m.operationId == operationId,
@@ -67,7 +71,7 @@ class SyncPerformanceMonitor {
       metric.success = success;
       metric.errorMessage = errorMessage;
       metric.recordsProcessed = recordsProcessed;
-      
+
       if (additionalMetadata != null) {
         metric.metadata.addAll(additionalMetadata);
       }
@@ -77,7 +81,8 @@ class SyncPerformanceMonitor {
         _lastSyncTimes[operationType] = DateTime.now();
         _syncFailureCounts[operationType] = 0;
       } else {
-        _syncFailureCounts[operationType] = (_syncFailureCounts[operationType] ?? 0) + 1;
+        _syncFailureCounts[operationType] =
+            (_syncFailureCounts[operationType] ?? 0) + 1;
       }
 
       // Update average sync time
@@ -88,10 +93,11 @@ class SyncPerformanceMonitor {
   /// Get sync performance metrics for a specific operation type
   SyncPerformanceStats getPerformanceStats(String operationType) {
     final metrics = _syncMetrics[operationType] ?? [];
-    final recentMetrics = metrics.where((m) => 
-      m.endTime != null && 
-      DateTime.now().difference(m.endTime!) < Duration(hours: 1)
-    ).toList();
+    final recentMetrics = metrics
+        .where((m) =>
+            m.endTime != null &&
+            DateTime.now().difference(m.endTime!) < Duration(hours: 1))
+        .toList();
 
     if (recentMetrics.isEmpty) {
       return SyncPerformanceStats(
@@ -108,14 +114,19 @@ class SyncPerformanceMonitor {
 
     final successful = recentMetrics.where((m) => m.success).length;
     final failed = recentMetrics.length - successful;
-    
+
     final durations = recentMetrics
         .where((m) => m.duration != null)
         .map((m) => m.duration!)
         .toList();
-    
+
     final averageDuration = durations.isNotEmpty
-        ? Duration(microseconds: (durations.map((d) => d.inMicroseconds).reduce((a, b) => a + b) / durations.length).round())
+        ? Duration(
+            microseconds: (durations
+                        .map((d) => d.inMicroseconds)
+                        .reduce((a, b) => a + b) /
+                    durations.length)
+                .round())
         : Duration.zero;
 
     return SyncPerformanceStats(
@@ -127,8 +138,12 @@ class SyncPerformanceMonitor {
       lastSyncTime: _lastSyncTimes[operationType],
       isStale: isDataStale(operationType),
       consecutiveFailures: _syncFailureCounts[operationType] ?? 0,
-      minDuration: durations.isNotEmpty ? durations.reduce((a, b) => a < b ? a : b) : Duration.zero,
-      maxDuration: durations.isNotEmpty ? durations.reduce((a, b) => a > b ? a : b) : Duration.zero,
+      minDuration: durations.isNotEmpty
+          ? durations.reduce((a, b) => a < b ? a : b)
+          : Duration.zero,
+      maxDuration: durations.isNotEmpty
+          ? durations.reduce((a, b) => a > b ? a : b)
+          : Duration.zero,
       recentErrors: recentMetrics
           .where((m) => !m.success && m.errorMessage != null)
           .map((m) => m.errorMessage!)
@@ -160,29 +175,36 @@ class SyncPerformanceMonitor {
 
     for (final operationType in allOperationTypes) {
       final stats = getPerformanceStats(operationType);
-      
+
       // Check for stale data
       if (stats.isStale) {
-        issues.add('$operationType data is stale (last sync: ${stats.lastSyncTime})');
+        issues.add(
+            '$operationType data is stale (last sync: ${stats.lastSyncTime})');
         recommendations.add('Refresh $operationType data');
       }
 
       // Check for high failure rate
-      if (stats.totalOperations > 0 && stats.failedOperations / stats.totalOperations > 0.2) {
-        issues.add('$operationType has high failure rate (${(stats.failedOperations / stats.totalOperations * 100).toStringAsFixed(1)}%)');
-        recommendations.add('Check network connectivity and Firestore permissions for $operationType');
+      if (stats.totalOperations > 0 &&
+          stats.failedOperations / stats.totalOperations > 0.2) {
+        issues.add(
+            '$operationType has high failure rate (${(stats.failedOperations / stats.totalOperations * 100).toStringAsFixed(1)}%)');
+        recommendations.add(
+            'Check network connectivity and Firestore permissions for $operationType');
       }
 
       // Check for consecutive failures
       if (stats.consecutiveFailures > 3) {
-        issues.add('$operationType has ${stats.consecutiveFailures} consecutive failures');
+        issues.add(
+            '$operationType has ${stats.consecutiveFailures} consecutive failures');
         recommendations.add('Investigate $operationType sync issues');
       }
 
       // Check for slow sync times
       if (stats.averageDuration > syncTimeoutThreshold) {
-        issues.add('$operationType sync is slow (avg: ${stats.averageDuration.inSeconds}s)');
-        recommendations.add('Optimize $operationType queries or check network performance');
+        issues.add(
+            '$operationType sync is slow (avg: ${stats.averageDuration.inSeconds}s)');
+        recommendations.add(
+            'Optimize $operationType queries or check network performance');
       }
 
       if (issues.isEmpty) {
@@ -202,13 +224,15 @@ class SyncPerformanceMonitor {
   /// Get detailed metrics for debugging
   Map<String, dynamic> getDetailedMetrics() {
     final result = <String, dynamic>{};
-    
+
     for (final operationType in _syncMetrics.keys) {
       final stats = getPerformanceStats(operationType);
       result[operationType] = {
         'stats': stats.toMap(),
         'recentMetrics': _syncMetrics[operationType]!
-            .where((m) => m.endTime != null && DateTime.now().difference(m.endTime!) < Duration(minutes: 30))
+            .where((m) =>
+                m.endTime != null &&
+                DateTime.now().difference(m.endTime!) < Duration(minutes: 30))
             .map((m) => m.toMap())
             .toList(),
       };
@@ -220,12 +244,11 @@ class SyncPerformanceMonitor {
   /// Clear old metrics to prevent memory leaks
   void cleanupOldMetrics() {
     final cutoffTime = DateTime.now().subtract(Duration(hours: 24));
-    
+
     for (final operationType in _syncMetrics.keys.toList()) {
-      _syncMetrics[operationType]!.removeWhere((metric) => 
-        metric.startTime.isBefore(cutoffTime)
-      );
-      
+      _syncMetrics[operationType]!
+          .removeWhere((metric) => metric.startTime.isBefore(cutoffTime));
+
       if (_syncMetrics[operationType]!.isEmpty) {
         _syncMetrics.remove(operationType);
         _lastSyncTimes.remove(operationType);
@@ -239,17 +262,20 @@ class SyncPerformanceMonitor {
   void _updateAverageSyncTime(String operationType) {
     final metrics = _syncMetrics[operationType] ?? [];
     final recentSuccessfulMetrics = metrics
-        .where((m) => m.success && m.duration != null && DateTime.now().difference(m.startTime) < Duration(hours: 1))
+        .where((m) =>
+            m.success &&
+            m.duration != null &&
+            DateTime.now().difference(m.startTime) < Duration(hours: 1))
         .toList();
 
     if (recentSuccessfulMetrics.isNotEmpty) {
       final totalMicroseconds = recentSuccessfulMetrics
           .map((m) => m.duration!.inMicroseconds)
           .reduce((a, b) => a + b);
-      
+
       _averageSyncTimes[operationType] = Duration(
-        microseconds: (totalMicroseconds / recentSuccessfulMetrics.length).round()
-      );
+          microseconds:
+              (totalMicroseconds / recentSuccessfulMetrics.length).round());
     }
   }
 

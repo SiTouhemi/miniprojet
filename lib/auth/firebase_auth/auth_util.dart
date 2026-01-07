@@ -22,7 +22,7 @@ class AuthService {
 
   // Session timeout duration (24 hours as per requirements)
   static const Duration sessionTimeout = Duration(hours: 24);
-  
+
   // Failed login attempt tracking
   final Map<String, int> _failedAttempts = {};
   final Map<String, DateTime> _lockoutTimes = {};
@@ -31,7 +31,7 @@ class AuthService {
 
   /// Current authenticated user
   User? get currentUser => _auth.currentUser;
-  
+
   /// Check if user is currently logged in
   bool get isLoggedIn => currentUser != null;
 
@@ -44,12 +44,14 @@ class AuthService {
     try {
       // Check if account is locked out
       if (_isAccountLockedOut(email)) {
-        throw Exception('Compte verrouillé. Réessayez dans ${lockoutDuration.inMinutes} minutes.');
+        throw Exception(
+            'Compte verrouillé. Réessayez dans ${lockoutDuration.inMinutes} minutes.');
       }
 
       // Validate password strength for new sessions
       if (!isPasswordStrong(password)) {
-        throw Exception('Le mot de passe ne respecte pas les critères de sécurité.');
+        throw Exception(
+            'Le mot de passe ne respecte pas les critères de sécurité.');
       }
 
       AppLogger.auth('Attempting login for: $email');
@@ -60,8 +62,9 @@ class AuthService {
       );
 
       if (result.user != null) {
-        AppLogger.auth('Firebase Auth successful for: ${result.user!.email}', success: true, userId: result.user!.uid);
-        
+        AppLogger.auth('Firebase Auth successful for: ${result.user!.email}',
+            success: true, userId: result.user!.uid);
+
         // Clear failed attempts on successful login
         _failedAttempts.remove(email);
         _lockoutTimes.remove(email);
@@ -69,22 +72,24 @@ class AuthService {
         // Update last login time and create/update user document
         await _updateLastLogin(result.user!.uid);
         await _ensureUserDocument(result.user!);
-        
+
         // Verify and set custom claims if needed
         await _ensureUserRole(result.user!.uid);
-        
+
         // Initialize real-time user data synchronization
         await _initializeUserDataSync(result.user!.uid);
-        
-        AppLogger.auth('Login complete for role: ${await getUserRole()}', success: true, userId: result.user!.uid);
+
+        AppLogger.auth('Login complete for role: ${await getUserRole()}',
+            success: true, userId: result.user!.uid);
       }
 
       return result;
     } on FirebaseAuthException catch (e) {
       // Track failed attempts
       _trackFailedAttempt(email);
-      
-      AppLogger.auth('Firebase Auth Error: ${e.code} - ${e.message}', success: false);
+
+      AppLogger.auth('Firebase Auth Error: ${e.code} - ${e.message}',
+          success: false);
       String errorMessage = _getErrorMessage(e.code);
       throw Exception(errorMessage);
     } catch (e) {
@@ -116,24 +121,24 @@ class AuthService {
 
     try {
       final targetUid = uid ?? user!.uid;
-      
+
       // First try to get from custom claims
       if (uid == null) {
         final idTokenResult = await user!.getIdTokenResult();
         final role = idTokenResult.claims?['role'] as String?;
-        
+
         if (role != null) {
           return _parseUserRole(role);
         }
       }
-      
+
       // Fallback to Firestore document
       final userDoc = await _firestore.collection('user').doc(targetUid).get();
       if (userDoc.exists) {
         final role = userDoc.data()?['role'] as String?;
         return _parseUserRole(role);
       }
-      
+
       return null;
     } catch (e) {
       AppLogger.e('Error getting user role', error: e, tag: 'AuthService');
@@ -148,7 +153,8 @@ class AuthService {
       // Verify current user is admin
       final currentRole = await getUserRole();
       if (currentRole != UserRole.admin) {
-        throw Exception('Accès non autorisé. Seuls les administrateurs peuvent modifier les rôles.');
+        throw Exception(
+            'Accès non autorisé. Seuls les administrateurs peuvent modifier les rôles.');
       }
 
       // Call Cloud Function to set custom claims
@@ -163,7 +169,6 @@ class AuthService {
         'role': role.name,
         'updatedAt': FieldValue.serverTimestamp(),
       });
-
     } catch (e) {
       throw Exception('Erreur de modification du rôle: ${e.toString()}');
     }
@@ -195,16 +200,18 @@ class AuthService {
       case 'manage_menu':
       case 'view_analytics':
         return role == UserRole.admin;
-      
+
       case 'scan_qr':
       case 'validate_tickets':
         return role == UserRole.staff || role == UserRole.admin;
-      
+
       case 'make_reservation':
       case 'view_menu':
       case 'view_profile':
-        return role == UserRole.student || role == UserRole.staff || role == UserRole.admin;
-      
+        return role == UserRole.student ||
+            role == UserRole.staff ||
+            role == UserRole.admin;
+
       default:
         return false;
     }
@@ -242,7 +249,8 @@ class AuthService {
       // Verify current user is admin
       final currentRole = await getUserRole();
       if (currentRole != UserRole.admin) {
-        throw Exception('Accès non autorisé. Seuls les administrateurs peuvent créer des utilisateurs.');
+        throw Exception(
+            'Accès non autorisé. Seuls les administrateurs peuvent créer des utilisateurs.');
       }
 
       // Validate password strength
@@ -289,11 +297,11 @@ class AuthService {
   /// Implements requirement 3.8 for password requirements
   bool isPasswordStrong(String password) {
     if (password.length < 8) return false;
-    
+
     bool hasUppercase = password.contains(RegExp(r'[A-Z]'));
     bool hasLowercase = password.contains(RegExp(r'[a-z]'));
     bool hasDigits = password.contains(RegExp(r'[0-9]'));
-    
+
     return hasUppercase && hasLowercase && hasDigits;
   }
 
@@ -302,7 +310,7 @@ class AuthService {
     if (password.length < 8) {
       return 'Le mot de passe doit contenir au moins 8 caractères';
     }
-    
+
     List<String> missing = [];
     if (!password.contains(RegExp(r'[A-Z]'))) {
       missing.add('une majuscule');
@@ -313,11 +321,11 @@ class AuthService {
     if (!password.contains(RegExp(r'[0-9]'))) {
       missing.add('un chiffre');
     }
-    
+
     if (missing.isNotEmpty) {
       return 'Le mot de passe doit contenir ${missing.join(', ')}';
     }
-    
+
     return 'Mot de passe fort';
   }
 
@@ -365,13 +373,13 @@ class AuthService {
   bool _isAccountLockedOut(String email) {
     final lockoutTime = _lockoutTimes[email];
     if (lockoutTime == null) return false;
-    
+
     return DateTime.now().difference(lockoutTime) < lockoutDuration;
   }
 
   void _trackFailedAttempt(String email) {
     _failedAttempts[email] = (_failedAttempts[email] ?? 0) + 1;
-    
+
     if (_failedAttempts[email]! >= maxFailedAttempts) {
       _lockoutTimes[email] = DateTime.now();
     }
@@ -390,7 +398,7 @@ class AuthService {
   Future<void> _ensureUserDocument(User user) async {
     try {
       final userDoc = await _firestore.collection('user').doc(user.uid).get();
-      
+
       if (!userDoc.exists) {
         // Create user document if it doesn't exist
         await _firestore.collection('user').doc(user.uid).set({
@@ -435,7 +443,8 @@ class AuthService {
       // Initialize user synchronization in app state
       await FFAppState().initializeUserSync(uid);
     } catch (e) {
-      AppLogger.e('Error initializing user data sync', error: e, tag: 'AuthService');
+      AppLogger.e('Error initializing user data sync',
+          error: e, tag: 'AuthService');
     }
   }
 
@@ -483,16 +492,20 @@ class AuthManager {
 
   Future<UserRole?> getUserRole() => _authService.getUserRole();
   Future<bool> hasRole(UserRole role) => _authService.hasRole(role);
-  Future<bool> hasAnyRole(List<UserRole> roles) => _authService.hasAnyRole(roles);
+  Future<bool> hasAnyRole(List<UserRole> roles) =>
+      _authService.hasAnyRole(roles);
 
-  Future<User?> signInWithEmail(BuildContext context, String email, String password) async {
+  Future<User?> signInWithEmail(
+      BuildContext context, String email, String password) async {
     final result = await _authService.signInWithEmail(email, password);
     return result.user;
   }
 
-  Future<User?> createUserWithEmail(BuildContext context, String email, String password) async {
+  Future<User?> createUserWithEmail(
+      BuildContext context, String email, String password) async {
     // This method is deprecated - use AuthService.createUserWithRole instead
-    throw Exception('Méthode dépréciée. Utilisez AuthService.createUserWithRole à la place.');
+    throw Exception(
+        'Méthode dépréciée. Utilisez AuthService.createUserWithRole à la place.');
   }
 
   Future<Map<String, dynamic>> createUserWithRole({
@@ -503,15 +516,16 @@ class AuthManager {
     String? cin,
     String? classe,
     String? phoneNumber,
-  }) => _authService.createUserWithRole(
-    email: email,
-    password: password,
-    displayName: displayName,
-    role: role,
-    cin: cin,
-    classe: classe,
-    phoneNumber: phoneNumber,
-  );
+  }) =>
+      _authService.createUserWithRole(
+        email: email,
+        password: password,
+        displayName: displayName,
+        role: role,
+        cin: cin,
+        classe: classe,
+        phoneNumber: phoneNumber,
+      );
 
   Future<Map<String, dynamic>> setUserRole(String uid, UserRole role) async {
     await _authService.setUserRole(uid, role);
@@ -538,8 +552,10 @@ class AuthManager {
 
   Future<void> signOut() => _authService.signOut();
   Future<void> resetPassword(String email) => _authService.resetPassword(email);
-  bool isPasswordStrong(String password) => _authService.isPasswordStrong(password);
-  String getPasswordStrengthMessage(String password) => _authService.getPasswordStrengthMessage(password);
+  bool isPasswordStrong(String password) =>
+      _authService.isPasswordStrong(password);
+  String getPasswordStrengthMessage(String password) =>
+      _authService.getPasswordStrengthMessage(password);
 }
 
 // Global instances
@@ -561,7 +577,8 @@ Future<User?> createUserWithEmail(
   String email,
   String password,
 ) {
-  throw Exception('Méthode dépréciée. Utilisez AuthService.createUserWithRole à la place.');
+  throw Exception(
+      'Méthode dépréciée. Utilisez AuthService.createUserWithRole à la place.');
 }
 
 Future<void> signOut() => authService.signOut();

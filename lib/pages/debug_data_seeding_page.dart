@@ -39,9 +39,8 @@ class _DebugDataSeedingPageState extends State<DebugDataSeedingPage> {
       final hasData = await DataSeedingService.instance.hasSampleData();
       setState(() {
         _hasSampleData = hasData;
-        _statusMessage = hasData 
-          ? 'Sample data exists in database' 
-          : 'No sample data found';
+        _statusMessage =
+            hasData ? 'Sample data exists in database' : 'No sample data found';
       });
     } catch (e) {
       setState(() {
@@ -63,11 +62,11 @@ class _DebugDataSeedingPageState extends State<DebugDataSeedingPage> {
     try {
       final success = await DataSeedingService.instance.seedAllData();
       setState(() {
-        _statusMessage = success 
-          ? '✅ Database seeded successfully!\n\n• 12 weekly menu items added\n• Time slots created for next 7 days\n• Students can now see menus and make reservations'
-          : '❌ Failed to seed database';
+        _statusMessage = success
+            ? '✅ Database seeded successfully!\n\n• 12 weekly menu items added\n• Time slots created for next 7 days\n• Students can now see menus and make reservations'
+            : '❌ Failed to seed database';
       });
-      
+
       if (success) {
         await _checkSampleData();
       }
@@ -88,7 +87,8 @@ class _DebugDataSeedingPageState extends State<DebugDataSeedingPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Clear Sample Data'),
-        content: const Text('Are you sure you want to clear all sample data? This action cannot be undone.'),
+        content: const Text(
+            'Are you sure you want to clear all sample data? This action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -112,11 +112,11 @@ class _DebugDataSeedingPageState extends State<DebugDataSeedingPage> {
     try {
       final success = await DataSeedingService.instance.clearSampleData();
       setState(() {
-        _statusMessage = success 
-          ? '✅ Sample data cleared successfully'
-          : '❌ Failed to clear sample data';
+        _statusMessage = success
+            ? '✅ Sample data cleared successfully'
+            : '❌ Failed to clear sample data';
       });
-      
+
       if (success) {
         await _checkSampleData();
       }
@@ -170,9 +170,9 @@ class _DebugDataSeedingPageState extends State<DebugDataSeedingPage> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 16.0),
-              
+
               // Status Card
               Card(
                 child: Padding(
@@ -183,8 +183,12 @@ class _DebugDataSeedingPageState extends State<DebugDataSeedingPage> {
                       Row(
                         children: [
                           Icon(
-                            _hasSampleData == true ? Icons.check_circle : Icons.info,
-                            color: _hasSampleData == true ? Colors.green : Colors.orange,
+                            _hasSampleData == true
+                                ? Icons.check_circle
+                                : Icons.info,
+                            color: _hasSampleData == true
+                                ? Colors.green
+                                : Colors.orange,
                           ),
                           const SizedBox(width: 8.0),
                           Text(
@@ -200,7 +204,8 @@ class _DebugDataSeedingPageState extends State<DebugDataSeedingPage> {
                             SizedBox(
                               width: 16.0,
                               height: 16.0,
-                              child: CircularProgressIndicator(strokeWidth: 2.0),
+                              child:
+                                  CircularProgressIndicator(strokeWidth: 2.0),
                             ),
                             SizedBox(width: 8.0),
                             Text('Checking...'),
@@ -215,9 +220,9 @@ class _DebugDataSeedingPageState extends State<DebugDataSeedingPage> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 16.0),
-              
+
               // Action Buttons
               Card(
                 child: Padding(
@@ -230,21 +235,22 @@ class _DebugDataSeedingPageState extends State<DebugDataSeedingPage> {
                         style: FlutterFlowTheme.of(context).titleMedium,
                       ),
                       const SizedBox(height: 16.0),
-                      
+
                       // Seed Database Button
                       FFButtonWidget(
-                        onPressed: _isSeeding || _isClearing ? null : _seedDatabase,
+                        onPressed:
+                            _isSeeding || _isClearing ? null : _seedDatabase,
                         text: _isSeeding ? 'Seeding...' : 'Seed Database',
-                        icon: _isSeeding 
-                          ? const SizedBox(
-                              width: 16.0,
-                              height: 16.0,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.0,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(Icons.add_circle, color: Colors.white),
+                        icon: _isSeeding
+                            ? const SizedBox(
+                                width: 16.0,
+                                height: 16.0,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.0,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.add_circle, color: Colors.white),
                         options: FFButtonOptions(
                           height: 50.0,
                           color: Colors.green,
@@ -256,12 +262,14 @@ class _DebugDataSeedingPageState extends State<DebugDataSeedingPage> {
                           borderRadius: BorderRadius.circular(8.0),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 12.0),
-                      
+
                       // Refresh Status Button
                       FFButtonWidget(
-                        onPressed: _isSeeding || _isClearing || _isChecking ? null : _checkSampleData,
+                        onPressed: _isSeeding || _isClearing || _isChecking
+                            ? null
+                            : _checkSampleData,
                         text: 'Refresh Status',
                         icon: const Icon(Icons.refresh, color: Colors.white),
                         options: FFButtonOptions(
@@ -275,23 +283,26 @@ class _DebugDataSeedingPageState extends State<DebugDataSeedingPage> {
                           borderRadius: BorderRadius.circular(8.0),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 12.0),
-                      
+
                       // Clear Data Button
                       FFButtonWidget(
-                        onPressed: _isSeeding || _isClearing || _hasSampleData != true ? null : _clearSampleData,
+                        onPressed:
+                            _isSeeding || _isClearing || _hasSampleData != true
+                                ? null
+                                : _clearSampleData,
                         text: _isClearing ? 'Clearing...' : 'Clear Sample Data',
-                        icon: _isClearing 
-                          ? const SizedBox(
-                              width: 16.0,
-                              height: 16.0,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.0,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(Icons.delete, color: Colors.white),
+                        icon: _isClearing
+                            ? const SizedBox(
+                                width: 16.0,
+                                height: 16.0,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.0,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.delete, color: Colors.white),
                         options: FFButtonOptions(
                           height: 50.0,
                           color: Colors.red,
@@ -307,9 +318,9 @@ class _DebugDataSeedingPageState extends State<DebugDataSeedingPage> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 16.0),
-              
+
               // Info Card
               Card(
                 child: Padding(

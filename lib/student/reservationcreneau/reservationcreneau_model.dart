@@ -26,7 +26,7 @@ class ReservationcreneauModel
   bool isProcessingReservation = false;
   String? errorMessage;
   String? successMessage;
-  
+
   /// Additional state management for button interactions
   DateTime? _lastReservationAttempt;
   static const Duration _reservationCooldown = Duration(seconds: 2);
@@ -41,73 +41,78 @@ class ReservationcreneauModel
   /// Check if reservation can be attempted (prevents rapid submissions)
   bool canAttemptReservation() {
     if (isProcessingReservation) return false;
-    
+
     if (_lastReservationAttempt != null) {
-      final timeSinceLastAttempt = DateTime.now().difference(_lastReservationAttempt!);
+      final timeSinceLastAttempt =
+          DateTime.now().difference(_lastReservationAttempt!);
       if (timeSinceLastAttempt < _reservationCooldown) {
         return false;
       }
     }
-    
+
     return true;
   }
 
   /// Check and generate today's time slots if needed
   Future<void> ensureTodaysTimeSlotsExist() async {
     if (hasCheckedTodaysSlots || isGeneratingSlots) return;
-    
+
     isGeneratingSlots = true;
     onStateChanged?.call();
-    
+
     try {
       final today = DateTime.now();
       final todayStart = DateTime(today.year, today.month, today.day);
-      
+
       // Check if restaurant is open (not Sunday)
       if (today.weekday == DateTime.sunday) {
-        AppLogger.i('Restaurant is closed on Sundays', tag: 'ReservationcreneauModel');
+        AppLogger.i('Restaurant is closed on Sundays',
+            tag: 'ReservationcreneauModel');
         hasCheckedTodaysSlots = true;
         return;
       }
-      
+
       // Check if slots already exist for today
       final existingSlots = await FirebaseFirestore.instance
           .collection('time_slots')
           .where('date', isEqualTo: todayStart)
           .where('is_active', isEqualTo: true)
           .get();
-      
+
       if (existingSlots.docs.isNotEmpty) {
-        AppLogger.i('Time slots already exist for today (${existingSlots.docs.length} slots)', 
+        AppLogger.i(
+            'Time slots already exist for today (${existingSlots.docs.length} slots)',
             tag: 'ReservationcreneauModel');
         hasCheckedTodaysSlots = true;
         return;
       }
-      
+
       // Generate slots from templates
-      AppLogger.i('No time slots found for today. Generating from templates...', 
+      AppLogger.i('No time slots found for today. Generating from templates...',
           tag: 'ReservationcreneauModel');
-      
-      final created = await _timeSlotService.createTimeSlotsForDateFromTemplates(todayStart);
-      
+
+      final created = await _timeSlotService
+          .createTimeSlotsForDateFromTemplates(todayStart);
+
       if (created) {
-        AppLogger.i('Successfully generated time slots for today', 
+        AppLogger.i('Successfully generated time slots for today',
             tag: 'ReservationcreneauModel');
       } else {
-        AppLogger.w('Failed to generate time slots for today. Check if templates exist.', 
+        AppLogger.w(
+            'Failed to generate time slots for today. Check if templates exist.',
             tag: 'ReservationcreneauModel');
       }
-      
+
       hasCheckedTodaysSlots = true;
-      
     } catch (e) {
-      AppLogger.e('Error ensuring today\'s time slots exist', 
+      AppLogger.e('Error ensuring today\'s time slots exist',
           error: e, tag: 'ReservationcreneauModel');
     } finally {
       isGeneratingSlots = false;
       onStateChanged?.call();
     }
   }
+
   Future<void> loadUserBalance() async {
     if (!authService.isLoggedIn) return;
 
@@ -182,16 +187,16 @@ class ReservationcreneauModel
     // Check if reservation can be attempted
     if (!canAttemptReservation()) {
       return {
-        'success': false, 
-        'error': isProcessingReservation 
-            ? 'Already processing' 
+        'success': false,
+        'error': isProcessingReservation
+            ? 'Already processing'
             : 'Please wait before trying again'
       };
     }
 
     // Record attempt timestamp
     _lastReservationAttempt = DateTime.now();
-    
+
     isProcessingReservation = true;
     errorMessage = null;
     successMessage = null;
@@ -219,7 +224,8 @@ class ReservationcreneauModel
       );
 
       if (reservationResult['success']) {
-        successMessage = 'Reservation created successfully! ${amount.toStringAsFixed(2)} TND deducted from wallet.';
+        successMessage =
+            'Reservation created successfully! ${amount.toStringAsFixed(2)} TND deducted from wallet.';
 
         // Reload user balance to reflect the deduction
         await loadUserBalance();
@@ -235,7 +241,8 @@ class ReservationcreneauModel
           'message': successMessage,
         };
       } else {
-        errorMessage = reservationResult['error'] ?? 'Failed to create reservation';
+        errorMessage =
+            reservationResult['error'] ?? 'Failed to create reservation';
         return {
           'success': false,
           'error': errorMessage,

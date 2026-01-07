@@ -86,53 +86,114 @@ class _HistoryWidgetState extends State<HistoryWidget> {
       content: Container(
         width: double.maxFinite,
         height: 300,
-        child: StreamBuilder<List<TimeSlotRecord>>(
-          stream: queryTimeSlotRecord(
-            queryBuilder: (query) => query
-                .where('date',
-                    isGreaterThanOrEqualTo:
-                        DateTime(date.year, date.month, date.day))
-                .where('date',
-                    isLessThan: DateTime(date.year, date.month, date.day + 1))
-                .where('is_active', isEqualTo: true)
-                .orderBy('start_time'),
-          ),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return Center(child: CircularProgressIndicator());
-            }
+        child: Column(
+          children: [
+            // Debug info
+            Container(
+              padding: EdgeInsets.all(8),
+              margin: EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                'Recherche pour: ${DateFormat('dd/MM/yyyy').format(date)}',
+                style: TextStyle(fontSize: 12, color: Colors.blue),
+              ),
+            ),
+            Expanded(
+              child: StreamBuilder<List<TimeSlotRecord>>(
+                stream: queryTimeSlotRecord(
+                  queryBuilder: (query) {
+                    // Create date range for the selected day
+                    final startOfDay =
+                        DateTime(date.year, date.month, date.day);
+                    final endOfDay =
+                        DateTime(date.year, date.month, date.day, 23, 59, 59);
 
-            final slots = snapshot.data!;
-            if (slots.isEmpty) {
-              return Center(
-                  child: Text('Aucun créneau disponible pour cette date.'));
-            }
-
-            return ListView.builder(
-              itemCount: slots.length,
-              itemBuilder: (context, index) {
-                final slot = slots[index];
-                final bool isFull =
-                    slot.currentReservations >= slot.maxCapacity;
-
-                return ListTile(
-                  title: Text(
-                    '${DateFormat('HH:mm').format(slot.startTime!)} - ${DateFormat('HH:mm').format(slot.endTime!)}',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text('${slot.mealType} | Prix: ${slot.price} DT'),
-                  trailing: isFull
-                      ? Text('Complet', style: TextStyle(color: Colors.red))
-                      : Icon(Icons.arrow_forward_ios, size: 16),
-                  enabled: !isFull,
-                  onTap: () async {
-                    Navigator.pop(context);
-                    await _processModification(reservation, slot);
+                    return query
+                        .where('is_active', isEqualTo: true)
+                        .where('start_time', isGreaterThanOrEqualTo: startOfDay)
+                        .where('start_time', isLessThanOrEqualTo: endOfDay)
+                        .orderBy('start_time');
                   },
-                );
-              },
-            );
-          },
+                ),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.error, color: Colors.red, size: 48),
+                          SizedBox(height: 16),
+                          Text('Erreur de chargement'),
+                          SizedBox(height: 8),
+                          Text(
+                            snapshot.error.toString(),
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  if (!snapshot.hasData) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+
+                  final slots = snapshot.data!;
+                  if (slots.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.schedule, color: Colors.grey, size: 48),
+                          SizedBox(height: 16),
+                          Text(
+                            'Aucun créneau disponible pour cette date.',
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Date sélectionnée: ${DateFormat('dd/MM/yyyy').format(date)}',
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    itemCount: slots.length,
+                    itemBuilder: (context, index) {
+                      final slot = slots[index];
+                      final bool isFull =
+                          slot.currentReservations >= slot.maxCapacity;
+
+                      return ListTile(
+                        title: Text(
+                          '${DateFormat('HH:mm').format(slot.startTime!)} - ${DateFormat('HH:mm').format(slot.endTime!)}',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle:
+                            Text('${slot.mealType} | Prix: ${slot.price} DT'),
+                        trailing: isFull
+                            ? Text('Complet',
+                                style: TextStyle(color: Colors.red))
+                            : Icon(Icons.arrow_forward_ios, size: 16),
+                        enabled: !isFull,
+                        onTap: () async {
+                          Navigator.pop(context);
+                          await _processModification(reservation, slot);
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
       actions: [
@@ -549,8 +610,6 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                           Icons.access_time,
                           DateFormat('HH:mm')
                               .format(reservation.creneaux ?? DateTime.now())),
-                      if (reservation.total > 0)
-                        _buildInfoRow(Icons.euro, '${reservation.total} DT'),
                     ],
                   ),
                 ),

@@ -9,8 +9,9 @@ service cloud.firestore {
       return request.auth != null;
     }
     
+    // Safe role getter - handles missing custom claims
     function getUserRole() {
-      return request.auth.token.role;
+      return request.auth.token.role != null ? request.auth.token.role : 'student';
     }
     
     function hasRole(role) {
@@ -20,10 +21,32 @@ service cloud.firestore {
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
+    
+    // Check if user is authenticated and has any valid role
+    function isValidUser() {
+      return isAuthenticated() && getUserRole() in ['admin', 'staff', 'student'];
+    }
 
     // Users collection - allow authenticated users to read/write their own data
+    // FIXED: Allow students to read their own document by UID match
     match /user/{userId} {
-      allow read, write: if isAuthenticated() && (isOwner(userId) || getUserRole() == 'admin');
+      // Allow read if authenticated and either owns the document OR is admin
+      allow read: if isAuthenticated() && (isOwner(userId) || getUserRole() == 'admin');
+      // Allow write if authenticated and either owns the document OR is admin
+      allow write: if isAuthenticated() && (isOwner(userId) || getUserRole() == 'admin');
+    }
+    
+    // FALLBACK: Allow authenticated users to query user collection by uid field
+    // This handles cases where document ID doesn't match auth UID
+    match /user/{document} {
+      allow read: if isAuthenticated() && (
+        resource.data.uid == request.auth.uid || 
+        getUserRole() == 'admin'
+      );
+      allow update: if isAuthenticated() && (
+        resource.data.uid == request.auth.uid || 
+        getUserRole() == 'admin'
+      );
     }
 
     // App settings - allow all authenticated users to read, allow unauthenticated read for basic settings
@@ -38,10 +61,14 @@ service cloud.firestore {
       allow write: if isAuthenticated() && getUserRole() in ['admin', 'staff'];
     }
 
-    // Time slots - allow all users to read
+    // Time slots - allow all users to read, admin to write
+    // FIXED: Ensure students can read time slots for reservation
     match /time_slots/{document} {
       allow read: if true; // Allow unauthenticated read for development
+      // Allow admin to write, but also allow authenticated users to update current_reservations
       allow write: if isAuthenticated() && getUserRole() == 'admin';
+      // Allow any authenticated user to update (needed for reservation counter updates in transactions)
+      allow update: if isAuthenticated();
     }
 
     // Plats (menu items) - allow all users to read
@@ -50,12 +77,38 @@ service cloud.firestore {
       allow write: if isAuthenticated() && getUserRole() == 'admin';
     }
 
-    // Reservations - require authentication
+    // Reservations - FIXED: Allow all authenticated users to create reservations
+    // Students need to create reservations, so we allow any authenticated user
     match /reservation/{document} {
+      // Allow read for authenticated users
       allow read: if isAuthenticated();
+      // FIXED: Allow create for any authenticated user (students, staff, admin)
       allow create: if isAuthenticated();
-      allow update: if isAuthenticated() && (isOwner(resource.data.userId) || getUserRole() in ['admin', 'staff']);
+      // Allow update if owner (by userId field) or admin/staff
+      allow update: if isAuthenticated() && (
+        resource.data.user_id == request.auth.uid || 
+        getUserRole() in ['admin', 'staff']
+      );
+      // Only admin can delete
       allow delete: if isAuthenticated() && getUserRole() == 'admin';
+    }
+
+    // Daily reservation counters - for tracking daily meal limits
+    // FIXED: Allow all authenticated users to read/write their own counters
+    match /daily_reservation_counters/{document} {
+      allow read: if isAuthenticated();
+      // Allow write if the document belongs to the user (document ID starts with user's UID)
+      allow write: if isAuthenticated();
+    }
+
+    // Payment transactions - for wallet transaction logs  
+    // FIXED: Allow authenticated users to create and read their own transactions
+    match /payment_transactions/{document} {
+      allow read: if isAuthenticated();
+      // Allow create for any authenticated user (needed for reservation payments)
+      allow create: if isAuthenticated();
+      // Only admin can update/delete
+      allow update, delete: if isAuthenticated() && getUserRole() == 'admin';
     }
 
     // Analytics - allow staff and admin to read

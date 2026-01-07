@@ -36,17 +36,20 @@ class D17PaymentService {
 
       // Generate QR code data
       // Format: merchant_id|amount|currency|order_id|payment_request_id
-      final qrData = 'ISET_RESTAURANT|${amount.toStringAsFixed(3)}|TND|$orderId|${docRef.id}';
+      final qrData =
+          'ISET_RESTAURANT|${amount.toStringAsFixed(3)}|TND|$orderId|${docRef.id}';
 
       return {
         'success': true,
         'paymentRequestId': docRef.id,
         'qrData': qrData,
         'amount': amount,
-        'expiresAt': DateTime.now().add(Duration(minutes: 15)).toIso8601String(),
+        'expiresAt':
+            DateTime.now().add(Duration(minutes: 15)).toIso8601String(),
       };
     } catch (e) {
-      AppLogger.e('Error generating D17 payment QR', error: e, tag: 'D17PaymentService');
+      AppLogger.e('Error generating D17 payment QR',
+          error: e, tag: 'D17PaymentService');
       return {
         'success': false,
         'error': 'Failed to generate payment QR: ${e.toString()}'
@@ -55,7 +58,8 @@ class D17PaymentService {
   }
 
   /// Check payment status
-  Future<Map<String, dynamic>> checkPaymentStatus(String paymentRequestId) async {
+  Future<Map<String, dynamic>> checkPaymentStatus(
+      String paymentRequestId) async {
     try {
       final doc = await FirebaseFirestore.instance
           .collection('payment_requests')
@@ -63,10 +67,7 @@ class D17PaymentService {
           .get();
 
       if (!doc.exists) {
-        return {
-          'success': false,
-          'error': 'Payment request not found'
-        };
+        return {'success': false, 'error': 'Payment request not found'};
       }
 
       final data = doc.data()!;
@@ -91,7 +92,8 @@ class D17PaymentService {
         'orderId': data['orderId'],
       };
     } catch (e) {
-      AppLogger.e('Error checking payment status', error: e, tag: 'D17PaymentService');
+      AppLogger.e('Error checking payment status',
+          error: e, tag: 'D17PaymentService');
       return {
         'success': false,
         'error': 'Failed to check payment status: ${e.toString()}'
@@ -112,18 +114,12 @@ class D17PaymentService {
           .get();
 
       if (!doc.exists) {
-        return {
-          'success': false,
-          'error': 'Payment request not found'
-        };
+        return {'success': false, 'error': 'Payment request not found'};
       }
 
       final data = doc.data()!;
       if (data['status'] != 'pending') {
-        return {
-          'success': false,
-          'error': 'Payment request is not pending'
-        };
+        return {'success': false, 'error': 'Payment request is not pending'};
       }
 
       // Update payment status
@@ -139,7 +135,8 @@ class D17PaymentService {
         'transactionId': transactionId,
       };
     } catch (e) {
-      AppLogger.e('Error confirming payment', error: e, tag: 'D17PaymentService');
+      AppLogger.e('Error confirming payment',
+          error: e, tag: 'D17PaymentService');
       return {
         'success': false,
         'error': 'Failed to confirm payment: ${e.toString()}'
@@ -158,12 +155,10 @@ class D17PaymentService {
         'cancelledAt': FieldValue.serverTimestamp(),
       });
 
-      return {
-        'success': true,
-        'message': 'Payment cancelled successfully'
-      };
+      return {'success': true, 'message': 'Payment cancelled successfully'};
     } catch (e) {
-      AppLogger.e('Error cancelling payment', error: e, tag: 'D17PaymentService');
+      AppLogger.e('Error cancelling payment',
+          error: e, tag: 'D17PaymentService');
       return {
         'success': false,
         'error': 'Failed to cancel payment: ${e.toString()}'

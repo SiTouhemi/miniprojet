@@ -34,10 +34,10 @@ class _QRDisplayWidgetState extends State<QRDisplayWidget> {
     super.initState();
     _model = QRDisplayModel();
     _model.setReservation(widget.reservation);
-    
+
     // Keep screen on while displaying QR
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    
+
     // Start countdown timer
     _countdownTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
       if (mounted) {
@@ -57,7 +57,7 @@ class _QRDisplayWidgetState extends State<QRDisplayWidget> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return ChangeNotifierProvider.value(
       value: _model,
       child: Scaffold(
@@ -158,9 +158,11 @@ class _QRDisplayWidgetState extends State<QRDisplayWidget> {
                       ),
                       AppSpacing.verticalXL,
                       FFButtonWidget(
-                        onPressed: model.isGenerating ? null : () => model.generateQRCode(),
-                        text: model.isGenerating 
-                            ? l10n.loading 
+                        onPressed: model.isGenerating
+                            ? null
+                            : () => model.generateQRCode(),
+                        text: model.isGenerating
+                            ? l10n.loading
                             : l10n.translate('generate_qr'),
                         options: FFButtonOptions(
                           color: AppColors.primary,
@@ -183,7 +185,7 @@ class _QRDisplayWidgetState extends State<QRDisplayWidget> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     AppSpacing.verticalMD,
-                    
+
                     // Instructions
                     Container(
                       padding: AppSpacing.paddingMD,
@@ -210,9 +212,9 @@ class _QRDisplayWidgetState extends State<QRDisplayWidget> {
                         ],
                       ),
                     ),
-                    
+
                     AppSpacing.verticalXL,
-                    
+
                     // QR Code
                     Container(
                       padding: AppSpacing.paddingXL,
@@ -235,9 +237,9 @@ class _QRDisplayWidgetState extends State<QRDisplayWidget> {
                         errorCorrectionLevel: QrErrorCorrectLevel.H,
                       ),
                     ),
-                    
+
                     AppSpacing.verticalXL,
-                    
+
                     // Expiry status
                     if (model.isExpired)
                       Container(
@@ -304,9 +306,9 @@ class _QRDisplayWidgetState extends State<QRDisplayWidget> {
                           ],
                         ),
                       ),
-                    
+
                     AppSpacing.verticalXL,
-                    
+
                     // Reservation details
                     Container(
                       width: double.infinity,
@@ -346,15 +348,17 @@ class _QRDisplayWidgetState extends State<QRDisplayWidget> {
                         ],
                       ),
                     ),
-                    
+
                     AppSpacing.verticalXL,
-                    
+
                     // Regenerate button
                     if (model.isExpired || model.minutesUntilExpiry < 5)
                       SizedBox(
                         width: double.infinity,
                         child: FFButtonWidget(
-                          onPressed: model.isGenerating ? null : () => model.generateQRCode(),
+                          onPressed: model.isGenerating
+                              ? null
+                              : () => model.generateQRCode(),
                           text: model.isGenerating
                               ? l10n.loading
                               : l10n.translate('regenerate_qr'),
@@ -368,7 +372,7 @@ class _QRDisplayWidgetState extends State<QRDisplayWidget> {
                           ),
                         ),
                       ),
-                    
+
                     AppSpacing.verticalXL,
                   ],
                 ),

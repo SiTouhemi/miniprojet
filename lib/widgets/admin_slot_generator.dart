@@ -23,12 +23,13 @@ class _AdminSlotGeneratorState extends State<AdminSlotGenerator> {
 
     try {
       final result = await TimeSlotGenerator.generateTodaysSlots();
-      
+
       setState(() {
         _isSuccess = result['success'];
         _message = result['message'];
         if (result['created'] > 0) {
-          _message = '${result['message']} (${result['created']} slots created)';
+          _message =
+              '${result['message']} (${result['created']} slots created)';
         } else if (result['existing'] != null) {
           _message = '${result['message']} (${result['existing']} slots found)';
         }
@@ -53,10 +54,11 @@ class _AdminSlotGeneratorState extends State<AdminSlotGenerator> {
 
     try {
       final result = await TimeSlotGenerator.generateSlotsForDays(days: 7);
-      
+
       setState(() {
         _isSuccess = result['success'];
-        _message = '${result['message']} (${result['created']} days created, ${result['skipped']} skipped)';
+        _message =
+            '${result['message']} (${result['created']} days created, ${result['skipped']} skipped)';
       });
     } catch (e) {
       setState(() {
@@ -83,9 +85,9 @@ class _AdminSlotGeneratorState extends State<AdminSlotGenerator> {
             Text(
               'Time Slot Generator',
               style: FlutterFlowTheme.of(context).titleMedium.override(
-                color: Color(0xFF005BAA),
-                fontWeight: FontWeight.bold,
-              ),
+                    color: Color(0xFF005BAA),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             SizedBox(height: 8),
             Text(
@@ -93,14 +95,14 @@ class _AdminSlotGeneratorState extends State<AdminSlotGenerator> {
               style: FlutterFlowTheme.of(context).bodySmall,
             ),
             SizedBox(height: 16),
-            
+
             // Action buttons
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: _isGenerating ? null : _generateTodaysSlots,
-                    icon: _isGenerating 
+                    icon: _isGenerating
                         ? SizedBox(
                             width: 16,
                             height: 16,
@@ -128,7 +130,7 @@ class _AdminSlotGeneratorState extends State<AdminSlotGenerator> {
                 ),
               ],
             ),
-            
+
             // Status message
             if (_message != null) ...[
               SizedBox(height: 16),
@@ -139,14 +141,18 @@ class _AdminSlotGeneratorState extends State<AdminSlotGenerator> {
                   color: _isSuccess ? Colors.green.shade50 : Colors.red.shade50,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: _isSuccess ? Colors.green.shade200 : Colors.red.shade200,
+                    color: _isSuccess
+                        ? Colors.green.shade200
+                        : Colors.red.shade200,
                   ),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       _isSuccess ? Icons.check_circle : Icons.error,
-                      color: _isSuccess ? Colors.green.shade700 : Colors.red.shade700,
+                      color: _isSuccess
+                          ? Colors.green.shade700
+                          : Colors.red.shade700,
                       size: 20,
                     ),
                     SizedBox(width: 8),
@@ -154,7 +160,9 @@ class _AdminSlotGeneratorState extends State<AdminSlotGenerator> {
                       child: Text(
                         _message!,
                         style: TextStyle(
-                          color: _isSuccess ? Colors.green.shade700 : Colors.red.shade700,
+                          color: _isSuccess
+                              ? Colors.green.shade700
+                              : Colors.red.shade700,
                           fontSize: 14,
                         ),
                       ),

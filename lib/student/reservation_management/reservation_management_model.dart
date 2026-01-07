@@ -6,11 +6,12 @@ import '/utils/app_logger.dart';
 import 'reservation_management_widget.dart' show ReservationManagementWidget;
 import 'package:flutter/material.dart';
 
-class ReservationManagementModel extends FlutterFlowModel<ReservationManagementWidget> {
+class ReservationManagementModel
+    extends FlutterFlowModel<ReservationManagementWidget> {
   /// State fields for reservation management
   List<ReservationRecord> userReservations = [];
   List<TimeSlotRecord> availableTimeSlots = [];
-  
+
   bool isLoading = true;
   bool isProcessing = false;
   String? errorMessage;
@@ -35,9 +36,10 @@ class ReservationManagementModel extends FlutterFlowModel<ReservationManagementW
   Future<void> loadUserReservations(String userId) async {
     isLoading = true;
     errorMessage = null;
-    
+
     try {
-      userReservations = await reservationService.getUpcomingReservations(userId);
+      userReservations =
+          await reservationService.getUpcomingReservations(userId);
       isLoading = false;
     } catch (e) {
       errorMessage = 'Failed to load reservations: ${e.toString()}';
@@ -49,9 +51,11 @@ class ReservationManagementModel extends FlutterFlowModel<ReservationManagementW
   Future<void> loadAvailableTimeSlots() async {
     try {
       final tomorrow = DateTime.now().add(const Duration(days: 1));
-      availableTimeSlots = await timeSlotService.getAvailableTimeSlots(tomorrow);
+      availableTimeSlots =
+          await timeSlotService.getAvailableTimeSlots(tomorrow);
     } catch (e) {
-      AppLogger.e('Error loading time slots', error: e, tag: 'ReservationManagementModel');
+      AppLogger.e('Error loading time slots',
+          error: e, tag: 'ReservationManagementModel');
     }
   }
 
@@ -166,7 +170,8 @@ class ReservationManagementModel extends FlutterFlowModel<ReservationManagementW
   }
 
   /// Get restriction message for reservations that cannot be modified/cancelled
-  String getRestrictionMessage(ReservationRecord reservation, int hoursUntilMeal) {
+  String getRestrictionMessage(
+      ReservationRecord reservation, int hoursUntilMeal) {
     if (reservation.status == 'cancelled') {
       return 'This reservation has been cancelled';
     }
@@ -186,9 +191,9 @@ class ReservationManagementModel extends FlutterFlowModel<ReservationManagementW
   bool canModifyOrCancel(ReservationRecord reservation) {
     final now = DateTime.now();
     final hoursUntilMeal = reservation.creneaux?.difference(now).inHours ?? 0;
-    
-    return hoursUntilMeal >= 2 && 
-           reservation.creneaux!.isAfter(now) &&
-           (reservation.status == 'confirmed' || reservation.status == 'pending');
+
+    return hoursUntilMeal >= 2 &&
+        reservation.creneaux!.isAfter(now) &&
+        (reservation.status == 'confirmed' || reservation.status == 'pending');
   }
 }

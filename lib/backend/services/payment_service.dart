@@ -17,7 +17,7 @@ class PaymentService {
     try {
       // Generate a unique payment ID
       final paymentId = 'D17_${DateTime.now().millisecondsSinceEpoch}_$userId';
-      
+
       // Call cloud function to verify payment with D17
       final result = await makeCloudCall('verifyD17Payment', {
         'paymentId': paymentId,
@@ -41,7 +41,8 @@ class PaymentService {
         };
       }
     } catch (e) {
-      AppLogger.e('Error processing D17 payment', error: e, tag: 'PaymentService');
+      AppLogger.e('Error processing D17 payment',
+          error: e, tag: 'PaymentService');
       return {
         'success': false,
         'error': 'Payment processing failed: ${e.toString()}',
@@ -52,22 +53,23 @@ class PaymentService {
   // Check user's pocket balance from Firestore
   Future<double> getUserBalance(String userId) async {
     try {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('user')
-          .doc(userId)
-          .get();
-      
+      final userDoc =
+          await FirebaseFirestore.instance.collection('user').doc(userId).get();
+
       if (userDoc.exists) {
         final userData = userDoc.data() as Map<String, dynamic>;
         final pocket = userData['pocket'] as double? ?? 0.0;
-        AppLogger.d('Retrieved user balance: $pocket DT for user: $userId', tag: 'PaymentService');
+        AppLogger.d('Retrieved user balance: $pocket DT for user: $userId',
+            tag: 'PaymentService');
         return pocket;
       } else {
-        AppLogger.w('User document not found for userId: $userId', tag: 'PaymentService');
+        AppLogger.w('User document not found for userId: $userId',
+            tag: 'PaymentService');
         return 0.0;
       }
     } catch (e) {
-      AppLogger.e('Error checking user balance', error: e, tag: 'PaymentService');
+      AppLogger.e('Error checking user balance',
+          error: e, tag: 'PaymentService');
       return 0.0;
     }
   }
@@ -79,51 +81,59 @@ class PaymentService {
           .collection('user')
           .doc(userId)
           .update({'pocket': newBalance});
-      
-      AppLogger.i('Updated user balance to $newBalance DT for user: $userId', tag: 'PaymentService');
+
+      AppLogger.i('Updated user balance to $newBalance DT for user: $userId',
+          tag: 'PaymentService');
       return true;
     } catch (e) {
-      AppLogger.e('Error updating user balance', error: e, tag: 'PaymentService');
+      AppLogger.e('Error updating user balance',
+          error: e, tag: 'PaymentService');
       return false;
     }
   }
 
   // Deduct amount from user balance using atomic transaction
-  Future<Map<String, dynamic>> deductFromBalance(String userId, double amount, {String? description}) async {
+  Future<Map<String, dynamic>> deductFromBalance(String userId, double amount,
+      {String? description}) async {
     try {
-      return await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final userRef = FirebaseFirestore.instance.collection('user').doc(userId);
+      return await FirebaseFirestore.instance
+          .runTransaction((transaction) async {
+        final userRef =
+            FirebaseFirestore.instance.collection('user').doc(userId);
         final userDoc = await transaction.get(userRef);
-        
+
         if (!userDoc.exists) {
           return {
             'success': false,
             'error': 'User not found',
           };
         }
-        
+
         final userData = userDoc.data() as Map<String, dynamic>;
         final currentBalance = (userData['pocket'] as num?)?.toDouble() ?? 0.0;
-        
+
         if (currentBalance < amount) {
           return {
             'success': false,
-            'error': 'Insufficient balance. Current: ${currentBalance.toStringAsFixed(2)} TND, Required: ${amount.toStringAsFixed(2)} TND',
+            'error':
+                'Insufficient balance. Current: ${currentBalance.toStringAsFixed(2)} TND, Required: ${amount.toStringAsFixed(2)} TND',
             'currentBalance': currentBalance,
             'requiredAmount': amount,
           };
         }
-        
+
         final newBalance = currentBalance - amount;
-        
+
         // Update user balance
         transaction.update(userRef, {
           'pocket': newBalance,
         });
-        
+
         // Log the transaction if description provided
         if (description != null) {
-          final transactionLogRef = FirebaseFirestore.instance.collection('payment_transactions').doc();
+          final transactionLogRef = FirebaseFirestore.instance
+              .collection('payment_transactions')
+              .doc();
           transaction.set(transactionLogRef, {
             'user_id': userId,
             'amount': -amount, // Negative for deduction
@@ -134,9 +144,11 @@ class PaymentService {
             'balance_after': newBalance,
           });
         }
-        
-        AppLogger.i('Deducted ${amount.toStringAsFixed(2)} TND from user $userId. New balance: ${newBalance.toStringAsFixed(2)} TND', tag: 'PaymentService');
-        
+
+        AppLogger.i(
+            'Deducted ${amount.toStringAsFixed(2)} TND from user $userId. New balance: ${newBalance.toStringAsFixed(2)} TND',
+            tag: 'PaymentService');
+
         return {
           'success': true,
           'previousBalance': currentBalance,
@@ -145,7 +157,8 @@ class PaymentService {
         };
       });
     } catch (e) {
-      AppLogger.e('Error deducting from balance', error: e, tag: 'PaymentService');
+      AppLogger.e('Error deducting from balance',
+          error: e, tag: 'PaymentService');
       return {
         'success': false,
         'error': 'Failed to deduct from balance: ${e.toString()}',
@@ -160,7 +173,7 @@ class PaymentService {
   }) async {
     try {
       final balance = await getUserBalance(userId);
-      
+
       if (balance >= amount) {
         return {
           'success': true,
@@ -173,7 +186,8 @@ class PaymentService {
           'success': false,
           'balance': balance,
           'canPay': false,
-          'message': 'Insufficient balance. Required: ${amount.toStringAsFixed(2)} TND, Available: ${balance.toStringAsFixed(2)} TND',
+          'message':
+              'Insufficient balance. Required: ${amount.toStringAsFixed(2)} TND, Available: ${balance.toStringAsFixed(2)} TND',
         };
       }
     } catch (e) {
@@ -209,7 +223,8 @@ class PaymentService {
         },
       ];
     } catch (e) {
-      AppLogger.e('Error fetching payment history', error: e, tag: 'PaymentService');
+      AppLogger.e('Error fetching payment history',
+          error: e, tag: 'PaymentService');
       return [];
     }
   }
@@ -245,18 +260,20 @@ class PaymentService {
   }) async {
     try {
       final settings = await AppService.instance.getAppSettings();
-      
+
       // For now, use default price from settings
       // In a more complex system, you might have different prices per time slot
       return settings.defaultMealPrice * quantity;
     } catch (e) {
-      AppLogger.e('Error calculating reservation amount', error: e, tag: 'PaymentService');
+      AppLogger.e('Error calculating reservation amount',
+          error: e, tag: 'PaymentService');
       return 5.0; // Default fallback price
     }
   }
 
   // Get payment methods available for user
-  Future<List<Map<String, String>>> getAvailablePaymentMethods(String userId) async {
+  Future<List<Map<String, String>>> getAvailablePaymentMethods(
+      String userId) async {
     return [
       {
         'id': 'd17',
@@ -279,11 +296,12 @@ class PaymentService {
     try {
       // Simulate checking D17 service status
       await Future.delayed(Duration(milliseconds: 300));
-      
+
       // In production, this would ping the D17 API health endpoint
       return true; // Assume service is available for simulation
     } catch (e) {
-      AppLogger.e('Error checking D17 service', error: e, tag: 'PaymentService');
+      AppLogger.e('Error checking D17 service',
+          error: e, tag: 'PaymentService');
       return false;
     }
   }

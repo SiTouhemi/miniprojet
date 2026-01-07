@@ -29,12 +29,12 @@ export 'schema/daily_menu_record.dart';
 // Mock class for error handling
 class MockAggregateQuerySnapshot implements AggregateQuerySnapshot {
   final int _count;
-  
+
   MockAggregateQuerySnapshot(this._count);
-  
+
   @override
   int? get count => _count;
-  
+
   @override
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -186,7 +186,8 @@ Stream<List<T>> queryCollection<T>(
       .map(
         (d) => safeGet(
           () => recordBuilder(d),
-          (e) => AppLogger.e('Error serializing doc ${d.reference.path}', error: e, tag: 'Backend'),
+          (e) => AppLogger.e('Error serializing doc ${d.reference.path}',
+              error: e, tag: 'Backend'),
         ),
       )
       .where((d) => d != null)
@@ -210,7 +211,8 @@ Future<List<T>> queryCollectionOnce<T>(
       .map(
         (d) => safeGet(
           () => recordBuilder(d),
-          (e) => AppLogger.e('Error serializing doc ${d.reference.path}', error: e, tag: 'Backend'),
+          (e) => AppLogger.e('Error serializing doc ${d.reference.path}',
+              error: e, tag: 'Backend'),
         ),
       )
       .where((d) => d != null)
@@ -275,7 +277,8 @@ Future<FFFirestorePage<T>> queryCollectionPage<T>(
       .map(
         (d) => safeGet(
           () => recordBuilder(d),
-          (e) => AppLogger.e('Error serializing doc ${d.reference.path}', error: e, tag: 'Backend'),
+          (e) => AppLogger.e('Error serializing doc ${d.reference.path}',
+              error: e, tag: 'Backend'),
         ),
       )
       .where((d) => d != null)
@@ -397,6 +400,7 @@ Future<List<AnalyticsRecord>> queryAnalyticsRecordOnce({
       limit: limit,
       singleRecord: singleRecord,
     );
+
 /// Functions to query DailyMenuRecords (as a Stream and as a Future).
 Future<int> queryDailyMenuRecordCount({
   Query Function(Query)? queryBuilder,

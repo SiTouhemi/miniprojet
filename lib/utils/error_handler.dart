@@ -17,7 +17,7 @@ class ErrorHandler {
   final Map<String, int> _errorCounts = {};
   final Map<String, DateTime> _lastErrorTimes = {};
   final List<ErrorLog> _errorHistory = [];
-  
+
   static const int maxErrorHistory = 100;
   static const Duration errorCooldown = Duration(seconds: 30);
 
@@ -26,24 +26,25 @@ class ErrorHandler {
   String handleError(dynamic error, {String? context, bool logError = true}) {
     final errorMessage = _extractErrorMessage(error);
     final frenchMessage = _translateToFrench(errorMessage, context);
-    
+
     if (logError) {
       _logError(errorMessage, frenchMessage, context);
     }
-    
+
     return frenchMessage;
   }
 
   /// Get user-friendly error message with retry options
   /// Requirement 6.2: Add retry mechanisms for failed data loads
-  ErrorResult getErrorWithRetry(dynamic error, {
+  ErrorResult getErrorWithRetry(
+    dynamic error, {
     String? context,
     VoidCallback? onRetry,
     bool canRetry = true,
   }) {
     final frenchMessage = handleError(error, context: context);
     final errorType = _categorizeError(error);
-    
+
     return ErrorResult(
       message: frenchMessage,
       type: errorType,
@@ -56,13 +57,16 @@ class ErrorHandler {
 
   /// Show error with appropriate UI feedback
   /// Requirement 6.3: Implement graceful offline mode handling
-  void showError(BuildContext context, dynamic error, {
+  void showError(
+    BuildContext context,
+    dynamic error, {
     String? contextInfo,
     VoidCallback? onRetry,
     Duration? duration,
   }) {
-    final errorResult = getErrorWithRetry(error, context: contextInfo, onRetry: onRetry);
-    
+    final errorResult =
+        getErrorWithRetry(error, context: contextInfo, onRetry: onRetry);
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -82,7 +86,8 @@ class ErrorHandler {
           ],
         ),
         backgroundColor: _getErrorColor(errorResult.type),
-        duration: duration ?? Duration(seconds: errorResult.isTemporary ? 3 : 5),
+        duration:
+            duration ?? Duration(seconds: errorResult.isTemporary ? 3 : 5),
         action: errorResult.canRetry && errorResult.onRetry != null
             ? SnackBarAction(
                 label: 'Retry',
@@ -165,7 +170,7 @@ class ErrorHandler {
   /// Requirement 6.4: Add clear loading indicators for all async operations
   Widget buildOfflineIndicator({bool isOffline = false}) {
     if (!isOffline) return SizedBox.shrink();
-    
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(8.0),
@@ -195,9 +200,9 @@ class ErrorHandler {
   /// Get error statistics for debugging
   Map<String, dynamic> getErrorStatistics() {
     final now = DateTime.now();
-    final recentErrors = _errorHistory.where((error) => 
-      now.difference(error.timestamp) < Duration(hours: 24)
-    ).toList();
+    final recentErrors = _errorHistory
+        .where((error) => now.difference(error.timestamp) < Duration(hours: 24))
+        .toList();
 
     final errorsByType = <String, int>{};
     final errorsByContext = <String, int>{};
@@ -205,7 +210,8 @@ class ErrorHandler {
     for (final error in recentErrors) {
       errorsByType[error.type] = (errorsByType[error.type] ?? 0) + 1;
       if (error.context != null) {
-        errorsByContext[error.context!] = (errorsByContext[error.context!] ?? 0) + 1;
+        errorsByContext[error.context!] =
+            (errorsByContext[error.context!] ?? 0) + 1;
       }
     }
 
@@ -213,19 +219,21 @@ class ErrorHandler {
       'totalErrors24h': recentErrors.length,
       'errorsByType': errorsByType,
       'errorsByContext': errorsByContext,
-      'mostCommonError': errorsByType.isNotEmpty 
+      'mostCommonError': errorsByType.isNotEmpty
           ? errorsByType.entries.reduce((a, b) => a.value > b.value ? a : b).key
           : null,
     };
   }
 
   // Legacy methods for backward compatibility
-  static void logError(dynamic error, StackTrace? stackTrace, {String? context}) {
-    AppLogger.e('Error occurred', error: error, stackTrace: stackTrace, tag: context ?? 'ErrorHandler');
-    
+  static void logError(dynamic error, StackTrace? stackTrace,
+      {String? context}) {
+    AppLogger.e('Error occurred',
+        error: error, stackTrace: stackTrace, tag: context ?? 'ErrorHandler');
+
     // Use new error handling
     instance.handleError(error, context: context);
-    
+
     // In production, send to crash reporting service
     if (AppConfig.isProduction && AppConfig.enableCrashReporting) {
       // TODO: Send to Firebase Crashlytics
@@ -271,9 +279,9 @@ class ErrorHandler {
   static bool isAuthError(dynamic error) {
     final errorString = error.toString().toLowerCase();
     return errorString.contains('permission') ||
-           errorString.contains('unauthorized') ||
-           errorString.contains('authentication') ||
-           errorString.contains('token');
+        errorString.contains('unauthorized') ||
+        errorString.contains('authentication') ||
+        errorString.contains('token');
   }
 
   // Private helper methods
@@ -304,7 +312,8 @@ class ErrorHandler {
     if (errorMessage.contains('already-exists')) {
       return 'This data already exists.';
     }
-    if (errorMessage.contains('deadline-exceeded') || errorMessage.contains('timeout')) {
+    if (errorMessage.contains('deadline-exceeded') ||
+        errorMessage.contains('timeout')) {
       return 'Timeout exceeded. Please try again.';
     }
     if (errorMessage.contains('unavailable')) {
@@ -357,33 +366,36 @@ class ErrorHandler {
 
   ErrorType _categorizeError(dynamic error) {
     final message = _extractErrorMessage(error);
-    
+
     if (_isNetworkError(message)) return ErrorType.network;
-    if (message.contains('permission') || message.contains('unauthorized')) return ErrorType.permission;
+    if (message.contains('permission') || message.contains('unauthorized'))
+      return ErrorType.permission;
     if (message.contains('not-found')) return ErrorType.notFound;
-    if (message.contains('timeout') || message.contains('deadline')) return ErrorType.timeout;
-    if (message.contains('validation') || message.contains('invalid')) return ErrorType.validation;
-    
+    if (message.contains('timeout') || message.contains('deadline'))
+      return ErrorType.timeout;
+    if (message.contains('validation') || message.contains('invalid'))
+      return ErrorType.validation;
+
     return ErrorType.unknown;
   }
 
   bool _isNetworkError(dynamic error) {
     final message = _extractErrorMessage(error);
-    return message.contains('network') || 
-           message.contains('connection') || 
-           message.contains('internet') ||
-           message.contains('offline') ||
-           message.contains('dns') ||
-           message.contains('host');
+    return message.contains('network') ||
+        message.contains('connection') ||
+        message.contains('internet') ||
+        message.contains('offline') ||
+        message.contains('dns') ||
+        message.contains('host');
   }
 
   bool _isTemporaryError(dynamic error) {
     final message = _extractErrorMessage(error);
     return message.contains('timeout') ||
-           message.contains('unavailable') ||
-           message.contains('deadline-exceeded') ||
-           message.contains('too-many-requests') ||
-           _isNetworkError(error);
+        message.contains('unavailable') ||
+        message.contains('deadline-exceeded') ||
+        message.contains('too-many-requests') ||
+        _isNetworkError(error);
   }
 
   bool _canRetry(ErrorType errorType) {
@@ -400,7 +412,8 @@ class ErrorHandler {
     }
   }
 
-  void _logError(String originalMessage, String frenchMessage, String? context) {
+  void _logError(
+      String originalMessage, String frenchMessage, String? context) {
     final errorLog = ErrorLog(
       originalMessage: originalMessage,
       frenchMessage: frenchMessage,
@@ -410,7 +423,7 @@ class ErrorHandler {
     );
 
     _errorHistory.add(errorLog);
-    
+
     // Keep only recent errors
     if (_errorHistory.length > maxErrorHistory) {
       _errorHistory.removeAt(0);
@@ -423,7 +436,8 @@ class ErrorHandler {
 
     // Log to console for debugging
     if (AppConfig.enableDebugLogging) {
-      AppLogger.d('Error [$context]: $originalMessage -> $frenchMessage', tag: 'ErrorHandler');
+      AppLogger.d('Error [$context]: $originalMessage -> $frenchMessage',
+          tag: 'ErrorHandler');
     }
   }
 

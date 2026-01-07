@@ -22,10 +22,10 @@ void main() async {
   if (kDebugMode) {
     // Suppress some Flutter web debug messages
     debugPrint = (String? message, {int? wrapWidth}) {
-      if (message != null && 
-          (message.contains('DebugService') || 
-           message.contains('ChannelBuffers') ||
-           message.contains('Cannot send Null'))) {
+      if (message != null &&
+          (message.contains('DebugService') ||
+              message.contains('ChannelBuffers') ||
+              message.contains('Cannot send Null'))) {
         return; // Suppress these specific debug messages
       }
       debugPrintThrottled(message, wrapWidth: wrapWidth);

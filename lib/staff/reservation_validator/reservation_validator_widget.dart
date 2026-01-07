@@ -22,7 +22,7 @@ class ReservationValidatorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Container(
       color: AppColors.successLight.withValues(alpha: 0.1),
       child: Center(
@@ -46,9 +46,9 @@ class ReservationValidatorWidget extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
-                
+
                 AppSpacing.verticalXL,
-                
+
                 Text(
                   l10n.translate('scan_success'),
                   style: AppTypography.h3.copyWith(
@@ -57,9 +57,9 @@ class ReservationValidatorWidget extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                
+
                 AppSpacing.verticalXL,
-                
+
                 // Student details card
                 Container(
                   width: double.infinity,
@@ -95,23 +95,17 @@ class ReservationValidatorWidget extends StatelessWidget {
                           ),
                         ],
                       ),
-                      
                       AppSpacing.verticalLG,
-                      
                       _buildInfoRow(
                         l10n.translate('full_name'),
                         user?.displayName ?? user?.nom ?? 'Unknown',
                       ),
-                      
                       AppSpacing.verticalMD,
-                      
                       _buildInfoRow(
                         l10n.translate('class'),
                         user?.classe ?? 'N/A',
                       ),
-                      
                       AppSpacing.verticalMD,
-                      
                       _buildInfoRow(
                         l10n.translate('email'),
                         user?.email ?? 'N/A',
@@ -119,9 +113,9 @@ class ReservationValidatorWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 AppSpacing.verticalLG,
-                
+
                 // Reservation details card
                 Container(
                   width: double.infinity,
@@ -157,30 +151,22 @@ class ReservationValidatorWidget extends StatelessWidget {
                           ),
                         ],
                       ),
-                      
                       AppSpacing.verticalLG,
-                      
                       _buildInfoRow(
                         l10n.translate('meal_type'),
                         _getMealTypeLabel(reservation.type, l10n),
                       ),
-                      
                       AppSpacing.verticalMD,
-                      
                       _buildInfoRow(
                         l10n.translate('time_label'),
                         _formatDateTime(reservation.creneaux!),
                       ),
-                      
                       AppSpacing.verticalMD,
-                      
                       _buildInfoRow(
                         l10n.translate('price_label'),
-                        AppConfig.formatPrice(reservation.prix.toDouble()),
+                        AppConfig.formatPrice(reservation.prix / 1000.0),
                       ),
-                      
                       AppSpacing.verticalMD,
-                      
                       _buildInfoRow(
                         l10n.translate('reservation_id'),
                         reservation.reference.id.substring(0, 12),
@@ -188,9 +174,9 @@ class ReservationValidatorWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 AppSpacing.verticalXL,
-                
+
                 // Continue button
                 SizedBox(
                   width: double.infinity,

@@ -94,8 +94,20 @@ class ReservationRecord extends FirestoreRecord {
 
   void _initializeFields() {
     _type = snapshotData['type'] as String?;
-    _prix = castToType<int>(snapshotData['prix']);
-    _total = castToType<int>(snapshotData['total']);
+    // Handle both double and int for prix field (convert double to millimes)
+    final prixValue = snapshotData['prix'];
+    if (prixValue is double) {
+      _prix = (prixValue * 1000).round(); // Convert TND to millimes
+    } else {
+      _prix = castToType<int>(prixValue);
+    }
+    // Handle both double and int for total field (convert double to millimes)
+    final totalValue = snapshotData['total'];
+    if (totalValue is double) {
+      _total = (totalValue * 1000).round(); // Convert TND to millimes
+    } else {
+      _total = castToType<int>(totalValue);
+    }
     _creneaux = snapshotData['creneaux'] as DateTime?;
     _userId = snapshotData['user_id'] as String?;
     _status = snapshotData['status'] as String?;

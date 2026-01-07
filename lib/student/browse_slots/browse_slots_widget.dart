@@ -20,7 +20,7 @@ class BrowseSlotsWidget extends StatefulWidget {
 
 class _BrowseSlotsWidgetState extends State<BrowseSlotsWidget> {
   DateTime selectedDate = DateTime.now();
-  
+
   @override
   void initState() {
     super.initState();
@@ -88,19 +88,24 @@ class _BrowseSlotsWidgetState extends State<BrowseSlotsWidget> {
                           setState(() {
                             selectedDate = picked;
                           });
-                          context.read<FFAppState>().loadTimeSlots(selectedDate);
+                          context
+                              .read<FFAppState>()
+                              .loadTimeSlots(selectedDate);
                         }
                       },
                       text: DateFormat('MMM dd, yyyy').format(selectedDate),
                       options: FFButtonOptions(
                         height: 40.0,
-                        padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                        iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                            16.0, 0.0, 16.0, 0.0),
+                        iconPadding:
+                            EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                         color: FlutterFlowTheme.of(context).primary,
-                        textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                              fontFamily: 'Readex Pro',
-                              color: Colors.white,
-                            ),
+                        textStyle:
+                            FlutterFlowTheme.of(context).titleSmall.override(
+                                  fontFamily: 'Readex Pro',
+                                  color: Colors.white,
+                                ),
                         elevation: 2.0,
                         borderSide: BorderSide(
                           color: Colors.transparent,
@@ -113,7 +118,7 @@ class _BrowseSlotsWidgetState extends State<BrowseSlotsWidget> {
                 ),
               ),
             ),
-            
+
             // Time Slots List
             Expanded(
               child: Consumer<FFAppState>(
@@ -142,9 +147,11 @@ class _BrowseSlotsWidgetState extends State<BrowseSlotsWidget> {
                           SizedBox(height: 16.0),
                           Text(
                             'Error Loading Time Slots',
-                            style: FlutterFlowTheme.of(context).headlineSmall.override(
-                              color: Colors.red,
-                            ),
+                            style: FlutterFlowTheme.of(context)
+                                .headlineSmall
+                                .override(
+                                  color: Colors.red,
+                                ),
                             textAlign: TextAlign.center,
                           ),
                           SizedBox(height: 8.0),
@@ -156,15 +163,21 @@ class _BrowseSlotsWidgetState extends State<BrowseSlotsWidget> {
                           SizedBox(height: 16.0),
                           FFButtonWidget(
                             onPressed: () {
-                              context.read<FFAppState>().loadTimeSlots(selectedDate);
+                              context
+                                  .read<FFAppState>()
+                                  .loadTimeSlots(selectedDate);
                             },
                             text: 'Retry',
                             options: FFButtonOptions(
                               height: 40.0,
-                              padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                              iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  16.0, 0.0, 16.0, 0.0),
+                              iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 0.0, 0.0, 0.0),
                               color: Colors.red,
-                              textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                              textStyle: FlutterFlowTheme.of(context)
+                                  .titleSmall
+                                  .override(
                                     fontFamily: 'Readex Pro',
                                     color: Colors.white,
                                   ),
@@ -211,10 +224,14 @@ class _BrowseSlotsWidgetState extends State<BrowseSlotsWidget> {
                             text: 'Refresh',
                             options: FFButtonOptions(
                               height: 40.0,
-                              padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                              iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  16.0, 0.0, 16.0, 0.0),
+                              iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 0.0, 0.0, 0.0),
                               color: FlutterFlowTheme.of(context).primary,
-                              textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                              textStyle: FlutterFlowTheme.of(context)
+                                  .titleSmall
+                                  .override(
                                     fontFamily: 'Readex Pro',
                                     color: Colors.white,
                                   ),
@@ -240,21 +257,29 @@ class _BrowseSlotsWidgetState extends State<BrowseSlotsWidget> {
                       itemCount: appState.availableTimeSlots.length,
                       itemBuilder: (context, index) {
                         final timeSlot = appState.availableTimeSlots[index];
-                        final availableSpots = timeSlot.maxCapacity - timeSlot.currentReservations;
-                        final occupancyRate = timeSlot.maxCapacity > 0 
-                            ? (timeSlot.currentReservations / timeSlot.maxCapacity) * 100 
+                        final availableSpots =
+                            timeSlot.maxCapacity - timeSlot.currentReservations;
+                        final occupancyRate = timeSlot.maxCapacity > 0
+                            ? (timeSlot.currentReservations /
+                                    timeSlot.maxCapacity) *
+                                100
                             : 0.0;
-                        
+
                         // Requirement 4.7: Prevent reservations for time slots in the past
-                        final isInPast = TimeSlotService.instance.isTimeSlotInPast(timeSlot);
-                        final canReserve = !isInPast && availableSpots > 0 && appState.canMakeMoreReservations();
-                        
+                        final isInPast =
+                            TimeSlotService.instance.isTimeSlotInPast(timeSlot);
+                        final canReserve = !isInPast &&
+                            availableSpots > 0 &&
+                            appState.canMakeMoreReservations();
+
                         return Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              0.0, 0.0, 0.0, 12.0),
                           child: Container(
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context).secondaryBackground,
+                              color: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
                               boxShadow: [
                                 BoxShadow(
                                   blurRadius: 3.0,
@@ -266,9 +291,10 @@ class _BrowseSlotsWidgetState extends State<BrowseSlotsWidget> {
                               border: Border.all(
                                 color: isInPast
                                     ? FlutterFlowTheme.of(context).secondaryText
-                                    : occupancyRate > 80 
+                                    : occupancyRate > 80
                                         ? FlutterFlowTheme.of(context).error
-                                        : FlutterFlowTheme.of(context).alternate,
+                                        : FlutterFlowTheme.of(context)
+                                            .alternate,
                                 width: 1.0,
                               ),
                             ),
@@ -280,134 +306,187 @@ class _BrowseSlotsWidgetState extends State<BrowseSlotsWidget> {
                                 children: [
                                   Row(
                                     mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Column(
                                         mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             '${DateFormat('HH:mm').format(timeSlot.startTime!)} - ${DateFormat('HH:mm').format(timeSlot.endTime!)}',
-                                            style: FlutterFlowTheme.of(context).headlineSmall,
+                                            style: FlutterFlowTheme.of(context)
+                                                .headlineSmall,
                                           ),
                                           Text(
                                             timeSlot.mealType.toUpperCase(),
-                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                              fontFamily: 'Readex Pro',
-                                              color: FlutterFlowTheme.of(context).primary,
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                            style: FlutterFlowTheme.of(context)
+                                                .bodyMedium
+                                                .override(
+                                                  fontFamily: 'Readex Pro',
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primary,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
                                           ),
                                         ],
                                       ),
                                       Column(
                                         mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
                                         children: [
                                           Text(
                                             '${timeSlot.price.toStringAsFixed(2)} TND',
-                                            style: FlutterFlowTheme.of(context).headlineSmall.override(
-                                              fontFamily: 'Outfit',
-                                              color: FlutterFlowTheme.of(context).primary,
-                                            ),
+                                            style: FlutterFlowTheme.of(context)
+                                                .headlineSmall
+                                                .override(
+                                                  fontFamily: 'Outfit',
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primary,
+                                                ),
                                           ),
                                           Text(
                                             '$availableSpots spots left',
-                                            style: FlutterFlowTheme.of(context).bodySmall.override(
-                                              fontFamily: 'Readex Pro',
-                                              color: isInPast
-                                                  ? FlutterFlowTheme.of(context).secondaryText
-                                                  : availableSpots < 5 
-                                                      ? FlutterFlowTheme.of(context).error
-                                                      : FlutterFlowTheme.of(context).secondaryText,
-                                            ),
+                                            style: FlutterFlowTheme.of(context)
+                                                .bodySmall
+                                                .override(
+                                                  fontFamily: 'Readex Pro',
+                                                  color: isInPast
+                                                      ? FlutterFlowTheme.of(
+                                                              context)
+                                                          .secondaryText
+                                                      : availableSpots < 5
+                                                          ? FlutterFlowTheme.of(
+                                                                  context)
+                                                              .error
+                                                          : FlutterFlowTheme.of(
+                                                                  context)
+                                                              .secondaryText,
+                                                ),
                                           ),
                                           if (isInPast)
                                             Text(
                                               'Past',
-                                              style: FlutterFlowTheme.of(context).bodySmall.override(
-                                                fontFamily: 'Readex Pro',
-                                                color: FlutterFlowTheme.of(context).secondaryText,
-                                                fontStyle: FontStyle.italic,
-                                              ),
+                                              style: FlutterFlowTheme.of(
+                                                      context)
+                                                  .bodySmall
+                                                  .override(
+                                                    fontFamily: 'Readex Pro',
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .secondaryText,
+                                                    fontStyle: FontStyle.italic,
+                                                  ),
                                             ),
                                         ],
                                       ),
                                     ],
                                   ),
-                                  
+
                                   SizedBox(height: 12.0),
-                                  
+
                                   // Occupancy Bar
                                   Column(
                                     mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Occupancy: ${occupancyRate.toStringAsFixed(0)}%',
-                                        style: FlutterFlowTheme.of(context).bodySmall,
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodySmall,
                                       ),
                                       SizedBox(height: 4.0),
                                       LinearProgressIndicator(
                                         value: occupancyRate / 100,
-                                        backgroundColor: FlutterFlowTheme.of(context).alternate,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          occupancyRate > 80 
-                                              ? FlutterFlowTheme.of(context).error
+                                        backgroundColor:
+                                            FlutterFlowTheme.of(context)
+                                                .alternate,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          occupancyRate > 80
+                                              ? FlutterFlowTheme.of(context)
+                                                  .error
                                               : occupancyRate > 60
-                                                  ? FlutterFlowTheme.of(context).warning
-                                                  : FlutterFlowTheme.of(context).success,
+                                                  ? FlutterFlowTheme.of(context)
+                                                      .warning
+                                                  : FlutterFlowTheme.of(context)
+                                                      .success,
                                         ),
                                       ),
                                     ],
                                   ),
-                                  
+
                                   SizedBox(height: 16.0),
-                                  
+
                                   // Reserve Button
                                   FFButtonWidget(
                                     onPressed: canReserve
                                         ? () async {
                                             // Validate time slot before navigation
-                                            final validation = await TimeSlotService.instance
-                                                .validateTimeSlotForReservation(timeSlot.reference.id);
-                                            
+                                            final validation = await TimeSlotService
+                                                .instance
+                                                .validateTimeSlotForReservation(
+                                                    timeSlot.reference.id);
+
                                             if (validation.isValid) {
                                               context.pushNamed(
                                                 'ReservationConfirm',
                                                 queryParameters: {
-                                                  'timeSlotId': timeSlot.reference.id,
-                                                  'selectedDate': selectedDate.millisecondsSinceEpoch.toString(),
+                                                  'timeSlotId':
+                                                      timeSlot.reference.id,
+                                                  'selectedDate': selectedDate
+                                                      .millisecondsSinceEpoch
+                                                      .toString(),
                                                 },
                                               );
                                             } else {
-                                              ScaffoldMessenger.of(context).showSnackBar(
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
                                                 SnackBar(
-                                                  content: Text(validation.errorMessage ?? 'Cannot reserve this time slot'),
-                                                  backgroundColor: FlutterFlowTheme.of(context).error,
+                                                  content: Text(validation
+                                                          .errorMessage ??
+                                                      'Cannot reserve this time slot'),
+                                                  backgroundColor:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .error,
                                                 ),
                                               );
                                               // Refresh time slots to get latest data
-                                              context.read<FFAppState>().refreshTimeSlots();
+                                              context
+                                                  .read<FFAppState>()
+                                                  .refreshTimeSlots();
                                             }
                                           }
                                         : null,
                                     text: isInPast
                                         ? 'Past Time Slot'
-                                        : availableSpots <= 0 
+                                        : availableSpots <= 0
                                             ? 'Fully Booked'
-                                            : !appState.canMakeMoreReservations()
+                                            : !appState
+                                                    .canMakeMoreReservations()
                                                 ? 'Max Reservations Reached'
                                                 : 'Reserve Now',
                                     options: FFButtonOptions(
                                       width: double.infinity,
                                       height: 44.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                      iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 0.0, 0.0, 0.0),
+                                      iconPadding:
+                                          EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 0.0, 0.0, 0.0),
                                       color: canReserve
                                           ? FlutterFlowTheme.of(context).primary
-                                          : FlutterFlowTheme.of(context).secondaryText,
-                                      textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                          : FlutterFlowTheme.of(context)
+                                              .secondaryText,
+                                      textStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .override(
                                             fontFamily: 'Readex Pro',
                                             color: Colors.white,
                                           ),

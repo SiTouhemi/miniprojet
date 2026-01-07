@@ -66,7 +66,7 @@ class QRScannerModel extends ChangeNotifier {
         _scanSuccess = true;
         _scannedReservation = result['reservation'];
         _scannedUser = result['user'];
-        
+
         // Add to scan history
         _scanHistory.insert(0, {
           'timestamp': DateTime.now(),
@@ -79,7 +79,7 @@ class QRScannerModel extends ChangeNotifier {
       } else {
         _errorMessage = result['error'];
         _errorCode = result['errorCode'];
-        
+
         // Add to scan history
         _scanHistory.insert(0, {
           'timestamp': DateTime.now(),
@@ -88,7 +88,8 @@ class QRScannerModel extends ChangeNotifier {
           'errorCode': _errorCode,
         });
 
-        AppLogger.w('QR code validation failed: $_errorMessage', tag: 'QRScannerModel');
+        AppLogger.w('QR code validation failed: $_errorMessage',
+            tag: 'QRScannerModel');
       }
 
       // Limit history to 50 items

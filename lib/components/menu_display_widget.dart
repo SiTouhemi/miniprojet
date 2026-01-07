@@ -41,9 +41,12 @@ class MenuDisplayWidget extends StatelessWidget {
     var filteredMenus = allMenus;
 
     // Filter by meal type if specified
-    if (mealTypeFilter != null && mealTypeFilter!.isNotEmpty && mealTypeFilter != 'Tous') {
+    if (mealTypeFilter != null &&
+        mealTypeFilter!.isNotEmpty &&
+        mealTypeFilter != 'Tous') {
       filteredMenus = filteredMenus
-          .where((menu) => menu.mealType.toLowerCase() == mealTypeFilter!.toLowerCase())
+          .where((menu) =>
+              menu.mealType.toLowerCase() == mealTypeFilter!.toLowerCase())
           .toList();
     }
 
@@ -64,8 +67,8 @@ class MenuDisplayWidget extends StatelessWidget {
           Text(
             'Error Loading Menu',
             style: FlutterFlowTheme.of(context).headlineSmall.override(
-              color: Colors.red,
-            ),
+                  color: Colors.red,
+                ),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 8.0),
@@ -178,9 +181,9 @@ class MenuDisplayWidget extends StatelessWidget {
                     Text(
                       _getMealTypeDisplayName(menu.mealType),
                       style: FlutterFlowTheme.of(context).titleMedium.override(
-                        color: _getMealTypeColor(menu.mealType),
-                        fontWeight: FontWeight.w600,
-                      ),
+                            color: _getMealTypeColor(menu.mealType),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ],
                 ),
@@ -202,7 +205,7 @@ class MenuDisplayWidget extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Menu content
           Padding(
             padding: EdgeInsets.all(16.0),
@@ -213,28 +216,28 @@ class MenuDisplayWidget extends StatelessWidget {
                 Text(
                   menu.mainDish,
                   style: FlutterFlowTheme.of(context).headlineSmall.override(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
-                
+
                 if (menu.description.isNotEmpty) ...[
                   SizedBox(height: 8.0),
                   Text(
                     menu.description,
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      color: FlutterFlowTheme.of(context).secondaryText,
-                    ),
+                          color: FlutterFlowTheme.of(context).secondaryText,
+                        ),
                   ),
                 ],
-                
+
                 // Accompaniments
                 if (menu.accompaniments.isNotEmpty) ...[
                   SizedBox(height: 12.0),
                   Text(
                     'Accompaniments:',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      fontWeight: FontWeight.w500,
-                    ),
+                          fontWeight: FontWeight.w500,
+                        ),
                   ),
                   SizedBox(height: 4.0),
                   Wrap(
@@ -242,7 +245,8 @@ class MenuDisplayWidget extends StatelessWidget {
                     runSpacing: 4.0,
                     children: menu.accompaniments.map((accompaniment) {
                       return Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 8.0, vertical: 4.0),
                         decoration: BoxDecoration(
                           color: FlutterFlowTheme.of(context).primaryBackground,
                           borderRadius: BorderRadius.circular(8.0),
@@ -258,7 +262,7 @@ class MenuDisplayWidget extends StatelessWidget {
                     }).toList(),
                   ),
                 ],
-                
+
                 // Price
                 if (showPrices) ...[
                   SizedBox(height: 16.0),
@@ -268,15 +272,16 @@ class MenuDisplayWidget extends StatelessWidget {
                       Text(
                         'Price:',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          fontWeight: FontWeight.w500,
-                        ),
+                              fontWeight: FontWeight.w500,
+                            ),
                       ),
                       Text(
                         '${menu.price.toStringAsFixed(3)} TND',
-                        style: FlutterFlowTheme.of(context).titleMedium.override(
-                          color: Colors.green,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style:
+                            FlutterFlowTheme.of(context).titleMedium.override(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.w600,
+                                ),
                       ),
                     ],
                   ),

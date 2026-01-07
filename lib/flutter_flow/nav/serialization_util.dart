@@ -96,7 +96,8 @@ String? serializeParam(
     }
     return data;
   } catch (e) {
-    AppLogger.e('Error serializing parameter', error: e, tag: 'SerializationUtil');
+    AppLogger.e('Error serializing parameter',
+        error: e, tag: 'SerializationUtil');
     return null;
   }
 }
@@ -240,7 +241,8 @@ dynamic deserializeParam<T>(
         return null;
     }
   } catch (e) {
-    AppLogger.e('Error deserializing parameter', error: e, tag: 'SerializationUtil');
+    AppLogger.e('Error deserializing parameter',
+        error: e, tag: 'SerializationUtil');
     return null;
   }
 }

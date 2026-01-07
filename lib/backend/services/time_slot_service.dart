@@ -795,28 +795,31 @@ class TimeSlotService {
           .where('end_time', isLessThan: now)
           .get();
 
-      AppLogger.i('Found ${expiredSlotsQuery.docs.length} expired time slots to clean up');
+      AppLogger.i(
+          'Found ${expiredSlotsQuery.docs.length} expired time slots to clean up');
 
       // Delete expired slots in batches
       final batch = FirebaseFirestore.instance.batch();
-      
+
       for (final doc in expiredSlotsQuery.docs) {
         try {
           final slot = TimeSlotRecord.fromSnapshot(doc);
-          
+
           // Only delete slots that are truly expired (not just past end time)
           // Keep slots from today that might still be relevant for reporting
           final slotDate = slot.date;
           if (slotDate != null) {
             final today = DateTime(now.year, now.month, now.day);
-            final slotDay = DateTime(slotDate.year, slotDate.month, slotDate.day);
-            
+            final slotDay =
+                DateTime(slotDate.year, slotDate.month, slotDate.day);
+
             // Only delete slots from previous days
             if (slotDay.isBefore(today)) {
               batch.delete(doc.reference);
               deletedCount++;
-              
-              AppLogger.d('Marked for deletion: ${slot.startTime} - ${slot.endTime} from ${slotDate.day}/${slotDate.month}');
+
+              AppLogger.d(
+                  'Marked for deletion: ${slot.startTime} - ${slot.endTime} from ${slotDate.day}/${slotDate.month}');
             }
           }
         } catch (e) {
@@ -837,9 +840,9 @@ class TimeSlotService {
         'deletedCount': deletedCount,
         'errorCount': errorCount,
         'errors': errors,
-        'message': 'Cleanup completed: $deletedCount slots deleted, $errorCount errors'
+        'message':
+            'Cleanup completed: $deletedCount slots deleted, $errorCount errors'
       };
-
     } catch (e) {
       AppLogger.e('Error during time slot cleanup', error: e);
       return {
@@ -864,11 +867,12 @@ class TimeSlotService {
           .where('date', isLessThan: cutoffDate)
           .get();
 
-      AppLogger.i('Found ${oldSlotsQuery.docs.length} time slots older than $daysOld days');
+      AppLogger.i(
+          'Found ${oldSlotsQuery.docs.length} time slots older than $daysOld days');
 
       // Delete in batches
       final batch = FirebaseFirestore.instance.batch();
-      
+
       for (final doc in oldSlotsQuery.docs) {
         batch.delete(doc.reference);
         deletedCount++;
@@ -884,7 +888,6 @@ class TimeSlotService {
         'deletedCount': deletedCount,
         'message': 'Deleted $deletedCount time slots older than $daysOld days'
       };
-
     } catch (e) {
       AppLogger.e('Error during old time slot cleanup', error: e);
       return {

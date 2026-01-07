@@ -5,12 +5,12 @@ import '/l10n/app_localizations.dart';
 extension LocalizationHelper on BuildContext {
   /// Get the current AppLocalizations instance
   AppLocalizations get l10n => AppLocalizations.of(this)!;
-  
+
   /// Quick translate method
   String translate(String key, {Map<String, String>? params}) {
     return l10n.translate(key, params: params);
   }
-  
+
   /// Get status label with localization
   String getStatusLabel(String status) {
     return translate('status_$status');
@@ -21,7 +21,7 @@ extension LocalizationHelper on BuildContext {
 class StatusHelper {
   static String getLocalizedStatus(BuildContext context, String status) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     switch (status.toLowerCase()) {
       case 'confirmed':
         return l10n.translate('status_confirmed');

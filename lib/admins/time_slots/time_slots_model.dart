@@ -6,7 +6,7 @@ class TimeSlotsModel extends FlutterFlowModel<TimeSlotsWidget> {
   ///  State fields for stateful widgets in this page.
 
   final unfocusNode = FocusNode();
-  
+
   /// Initialization and disposal methods.
 
   @override

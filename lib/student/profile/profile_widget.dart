@@ -219,7 +219,8 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                     // TODO: Navigate to wallet top-up
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text('Wallet top-up feature coming soon!'),
+                                        content: Text(
+                                            'Wallet top-up feature coming soon!'),
                                         backgroundColor: Colors.blue,
                                       ),
                                     );

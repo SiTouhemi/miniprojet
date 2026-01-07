@@ -45,7 +45,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
     return Consumer<FFAppState>(
       builder: (context, appState, _) {
         final user = appState.currentUser;
-        
+
         return GestureDetector(
           onTap: () {
             FocusScope.of(context).unfocus();
@@ -95,7 +95,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(height: 20.0),
-                      
+
                       // Welcome message
                       Container(
                         width: double.infinity,
@@ -112,7 +112,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              user != null 
+                              user != null
                                   ? 'Bonjour, ${user.nom.isNotEmpty ? user.nom : user.displayName}'
                                   : 'Bonjour, Personnel',
                               style: FlutterFlowTheme.of(context)
@@ -139,22 +139,23 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                           ],
                         ),
                       ),
-                      
+
                       SizedBox(height: 30.0),
-                      
+
                       // Main action buttons
                       Text(
                         'Actions Principales',
-                        style: FlutterFlowTheme.of(context).headlineSmall.override(
-                              fontFamily: 'Inter Tight',
-                              color: Color(0xFF1C1284),
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        style:
+                            FlutterFlowTheme.of(context).headlineSmall.override(
+                                  fontFamily: 'Inter Tight',
+                                  color: Color(0xFF1C1284),
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
                       ),
-                      
+
                       SizedBox(height: 20.0),
-                      
+
                       // Manage Menus Button
                       Container(
                         width: double.infinity,
@@ -167,7 +168,8 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                             backgroundColor: Color(0xFF1C1284),
                             foregroundColor: Colors.white,
                             elevation: 4.0,
-                            padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 24.0),
+                            padding: EdgeInsets.symmetric(
+                                vertical: 20.0, horizontal: 24.0),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16.0),
                             ),
@@ -206,7 +208,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                           ),
                         ),
                       ),
-                      
+
                       // QR Scanner Button
                       Container(
                         width: double.infinity,
@@ -219,7 +221,8 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                             backgroundColor: Color(0xFF00A4E4),
                             foregroundColor: Colors.white,
                             elevation: 4.0,
-                            padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 24.0),
+                            padding: EdgeInsets.symmetric(
+                                vertical: 20.0, horizontal: 24.0),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16.0),
                             ),
@@ -258,39 +261,47 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                           ),
                         ),
                       ),
-                      
+
                       SizedBox(height: 30.0),
-                      
+
                       // Statistics Section
                       Text(
                         'Statistiques du Jour',
-                        style: FlutterFlowTheme.of(context).headlineSmall.override(
-                              fontFamily: 'Inter Tight',
-                              color: Color(0xFF1C1284),
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        style:
+                            FlutterFlowTheme.of(context).headlineSmall.override(
+                                  fontFamily: 'Inter Tight',
+                                  color: Color(0xFF1C1284),
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
                       ),
-                      
+
                       SizedBox(height: 20.0),
-                      
+
                       // Stats Cards Row
                       StreamBuilder<List<ReservationRecord>>(
                         stream: queryReservationRecord(
                           queryBuilder: (query) {
                             final now = DateTime.now();
-                            final startOfDay = DateTime(now.year, now.month, now.day);
+                            final startOfDay =
+                                DateTime(now.year, now.month, now.day);
                             final endOfDay = startOfDay.add(Duration(days: 1));
                             return query
-                                .where('creneaux', isGreaterThanOrEqualTo: startOfDay)
+                                .where('creneaux',
+                                    isGreaterThanOrEqualTo: startOfDay)
                                 .where('creneaux', isLessThan: endOfDay)
-                                .where('status', whereIn: ['confirmed', 'used']);
+                                .where('status',
+                                    whereIn: ['confirmed', 'used']);
                           },
                         ),
                         builder: (context, reservationSnapshot) {
-                          final todayReservations = reservationSnapshot.data?.length ?? 0;
-                          final usedTickets = reservationSnapshot.data?.where((r) => r.status == 'used').length ?? 0;
-                          
+                          final todayReservations =
+                              reservationSnapshot.data?.length ?? 0;
+                          final usedTickets = reservationSnapshot.data
+                                  ?.where((r) => r.status == 'used')
+                                  .length ??
+                              0;
+
                           return Row(
                             mainAxisSize: MainAxisSize.max,
                             children: [
@@ -299,7 +310,10 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                                   padding: EdgeInsets.all(20.0),
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
-                                      colors: [Color(0xFF052753), Color(0xFF1E46E4)],
+                                      colors: [
+                                        Color(0xFF052753),
+                                        Color(0xFF1E46E4)
+                                      ],
                                       stops: [0.0, 1.0],
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
@@ -390,7 +404,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                           );
                         },
                       ),
-                      
+
                       SizedBox(height: 40.0),
                     ],
                   ),
