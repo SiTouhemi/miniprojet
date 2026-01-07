@@ -5,6 +5,7 @@ import '/backend/services/time_slot_service.dart';
 import '/backend/services/payment_service.dart';
 import '/auth/firebase_auth/auth_util.dart';
 import '/utils/app_logger.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'reservationcreneau_widget.dart' show ReservationcreneauWidget;
 import 'package:flutter/material.dart';
 
@@ -13,6 +14,10 @@ class ReservationcreneauModel
   /// Services
   final ReservationService _reservationService = ReservationService.instance;
   final TimeSlotService _timeSlotService = TimeSlotService.instance;
+
+  /// Auto-generation state
+  bool isGeneratingSlots = false;
+  bool hasCheckedTodaysSlots = false;
 
   /// State field for selected time slot
   TimeSlotRecord? selectedTimeSlot;
@@ -47,7 +52,62 @@ class ReservationcreneauModel
     return true;
   }
 
-  /// Load user balance
+  /// Check and generate today's time slots if needed
+  Future<void> ensureTodaysTimeSlotsExist() async {
+    if (hasCheckedTodaysSlots || isGeneratingSlots) return;
+    
+    isGeneratingSlots = true;
+    onStateChanged?.call();
+    
+    try {
+      final today = DateTime.now();
+      final todayStart = DateTime(today.year, today.month, today.day);
+      
+      // Check if restaurant is open (not Sunday)
+      if (today.weekday == DateTime.sunday) {
+        AppLogger.i('Restaurant is closed on Sundays', tag: 'ReservationcreneauModel');
+        hasCheckedTodaysSlots = true;
+        return;
+      }
+      
+      // Check if slots already exist for today
+      final existingSlots = await FirebaseFirestore.instance
+          .collection('time_slots')
+          .where('date', isEqualTo: todayStart)
+          .where('is_active', isEqualTo: true)
+          .get();
+      
+      if (existingSlots.docs.isNotEmpty) {
+        AppLogger.i('Time slots already exist for today (${existingSlots.docs.length} slots)', 
+            tag: 'ReservationcreneauModel');
+        hasCheckedTodaysSlots = true;
+        return;
+      }
+      
+      // Generate slots from templates
+      AppLogger.i('No time slots found for today. Generating from templates...', 
+          tag: 'ReservationcreneauModel');
+      
+      final created = await _timeSlotService.createTimeSlotsForDateFromTemplates(todayStart);
+      
+      if (created) {
+        AppLogger.i('Successfully generated time slots for today', 
+            tag: 'ReservationcreneauModel');
+      } else {
+        AppLogger.w('Failed to generate time slots for today. Check if templates exist.', 
+            tag: 'ReservationcreneauModel');
+      }
+      
+      hasCheckedTodaysSlots = true;
+      
+    } catch (e) {
+      AppLogger.e('Error ensuring today\'s time slots exist', 
+          error: e, tag: 'ReservationcreneauModel');
+    } finally {
+      isGeneratingSlots = false;
+      onStateChanged?.call();
+    }
+  }
   Future<void> loadUserBalance() async {
     if (!authService.isLoggedIn) return;
 
@@ -219,9 +279,10 @@ class ReservationcreneauModel
 
   @override
   void initState(BuildContext context) {
-    // Load user balance when model initializes
+    // Load user balance and ensure today's slots exist when model initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       loadUserBalance();
+      ensureTodaysTimeSlotsExist();
     });
   }
 

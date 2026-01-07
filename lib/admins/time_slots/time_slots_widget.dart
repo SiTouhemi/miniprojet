@@ -116,6 +116,20 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
                 await _showBulkCreateDialog();
               },
             ),
+            FlutterFlowIconButton(
+              borderColor: Colors.transparent,
+              borderRadius: 30.0,
+              borderWidth: 1.0,
+              buttonSize: 60.0,
+              icon: Icon(
+                Icons.cleaning_services,
+                color: Color(0xFFE74C3C),
+                size: 24.0,
+              ),
+              onPressed: () async {
+                await _showCleanupDialog();
+              },
+            ),
           ],
           centerTitle: false,
           elevation: 0.0,
@@ -315,6 +329,169 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
         return EditSlotDialog(slot: slot);
       },
     );
+  }
+
+  /// Show cleanup dialog for expired time slots
+  Future<void> _showCleanupDialog() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.cleaning_services, color: Color(0xFFE74C3C)),
+              SizedBox(width: 8),
+              Text('Cleanup Expired Slots'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'This will remove expired time slots from the database to improve performance.',
+                style: TextStyle(fontSize: 14),
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Options:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Text('• Clean expired slots (from previous days)'),
+              Text('• Clean old slots (older than 7 days)'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _performCleanup(false);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFFF9800),
+                foregroundColor: Colors.white,
+              ),
+              child: Text('Clean Expired'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _performCleanup(true);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFE74C3C),
+                foregroundColor: Colors.white,
+              ),
+              child: Text('Clean Old (7+ days)'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Perform the actual cleanup operation
+  Future<void> _performCleanup(bool cleanOld) async {
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Cleaning up time slots...'),
+            ],
+          ),
+        ),
+      );
+
+      // Perform cleanup
+      final result = cleanOld
+          ? await TimeSlotService.instance.cleanupOldTimeSlots(daysOld: 7)
+          : await TimeSlotService.instance.cleanupExpiredTimeSlots();
+
+      // Close loading dialog
+      Navigator.pop(context);
+
+      // Show result dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                result['success'] ? Icons.check_circle : Icons.error,
+                color: result['success'] ? Colors.green : Colors.red,
+              ),
+              SizedBox(width: 8),
+              Text('Cleanup ${result['success'] ? 'Complete' : 'Failed'}'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(result['message']),
+              if (result['success'] && result['deletedCount'] > 0) ...[
+                SizedBox(height: 8),
+                Text(
+                  'Deleted ${result['deletedCount']} time slots',
+                  style: TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+              if (result['errorCount'] != null && result['errorCount'] > 0) ...[
+                SizedBox(height: 8),
+                Text(
+                  'Errors: ${result['errorCount']}',
+                  style: TextStyle(color: Colors.orange),
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      // Close loading dialog if still open
+      Navigator.pop(context);
+      
+      // Show error dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.error, color: Colors.red),
+              SizedBox(width: 8),
+              Text('Cleanup Failed'),
+            ],
+          ),
+          content: Text('Error: $e'),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 }
 

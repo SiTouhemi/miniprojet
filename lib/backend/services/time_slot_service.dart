@@ -467,6 +467,8 @@ class TimeSlotService {
 
   /// Check if a time slot is locked (past time but can be unlocked next day)
   /// RECURRING LOGIC: Ignores stored date, treats slots as daily recurring
+  /// Check if a time slot is locked based on database data and business rules
+  /// - Individual slots are locked when their end time has passed
   /// - Lunch slots (11:40-14:00) are available until 17:40 (dinner starts)
   /// - Dinner slots (17:40-18:40) are available until 23:59 (end of day)
   /// - All slots reset the next day (except Sundays - restaurant closed)
@@ -478,7 +480,14 @@ class TimeSlotService {
       return true;
     }
 
-    // For recurring slots, check meal period availability for TODAY
+    // FIRST: Check if this specific time slot has already ended
+    // This is the primary check - if the slot's end time has passed, it's locked
+    if (timeSlot.endTime != null && timeSlot.endTime!.isBefore(now)) {
+      return true;
+    }
+
+    // SECOND: Check meal period business rules for future slots
+    // This prevents booking slots that are outside business hours
     if (timeSlot.mealType == 'lunch') {
       // Lunch slots available until dinner starts (17:40)
       final dinnerStartTime = DateTime(now.year, now.month, now.day, 17, 40);
@@ -768,6 +777,122 @@ class TimeSlotService {
       subscription.cancel();
     }
     _activeListeners.clear();
+  }
+
+  /// ADMIN FUNCTION: Clean up expired time slots
+  /// Removes time slots that have ended and are no longer needed
+  /// This helps keep the database clean and improves query performance
+  Future<Map<String, dynamic>> cleanupExpiredTimeSlots() async {
+    try {
+      final now = DateTime.now();
+      int deletedCount = 0;
+      int errorCount = 0;
+      List<String> errors = [];
+
+      // Query all time slots that have ended
+      final expiredSlotsQuery = await FirebaseFirestore.instance
+          .collection('time_slots')
+          .where('end_time', isLessThan: now)
+          .get();
+
+      AppLogger.i('Found ${expiredSlotsQuery.docs.length} expired time slots to clean up');
+
+      // Delete expired slots in batches
+      final batch = FirebaseFirestore.instance.batch();
+      
+      for (final doc in expiredSlotsQuery.docs) {
+        try {
+          final slot = TimeSlotRecord.fromSnapshot(doc);
+          
+          // Only delete slots that are truly expired (not just past end time)
+          // Keep slots from today that might still be relevant for reporting
+          final slotDate = slot.date;
+          if (slotDate != null) {
+            final today = DateTime(now.year, now.month, now.day);
+            final slotDay = DateTime(slotDate.year, slotDate.month, slotDate.day);
+            
+            // Only delete slots from previous days
+            if (slotDay.isBefore(today)) {
+              batch.delete(doc.reference);
+              deletedCount++;
+              
+              AppLogger.d('Marked for deletion: ${slot.startTime} - ${slot.endTime} from ${slotDate.day}/${slotDate.month}');
+            }
+          }
+        } catch (e) {
+          errorCount++;
+          errors.add('Error processing slot ${doc.id}: $e');
+          AppLogger.e('Error processing expired slot', error: e);
+        }
+      }
+
+      // Execute the batch delete
+      if (deletedCount > 0) {
+        await batch.commit();
+        AppLogger.i('Successfully deleted $deletedCount expired time slots');
+      }
+
+      return {
+        'success': true,
+        'deletedCount': deletedCount,
+        'errorCount': errorCount,
+        'errors': errors,
+        'message': 'Cleanup completed: $deletedCount slots deleted, $errorCount errors'
+      };
+
+    } catch (e) {
+      AppLogger.e('Error during time slot cleanup', error: e);
+      return {
+        'success': false,
+        'error': e.toString(),
+        'message': 'Cleanup failed: $e'
+      };
+    }
+  }
+
+  /// ADMIN FUNCTION: Clean up time slots older than specified days
+  /// More aggressive cleanup for maintenance
+  Future<Map<String, dynamic>> cleanupOldTimeSlots({int daysOld = 7}) async {
+    try {
+      final now = DateTime.now();
+      final cutoffDate = now.subtract(Duration(days: daysOld));
+      int deletedCount = 0;
+
+      // Query slots older than cutoff date
+      final oldSlotsQuery = await FirebaseFirestore.instance
+          .collection('time_slots')
+          .where('date', isLessThan: cutoffDate)
+          .get();
+
+      AppLogger.i('Found ${oldSlotsQuery.docs.length} time slots older than $daysOld days');
+
+      // Delete in batches
+      final batch = FirebaseFirestore.instance.batch();
+      
+      for (final doc in oldSlotsQuery.docs) {
+        batch.delete(doc.reference);
+        deletedCount++;
+      }
+
+      if (deletedCount > 0) {
+        await batch.commit();
+        AppLogger.i('Successfully deleted $deletedCount old time slots');
+      }
+
+      return {
+        'success': true,
+        'deletedCount': deletedCount,
+        'message': 'Deleted $deletedCount time slots older than $daysOld days'
+      };
+
+    } catch (e) {
+      AppLogger.e('Error during old time slot cleanup', error: e);
+      return {
+        'success': false,
+        'error': e.toString(),
+        'message': 'Old slot cleanup failed: $e'
+      };
+    }
   }
 }
 

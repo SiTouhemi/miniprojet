@@ -50,19 +50,34 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
   }
 
   /// Check if a time slot is locked (past time or Sunday)
+  /// Combines individual slot expiry check with meal period business rules
   bool _isTimeSlotLocked(TimeSlotRecord timeSlot) {
     final now = DateTime.now();
     
     // Check if it's Sunday (restaurant closed)
-    if (timeSlot.date?.weekday == DateTime.sunday) {
+    if (now.weekday == DateTime.sunday) {
       return true;
     }
     
-    // If the time slot is in the past (end time has passed), it's locked
+    // FIRST: Check if this specific time slot has already ended
+    // This is the primary check - if the slot's end time has passed, it's locked
     if (timeSlot.endTime != null && timeSlot.endTime!.isBefore(now)) {
       return true;
     }
     
+    // SECOND: Check meal period business rules for future slots
+    // This prevents booking slots that are outside business hours
+    if (timeSlot.mealType == 'lunch') {
+      // Lunch slots available until dinner starts (17:40)
+      final dinnerStartTime = DateTime(now.year, now.month, now.day, 17, 40);
+      return now.isAfter(dinnerStartTime);
+    } else if (timeSlot.mealType == 'dinner') {
+      // Dinner slots available until end of day (23:59)
+      final endOfDay = DateTime(now.year, now.month, now.day, 23, 59);
+      return now.isAfter(endOfDay);
+    }
+    
+    // Default: not locked
     return false;
   }
 
@@ -344,11 +359,19 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                         // Time slot cards with locking logic
                         StreamBuilder<List<TimeSlotRecord>>(
                           stream: queryTimeSlotRecord(
-                            queryBuilder: (timeSlotRecord) => timeSlotRecord
-                                .where('is_active', isEqualTo: true)
-                                .orderBy('date')
-                                .orderBy('start_time')
-                                .limit(20),
+                            queryBuilder: (timeSlotRecord) {
+                              final today = DateTime.now();
+                              final startOfDay = DateTime(today.year, today.month, today.day);
+                              final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
+                              
+                              return timeSlotRecord
+                                  .where('is_active', isEqualTo: true)
+                                  .where('date', isGreaterThanOrEqualTo: startOfDay)
+                                  .where('date', isLessThanOrEqualTo: endOfDay)
+                                  .orderBy('date')
+                                  .orderBy('start_time')
+                                  .limit(20);
+                            },
                           ),
                           builder: (context, snapshot) {
                             if (snapshot.hasError) {
@@ -385,7 +408,7 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                             }
 
                             if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
+                                ConnectionState.waiting || _model.isGeneratingSlots) {
                               return Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     16.0, 0.0, 16.0, 0.0),
@@ -396,8 +419,23 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                                     borderRadius: BorderRadius.circular(12.0),
                                   ),
                                   child: Center(
-                                    child: CircularProgressIndicator(
-                                      color: Color(0xFF005BAA),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        CircularProgressIndicator(
+                                          color: Color(0xFF005BAA),
+                                        ),
+                                        SizedBox(height: 12),
+                                        Text(
+                                          _model.isGeneratingSlots 
+                                              ? 'Generating time slots...'
+                                              : 'Loading time slots...',
+                                          style: TextStyle(
+                                            color: Color(0xFF005BAA),
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
