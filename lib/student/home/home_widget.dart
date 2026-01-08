@@ -843,6 +843,11 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _buildMainMenuImage(DailyMenuRecord item) {
+    // Use a default meal image if imageUrl is empty
+    final imageUrl = item.imageUrl.isNotEmpty 
+        ? item.imageUrl 
+        : 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80'; // Default food image
+    
     return Container(
       height: 200,
       width: double.infinity,
@@ -852,7 +857,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           topRight: Radius.circular(AppBorders.radiusMD),
         ),
         child: Image.network(
-          item.imageUrl,
+          imageUrl,
           width: double.infinity,
           height: double.infinity,
           fit: BoxFit.cover,

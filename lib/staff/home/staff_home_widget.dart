@@ -162,7 +162,13 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                         margin: EdgeInsets.only(bottom: 16.0),
                         child: ElevatedButton(
                           onPressed: () async {
-                            context.pushNamed('DailyMenuManagement');
+                            try {
+                              context.pushNamed('DailyMenuManagement');
+                            } catch (e) {
+                              print('Navigation error: $e');
+                              // Fallback navigation
+                              context.go('/dailyMenuManagement');
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF1C1284),

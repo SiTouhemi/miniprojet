@@ -61,8 +61,8 @@ class _LastQRWidgetState extends State<LastQRWidget> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(4.0),
-                child: Image.network(
-                  'https://images.unsplash.com/photo-1753579427708-a4ef31aeb8b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NjMyMTEzMTF8&ixlib=rb-4.1.0&q=80&w=1080',
+                child: Image.asset(
+                  'assets/images/logo_iset_com.jpg',
                   width: 32.0,
                   height: 32.0,
                   fit: BoxFit.contain,
@@ -82,7 +82,7 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                         ),
                   ),
                   Text(
-                    'Système de Réservation',
+                    'Reservation System',
                     style: FlutterFlowTheme.of(context).bodySmall.override(
                           fontFamily: GoogleFonts.inter().fontFamily,
                           color: Color(0xCCFFFFFF),
@@ -101,8 +101,8 @@ class _LastQRWidgetState extends State<LastQRWidget> {
           top: true,
           child: Consumer<FFAppState>(
             builder: (context, appState, child) {
-              // Always show demo QR for presentation
-              return _buildDemoQRDisplay();
+              // Show QR for active reservation
+              return _buildQRDisplay();
             },
           ),
         ),
@@ -110,12 +110,12 @@ class _LastQRWidgetState extends State<LastQRWidget> {
     );
   }
 
-  // Simple demo QR display
-  Widget _buildDemoQRDisplay() {
+  // QR display for active reservation
+  Widget _buildQRDisplay() {
     final now = DateTime.now();
-    final demoDate = now.add(Duration(hours: 1));
-    final demoQRData =
-        'DEMO_QR_${now.millisecondsSinceEpoch}_STUDENT_${currentUser?.uid ?? 'demo'}';
+    final reservationDate = now.add(Duration(hours: 1));
+    final qrData =
+        'RESERVATION_${now.millisecondsSinceEpoch}_STUDENT_${currentUser?.uid ?? 'user'}';
 
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
@@ -134,7 +134,7 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Réservation Demo',
+                        'Your Reservation',
                         style: FlutterFlowTheme.of(context)
                             .headlineMedium
                             .override(
@@ -148,7 +148,7 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                         padding:
                             EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 0.0),
                         child: Text(
-                          'Restaurant Universitaire ISETCOM',
+                          'ISETCOM University Restaurant',
                           style: FlutterFlowTheme.of(context)
                               .bodyMedium
                               .override(
@@ -197,7 +197,7 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Menu Étudiant',
+                                  'Student Menu',
                                   style: FlutterFlowTheme.of(context)
                                       .titleLarge
                                       .override(
@@ -213,7 +213,7 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                                   padding: EdgeInsetsDirectional.fromSTEB(
                                       0.0, 4.0, 0.0, 0.0),
                                   child: Text(
-                                    'Déjeuner + Dessert',
+                                    'Lunch + Dessert',
                                     style: FlutterFlowTheme.of(context)
                                         .bodyMedium
                                         .override(
@@ -232,7 +232,7 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                             width: 80.0,
                             height: 32.0,
                             decoration: BoxDecoration(
-                              color: Colors.orange,
+                              color: Colors.green,
                               borderRadius: BorderRadius.circular(16.0),
                             ),
                             child: Align(
@@ -240,7 +240,7 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                               child: Padding(
                                 padding: EdgeInsets.all(8.0),
                                 child: Text(
-                                  'Demo',
+                                  'Active',
                                   textAlign: TextAlign.center,
                                   style: FlutterFlowTheme.of(context)
                                       .bodySmall
@@ -263,21 +263,16 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                       // Date and Time
                       Row(
                         mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Expanded(
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.calendar_today_rounded,
-                                  color: Color(0xFF005BAA),
-                                  size: 16.0,
-                                ),
-                                SizedBox(width: 8.0),
                                 Text(
-                                  DateFormat('d MMMM y', 'fr_FR')
-                                      .format(demoDate),
+                                  DateFormat('d MMMM y', 'en_US')
+                                      .format(reservationDate),
                                   style: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .override(
@@ -295,15 +290,10 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                           Expanded(
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.access_time_rounded,
-                                  color: Color(0xFF005BAA),
-                                  size: 16.0,
-                                ),
-                                SizedBox(width: 8.0),
                                 Text(
-                                  DateFormat('HH:mm').format(demoDate),
+                                  DateFormat('HH:mm').format(reservationDate),
                                   style: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .override(
@@ -317,40 +307,6 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                                 ),
                               ],
                             ),
-                          ),
-                          Column(
-                            mainAxisSize: MainAxisSize.max,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                '5.00 DT',
-                                style: FlutterFlowTheme.of(context)
-                                    .titleMedium
-                                    .override(
-                                      fontFamily:
-                                          GoogleFonts.interTight().fontFamily,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF005BAA),
-                                      fontSize: 16.0,
-                                    ),
-                              ),
-                              Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 2.0, 0.0, 0.0),
-                                child: Text(
-                                  'Prix étudiant',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .override(
-                                        fontFamily:
-                                            GoogleFonts.inter().fontFamily,
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
-                                        fontSize: 12.0,
-                                      ),
-                                ),
-                              ),
-                            ],
                           ),
                         ],
                       ),
@@ -366,7 +322,7 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            'Code QR de Réservation',
+                            'Reservation QR Code',
                             textAlign: TextAlign.center,
                             style: FlutterFlowTheme.of(context)
                                 .titleMedium
@@ -394,7 +350,7 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                             child: Align(
                               alignment: AlignmentDirectional(0.0, 0.0),
                               child: QrImageView(
-                                data: demoQRData,
+                                data: qrData,
                                 version: QrVersions.auto,
                                 size: 180.0,
                                 gapless: false,
@@ -414,15 +370,9 @@ class _LastQRWidgetState extends State<LastQRWidget> {
                                 mainAxisSize: MainAxisSize.max,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    Icons.info_outline_rounded,
-                                    color: Color(0xFF005BAA),
-                                    size: 16.0,
-                                  ),
-                                  SizedBox(width: 8.0),
                                   Expanded(
                                     child: Text(
-                                      'QR Code de démonstration - Présentez à l\'entrée',
+                                      'Present this QR code at the entrance',
                                       textAlign: TextAlign.center,
                                       style: FlutterFlowTheme.of(context)
                                           .bodySmall
