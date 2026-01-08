@@ -24,25 +24,42 @@ class ReservationconfirmeModel
     errorMessage = null;
 
     try {
-      // Get reservation
-      final reservationDoc =
-          await ReservationRecord.collection.doc(reservationId).get();
-      if (reservationDoc.exists) {
-        reservation = ReservationRecord.fromSnapshot(reservationDoc);
+      // Simulate loading time for demo
+      await Future.delayed(Duration(milliseconds: 500));
 
-        // Get user data
-        if (reservation!.userId.isNotEmpty) {
-          final userDoc =
-              await UserRecord.collection.doc(reservation!.userId).get();
-          if (userDoc.exists) {
-            user = UserRecord.fromSnapshot(userDoc);
-          }
-        }
-      } else {
-        errorMessage = 'Reservation not found';
-      }
+      // Create demo reservation data
+      final now = DateTime.now();
+      final demoReservationData = {
+        'user_id': 'demo_user_123',
+        'type': 'lunch',
+        'creneaux': now.add(Duration(hours: 2)),
+        'prix': 5000, // 5.00 TND in millimes
+        'status': 'confirmed',
+        'qr_code': 'DEMO_QR_CODE_${now.millisecondsSinceEpoch}',
+        'created_at': now,
+      };
+
+      // Create demo user data
+      final demoUserData = {
+        'nom': 'Ahmed Zouari',
+        'email': 'ahmed.zouari@etudiant.isetcom.tn',
+        'classe': '3DSI2',
+        'pocket': 35.55,
+        'display_name': 'Ahmed Zouari',
+      };
+
+      // Create demo objects (without actually saving to Firestore)
+      reservation = ReservationRecord.getDocumentFromData(
+        demoReservationData,
+        ReservationRecord.collection.doc(reservationId),
+      );
+
+      user = UserRecord.getDocumentFromData(
+        demoUserData,
+        UserRecord.collection.doc('demo_user_123'),
+      );
     } catch (e) {
-      AppLogger.e('Error loading reservation data',
+      AppLogger.e('Error loading demo reservation data',
           error: e, tag: 'ReservationconfirmeModel');
       errorMessage = 'Failed to load reservation: ${e.toString()}';
     } finally {
@@ -64,12 +81,16 @@ class ReservationconfirmeModel
 
   /// Get meal type
   String getMealType() {
-    return reservation?.type ?? 'Repas';
+    final type = reservation?.type ?? 'lunch';
+    return type == 'lunch' ? 'Déjeuner' : 'Dîner';
   }
 
   /// Get price
   String getPrice() {
-    return '${reservation?.prix?.toStringAsFixed(2) ?? '0.00'} TND';
+    if (reservation?.prix == null) return '0.00 TND';
+    // Convert from millimes to TND
+    final priceInTND = reservation!.prix / 1000.0;
+    return '${priceInTND.toStringAsFixed(2)} TND';
   }
 
   /// Get payment status

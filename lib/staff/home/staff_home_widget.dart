@@ -58,7 +58,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
               backgroundColor: Color(0xFF1C1284),
               automaticallyImplyLeading: false,
               title: Text(
-                'ISET Restaurant - Personnel',
+                'ISET Restaurant - Staff',
                 style: FlutterFlowTheme.of(context).headlineMedium.override(
                       fontFamily: 'Inter Tight',
                       color: Colors.white,
@@ -113,8 +113,8 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                           children: [
                             Text(
                               user != null
-                                  ? 'Bonjour, ${user.nom.isNotEmpty ? user.nom : user.displayName}'
-                                  : 'Bonjour, Personnel',
+                                  ? 'Hello, ${user.nom.isNotEmpty ? user.nom : user.displayName}'
+                                  : 'Hello, Staff',
                               style: FlutterFlowTheme.of(context)
                                   .headlineMedium
                                   .override(
@@ -126,7 +126,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                             ),
                             SizedBox(height: 8.0),
                             Text(
-                              'Tableau de bord du personnel ISET Restaurant',
+                              'ISET Restaurant Staff Dashboard',
                               style: FlutterFlowTheme.of(context)
                                   .bodyLarge
                                   .override(
@@ -144,7 +144,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
 
                       // Main action buttons
                       Text(
-                        'Actions Principales',
+                        'Main Actions',
                         style:
                             FlutterFlowTheme.of(context).headlineSmall.override(
                                   fontFamily: 'Inter Tight',
@@ -187,7 +187,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    'Gérer les Menus',
+                                    'Manage Menus',
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 18.0,
@@ -195,7 +195,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                                     ),
                                   ),
                                   Text(
-                                    'Menus de la semaine',
+                                    'Weekly Menus',
                                     style: TextStyle(
                                       color: Colors.white70,
                                       fontSize: 14.0,
@@ -240,7 +240,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    'Scanner QR Code',
+                                    'Scan QR Code',
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 18.0,
@@ -248,7 +248,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                                     ),
                                   ),
                                   Text(
-                                    'Valider les réservations',
+                                    'Validate Reservations',
                                     style: TextStyle(
                                       color: Colors.white70,
                                       fontSize: 14.0,
@@ -266,7 +266,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
 
                       // Statistics Section
                       Text(
-                        'Statistiques du Jour',
+                        'Today\'s Statistics',
                         style:
                             FlutterFlowTheme.of(context).headlineSmall.override(
                                   fontFamily: 'Inter Tight',
@@ -340,7 +340,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                                             ),
                                       ),
                                       Text(
-                                        'Tickets Scannés',
+                                        'Scanned Tickets',
                                         textAlign: TextAlign.center,
                                         style: FlutterFlowTheme.of(context)
                                             .bodyMedium
@@ -386,7 +386,7 @@ class _StaffHomeWidgetState extends State<StaffHomeWidget> {
                                             ),
                                       ),
                                       Text(
-                                        'Réservations Jour',
+                                        'Today\'s Reservations',
                                         textAlign: TextAlign.center,
                                         style: FlutterFlowTheme.of(context)
                                             .bodyMedium

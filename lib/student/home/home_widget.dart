@@ -1,7 +1,6 @@
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/app_state.dart';
 import '/auth/firebase_auth/auth_util.dart';
 import '/utils/error_handler.dart';
@@ -282,7 +281,6 @@ class _HomeWidgetState extends State<HomeWidget> {
       },
     );
   }
-
   Widget _buildUserGreeting(UserRecord? user, AppLocalizations l10n) {
     return Row(
       mainAxisSize: MainAxisSize.max,
@@ -528,6 +526,80 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
+  /// Fetches real dish images from PlatRecord collection for menu components
+  Future<Map<String, String>> _fetchDishImages(DailyMenuRecord menu) async {
+    Map<String, String> dishImages = {};
+    
+    try {
+      // Fetch image for main dish
+      if (menu.mainDish.isNotEmpty) {
+        final platQuery = await queryPlatRecordOnce(
+          queryBuilder: (query) => query
+              .where('nom', isEqualTo: menu.mainDish)
+              .limit(1),
+        );
+        if (platQuery.isNotEmpty && platQuery.first.image.isNotEmpty) {
+          dishImages['mainDish'] = platQuery.first.image;
+        }
+      }
+      
+      // Fetch image for salad
+      if (menu.salad.isNotEmpty) {
+        final platQuery = await queryPlatRecordOnce(
+          queryBuilder: (query) => query
+              .where('nom', isEqualTo: menu.salad)
+              .limit(1),
+        );
+        if (platQuery.isNotEmpty && platQuery.first.image.isNotEmpty) {
+          dishImages['salad'] = platQuery.first.image;
+        }
+      }
+      
+      // Fetch image for dessert
+      if (menu.dessert.isNotEmpty) {
+        final platQuery = await queryPlatRecordOnce(
+          queryBuilder: (query) => query
+              .where('nom', isEqualTo: menu.dessert)
+              .limit(1),
+        );
+        if (platQuery.isNotEmpty && platQuery.first.image.isNotEmpty) {
+          dishImages['dessert'] = platQuery.first.image;
+        }
+      }
+      
+      // Fetch image for accompaniment
+      if (menu.accompaniment.isNotEmpty) {
+        final platQuery = await queryPlatRecordOnce(
+          queryBuilder: (query) => query
+              .where('nom', isEqualTo: menu.accompaniment)
+              .limit(1),
+        );
+        if (platQuery.isNotEmpty && platQuery.first.image.isNotEmpty) {
+          dishImages['accompaniment'] = platQuery.first.image;
+        }
+      }
+      
+      // Fetch images for accompaniments list
+      for (int i = 0; i < menu.accompaniments.length; i++) {
+        final accompanimentName = menu.accompaniments[i];
+        if (accompanimentName.isNotEmpty) {
+          final platQuery = await queryPlatRecordOnce(
+            queryBuilder: (query) => query
+                .where('nom', isEqualTo: accompanimentName)
+                .limit(1),
+          );
+          if (platQuery.isNotEmpty && platQuery.first.image.isNotEmpty) {
+            dishImages['accompaniments_$i'] = platQuery.first.image;
+          }
+        }
+      }
+      
+    } catch (e) {
+      AppLogger.w('Error fetching dish images: $e', tag: 'HomeWidget');
+    }
+    
+    return dishImages;
+  }
   Widget _buildTodaysMenu(FFAppState appState, AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -538,12 +610,14 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
         AppSpacing.verticalMD,
         
-        // Stream today's menu from Firestore
+        // Stream today's menu from Firestore with simplified filtering
         StreamBuilder<List<DailyMenuRecord>>(
           stream: queryDailyMenuRecord(
             queryBuilder: (query) {
               final today = DateTime.now();
               final dayOfWeek = today.weekday; // 1=Monday, 7=Sunday
+              
+              // Simplified query - remove orderBy to avoid index requirement
               return query
                   .where('day_of_week', isEqualTo: dayOfWeek)
                   .where('available', isEqualTo: true);
@@ -590,6 +664,9 @@ class _HomeWidgetState extends State<HomeWidget> {
             }
 
             final menuItems = snapshot.data!;
+            // Sort by created_at in code instead of query
+            menuItems.sort((a, b) => (b.createdAt ?? DateTime.now()).compareTo(a.createdAt ?? DateTime.now()));
+            
             final lunchItems = menuItems.where((item) => item.mealType == 'lunch').toList();
             final dinnerItems = menuItems.where((item) => item.mealType == 'dinner').toList();
 
@@ -689,34 +766,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _buildMenuItemCard(DailyMenuRecord item, AppLocalizations l10n) {
-    // Collect all available images from the menu components
-    List<String> allImages = [];
-    List<String> imageLabels = [];
-    
-    if (item.imageUrl.isNotEmpty) {
-      allImages.add(item.imageUrl);
-      imageLabels.add(item.mainDish);
-    }
-    
-    // For demo purposes, we'll create placeholder images for different components
-    // In a real implementation, you'd fetch these from related Plat records
-    final components = <Map<String, String>>[];
-    
-    if (item.salad.isNotEmpty) {
-      components.add({'name': item.salad, 'type': 'Salad', 'image': item.imageUrl});
-    }
-    if (item.accompaniment.isNotEmpty) {
-      components.add({'name': item.accompaniment, 'type': 'Side', 'image': item.imageUrl});
-    }
-    if (item.accompaniments.isNotEmpty) {
-      for (String acc in item.accompaniments) {
-        components.add({'name': acc, 'type': 'Side', 'image': item.imageUrl});
-      }
-    }
-    if (item.dessert.isNotEmpty) {
-      components.add({'name': item.dessert, 'type': 'Dessert', 'image': item.imageUrl});
-    }
-
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -731,9 +780,9 @@ class _HomeWidgetState extends State<HomeWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image Carousel with Navigation Arrows
-          if (allImages.isNotEmpty || components.isNotEmpty)
-            _buildImageCarousel(item, components),
+          // Main Image - Show menu image or fetch main dish image
+          if (item.imageUrl.isNotEmpty)
+            _buildMainMenuImage(item),
           
           // Menu content
           Padding(
@@ -741,7 +790,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Main dish name (removed price)
+                // Main dish name
                 Text(
                   item.mainDish,
                   style: AppTypography.h6.copyWith(
@@ -780,6 +829,11 @@ class _HomeWidgetState extends State<HomeWidget> {
                       _buildMenuComponent('Dessert', item.dessert, Icons.cake, Colors.pink),
                   ],
                 ),
+                
+                AppSpacing.verticalSM,
+                
+                // Tap to see individual dish images
+                _buildViewDishImagesButton(item, l10n),
               ],
             ),
           ),
@@ -788,247 +842,342 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
-  Widget _buildImageCarousel(DailyMenuRecord item, List<Map<String, String>> components) {
-    // Create a list of all images with their labels
-    List<Map<String, String>> allImageData = [];
-    
-    // Add main dish image
-    if (item.imageUrl.isNotEmpty) {
-      allImageData.add({
-        'image': item.imageUrl,
-        'label': item.mainDish,
-        'type': 'Main Dish'
-      });
-    }
-    
-    // Add component images (for demo, using the same image with different labels)
-    // In production, you'd fetch actual component images from the Plat collection
-    for (var component in components) {
-      if (component['image']?.isNotEmpty == true) {
-        allImageData.add({
-          'image': component['image']!,
-          'label': component['name']!,
-          'type': component['type']!
-        });
-      }
-    }
-    
-    if (allImageData.isEmpty) return const SizedBox.shrink();
-    
-    return StatefulBuilder(
-      builder: (context, setState) {
-        int currentImageIndex = 0;
-        final PageController pageController = PageController();
-        
-        return Container(
-          height: 200,
-          child: Stack(
-            children: [
-              // Image PageView
-              PageView.builder(
-                controller: pageController,
-                itemCount: allImageData.length,
-                onPageChanged: (index) {
-                  setState(() {
-                    currentImageIndex = index;
-                  });
-                },
-                itemBuilder: (context, index) {
-                  final imageData = allImageData[index];
-                  
-                  return Container(
-                    margin: const EdgeInsets.all(AppSpacing.xs),
-                    child: Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: AppBorders.borderMD,
-                          child: Image.network(
-                            imageData['image']!,
-                            width: double.infinity,
-                            height: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: AppColors.gray100,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      _getComponentIcon(imageData['type']!),
-                                      size: AppIconSizes.xxxl,
-                                      color: AppColors.gray400,
-                                    ),
-                                    AppSpacing.verticalSM,
-                                    Text(
-                                      imageData['label']!,
-                                      style: AppTypography.bodySmall.copyWith(
-                                        color: AppColors.gray400,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Container(
-                                color: AppColors.gray100,
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.primary,
-                                    value: loadingProgress.expectedTotalBytes != null
-                                        ? loadingProgress.cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes!
-                                        : null,
-                                  ),
-                                ),
-                              );
-                            },
+  Widget _buildMainMenuImage(DailyMenuRecord item) {
+    return Container(
+      height: 200,
+      width: double.infinity,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(AppBorders.radiusMD),
+          topRight: Radius.circular(AppBorders.radiusMD),
+        ),
+        child: Image.network(
+          item.imageUrl,
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: AppColors.gray100,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.restaurant_menu,
+                    size: AppIconSizes.xxxl,
+                    color: AppColors.gray400,
+                  ),
+                  AppSpacing.verticalSM,
+                  Text(
+                    item.mainDish,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.gray400,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Container(
+              color: AppColors.gray100,
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.primary,
+                  value: loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes!
+                      : null,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildViewDishImagesButton(DailyMenuRecord item, AppLocalizations l10n) {
+    return InkWell(
+      onTap: () => _showDishImagesDialog(item, l10n),
+      borderRadius: AppBorders.borderSM,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.1),
+          borderRadius: AppBorders.borderSM,
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.3),
+            width: 1.0,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.photo_library,
+              size: AppIconSizes.sm,
+              color: AppColors.primary,
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            Text(
+              'View Individual Dish Images',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.primary,
+                fontWeight: AppTypography.semiBold,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: AppIconSizes.xs,
+              color: AppColors.primary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDishImagesDialog(DailyMenuRecord item, AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            constraints: const BoxConstraints(maxHeight: 600),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: AppBorders.borderLG,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Container(
+                  width: double.infinity,
+                  padding: AppSpacing.paddingMD,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(AppBorders.radiusLG),
+                      topRight: Radius.circular(AppBorders.radiusLG),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.restaurant_menu,
+                        color: AppColors.primary,
+                        size: AppIconSizes.md,
+                      ),
+                      AppSpacing.horizontalSM,
+                      Expanded(
+                        child: Text(
+                          item.mainDish,
+                          style: AppTypography.h6.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: AppTypography.bold,
                           ),
                         ),
-                        
-                        // Image label overlay
-                        Positioned(
-                          bottom: AppSpacing.sm,
-                          left: AppSpacing.sm,
-                          right: AppSpacing.sm,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.sm,
-                              vertical: AppSpacing.xs,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.7),
-                              borderRadius: AppBorders.borderSM,
-                            ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: Icon(
+                          Icons.close,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Dish Images List
+                Flexible(
+                  child: FutureBuilder<Map<String, String>>(
+                    future: _fetchDishImages(item),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Container(
+                          height: 200,
+                          child: Center(
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
+                                CircularProgressIndicator(color: AppColors.primary),
+                                AppSpacing.verticalSM,
                                 Text(
-                                  imageData['label']!,
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: AppTypography.semiBold,
-                                  ),
-                                ),
-                                Text(
-                                  imageData['type']!,
+                                  'Loading dish images...',
                                   style: AppTypography.bodySmall.copyWith(
-                                    color: Colors.white.withValues(alpha: 0.8),
+                                    color: AppColors.textSecondary,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-              
-              // Navigation Arrows
-              if (allImageData.length > 1) ...[
-                // Left Arrow
-                Positioned(
-                  left: AppSpacing.sm,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        final newIndex = currentImageIndex > 0 
-                            ? currentImageIndex - 1 
-                            : allImageData.length - 1;
-                        pageController.animateToPage(
-                          newIndex,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
                         );
-                      },
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back_ios_new,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                
-                // Right Arrow
-                Positioned(
-                  right: AppSpacing.sm,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        final newIndex = currentImageIndex < allImageData.length - 1 
-                            ? currentImageIndex + 1 
-                            : 0;
-                        pageController.animateToPage(
-                          newIndex,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.arrow_forward_ios,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
+                      }
+                      
+                      final dishImages = snapshot.data ?? <String, String>{};
+                      final dishList = <Map<String, String>>[];
+                      
+                      // Add dishes with their images
+                      if (item.mainDish.isNotEmpty) {
+                        dishList.add({
+                          'name': item.mainDish,
+                          'type': 'Main Dish',
+                          'image': dishImages['mainDish'] ?? item.imageUrl,
+                        });
+                      }
+                      
+                      if (item.salad.isNotEmpty) {
+                        dishList.add({
+                          'name': item.salad,
+                          'type': 'Salad',
+                          'image': dishImages['salad'] ?? '',
+                        });
+                      }
+                      
+                      if (item.accompaniment.isNotEmpty) {
+                        dishList.add({
+                          'name': item.accompaniment,
+                          'type': 'Side',
+                          'image': dishImages['accompaniment'] ?? '',
+                        });
+                      }
+                      
+                      for (int i = 0; i < item.accompaniments.length; i++) {
+                        dishList.add({
+                          'name': item.accompaniments[i],
+                          'type': 'Side',
+                          'image': dishImages['accompaniments_$i'] ?? '',
+                        });
+                      }
+                      
+                      if (item.dessert.isNotEmpty) {
+                        dishList.add({
+                          'name': item.dessert,
+                          'type': 'Dessert',
+                          'image': dishImages['dessert'] ?? '',
+                        });
+                      }
+                      
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        padding: AppSpacing.paddingMD,
+                        itemCount: dishList.length,
+                        itemBuilder: (context, index) {
+                          final dish = dishList[index];
+                          return _buildDishImageItem(dish);
+                        },
+                      );
+                    },
                   ),
                 ),
               ],
-              
-              // Page Indicators
-              if (allImageData.length > 1)
-                Positioned(
-                  bottom: AppSpacing.sm,
-                  right: AppSpacing.sm,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: AppSpacing.xs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.5),
-                      borderRadius: AppBorders.borderSM,
-                    ),
-                    child: Text(
-                      '${currentImageIndex + 1}/${allImageData.length}',
-                      style: AppTypography.bodySmall.copyWith(
-                        color: Colors.white,
-                        fontWeight: AppTypography.semiBold,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
+            ),
           ),
         );
       },
     );
   }
 
+  Widget _buildDishImageItem(Map<String, String> dish) {
+    final hasImage = dish['image']?.isNotEmpty == true;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: AppBorders.borderMD,
+        border: Border.all(
+          color: AppColors.border,
+          width: 1.0,
+        ),
+      ),
+      child: Row(
+        children: [
+          // Image
+          Container(
+            width: 80,
+            height: 80,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(AppBorders.radiusMD),
+                bottomLeft: Radius.circular(AppBorders.radiusMD),
+              ),
+              child: hasImage
+                  ? Image.network(
+                      dish['image']!,
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return _buildDishPlaceholder(dish);
+                      },
+                    )
+                  : _buildDishPlaceholder(dish),
+            ),
+          ),
+          
+          // Dish Info
+          Expanded(
+            child: Padding(
+              padding: AppSpacing.paddingMD,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    dish['name']!,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: AppTypography.semiBold,
+                    ),
+                  ),
+                  Text(
+                    dish['type']!,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  if (!hasImage)
+                    Text(
+                      'Image not available',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.gray400,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDishPlaceholder(Map<String, String> dish) {
+    return Container(
+      color: AppColors.gray100,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            _getComponentIcon(dish['type']!),
+            size: AppIconSizes.md,
+            color: AppColors.gray400,
+          ),
+        ],
+      ),
+    );
+  }
   IconData _getComponentIcon(String type) {
     switch (type.toLowerCase()) {
       case 'salad':

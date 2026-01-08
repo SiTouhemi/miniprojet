@@ -11,9 +11,9 @@ class ReservationConfig {
   /// - Pros: Direct query of reservation data, no additional documents
   /// - Cons: May require Firestore indexes for complex queries
   ///
-  /// FIXED: Changed to COUNTER_BASED to avoid Firestore index errors
+  /// TEMPORARY: Switch to QUERY_BASED if counter issues persist
   static const ValidationMethod validationMethod =
-      ValidationMethod.COUNTER_BASED;
+      ValidationMethod.QUERY_BASED; // TEMPORARY FIX - was COUNTER_BASED
 
   /// Maximum reservations per meal type per day
   static const int maxLunchReservationsPerDay = 1;

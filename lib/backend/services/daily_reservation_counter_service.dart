@@ -15,20 +15,27 @@ class DailyReservationCounterService {
       String userId, DateTime date) async {
     final dateStr =
         '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    final docId = '${userId}_$dateStr';
+    AppLogger.d('Counter document ID: $docId', tag: 'DailyReservationCounterService');
     return FirebaseFirestore.instance
         .collection('daily_reservation_counters')
-        .doc('${userId}_$dateStr');
+        .doc(docId);
   }
 
   /// Check if user can make a reservation for the specified meal type
   Future<Map<String, dynamic>> canMakeReservation(
       String userId, String mealType) async {
     try {
+      AppLogger.d('Checking if user $userId can make $mealType reservation', 
+          tag: 'DailyReservationCounterService');
+          
       final today = DateTime.now();
       final counterRef = await _getDailyCounterRef(userId, today);
       final counterDoc = await counterRef.get();
 
       if (!counterDoc.exists) {
+        AppLogger.d('No counter document exists - user can make reservation', 
+            tag: 'DailyReservationCounterService');
         // No reservations today - user can make reservation
         return {'success': true, 'canReserve': true};
       }
@@ -37,7 +44,12 @@ class DailyReservationCounterService {
       final lunchCount = (data['lunch_count'] as int?) ?? 0;
       final dinnerCount = (data['dinner_count'] as int?) ?? 0;
 
+      AppLogger.d('Current counts - lunch: $lunchCount, dinner: $dinnerCount', 
+          tag: 'DailyReservationCounterService');
+
       if (mealType == 'lunch' && lunchCount >= 1) {
+        AppLogger.w('User already has lunch reservation today', 
+            tag: 'DailyReservationCounterService');
         return {
           'success': false,
           'canReserve': false,
@@ -48,6 +60,8 @@ class DailyReservationCounterService {
       }
 
       if (mealType == 'dinner' && dinnerCount >= 1) {
+        AppLogger.w('User already has dinner reservation today', 
+            tag: 'DailyReservationCounterService');
         return {
           'success': false,
           'canReserve': false,
@@ -57,17 +71,18 @@ class DailyReservationCounterService {
         };
       }
 
+      AppLogger.d('User can make reservation', tag: 'DailyReservationCounterService');
       return {'success': true, 'canReserve': true};
     } catch (e) {
       AppLogger.e('Error checking daily reservation counter',
           error: e, tag: 'DailyReservationCounterService');
 
-      // On error, allow reservation but log the issue
+      // FIXED: On error, BLOCK reservation to prevent duplicates
       return {
-        'success': true,
-        'canReserve': true,
-        'warning':
-            'Could not verify daily reservation limit due to database issues.'
+        'success': false,
+        'canReserve': false,
+        'error': 'Unable to verify daily reservation limit. Please try again.',
+        'errorCode': 'COUNTER_CHECK_FAILED'
       };
     }
   }

@@ -164,7 +164,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                   stream: queryDailyMenuRecord(),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
-                      return Center(child: Text('Erreur: ${snapshot.error}'));
+                      return Center(child: Text('Error: ${snapshot.error}'));
                     }
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(
@@ -963,7 +963,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: Text('Ajouter un Menu'),
+              title: Text('Add Menu'),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -990,7 +990,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                     DropdownButtonFormField<String>(
                       value: selectedMealType,
                       decoration: InputDecoration(
-                        labelText: 'Type de repas *',
+                        labelText: 'Meal Type *',
                         border: OutlineInputBorder(),
                       ),
                       items: [
@@ -1170,7 +1170,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: Text('Annuler'),
+                  child: Text('Cancel'),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -1178,7 +1178,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content:
-                              Text('Veuillez sélectionner un plat principal'),
+                              Text('Please select a main dish'),
                           backgroundColor: Colors.red,
                         ),
                       );
@@ -1245,7 +1245,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                         Navigator.of(dialogContext).pop();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Menu ajouté avec succès'),
+                            content: Text('Menu added successfully'),
                             backgroundColor: Colors.green,
                           ),
                         );
@@ -1254,7 +1254,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Erreur: $e'),
+                            content: Text('Error: $e'),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -1263,7 +1263,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                   },
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF1C1284)),
-                  child: Text('Ajouter', style: TextStyle(color: Colors.white)),
+                  child: Text('Add', style: TextStyle(color: Colors.white)),
                 ),
               ],
             );
@@ -1333,7 +1333,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
             return StatefulBuilder(
               builder: (context, setDialogState) {
                 return AlertDialog(
-                  title: Text('Modifier le Menu'),
+                  title: Text('Edit Menu'),
                   content: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -1361,7 +1361,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                         DropdownButtonFormField<String>(
                           value: selectedMealType,
                           decoration: InputDecoration(
-                            labelText: 'Type de repas *',
+                            labelText: 'Meal Type *',
                             border: OutlineInputBorder(),
                           ),
                           items: [
@@ -1515,7 +1515,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(dialogContext).pop(),
-                      child: Text('Annuler'),
+                      child: Text('Cancel'),
                     ),
                     ElevatedButton(
                       onPressed: () async {
@@ -1577,7 +1577,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                             Navigator.of(dialogContext).pop();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Menu modifié avec succès'),
+                                content: Text('Menu updated successfully'),
                                 backgroundColor: Colors.green,
                               ),
                             );
@@ -1586,7 +1586,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Erreur: $e'),
+                                content: Text('Error: $e'),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -1595,7 +1595,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xFF1C1284)),
-                      child: Text('Modifier',
+                      child: Text('Update',
                           style: TextStyle(color: Colors.white)),
                     ),
                   ],
@@ -1755,7 +1755,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text('Annuler'),
+              child: Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -1765,7 +1765,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                     Navigator.of(dialogContext).pop();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Menu supprimé avec succès'),
+                        content: Text('Menu deleted successfully'),
                         backgroundColor: Colors.green,
                       ),
                     );
@@ -1774,7 +1774,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Erreur: $e'),
+                        content: Text('Error: $e'),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -1782,7 +1782,7 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                 }
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: Text('Supprimer', style: TextStyle(color: Colors.white)),
+              child: Text('Delete', style: TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -1792,13 +1792,13 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
 
   String _getDayName(int dayOfWeek) {
     const days = [
-      'Lundi',
-      'Mardi',
-      'Mercredi',
-      'Jeudi',
-      'Vendredi',
-      'Samedi',
-      'Dimanche'
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
     ];
     return days[dayOfWeek - 1];
   }

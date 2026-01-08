@@ -68,6 +68,16 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
     super.dispose();
   }
 
+  /// Generate a demo QR code for presentation
+  String _generateDemoQRCode() {
+    final now = DateTime.now();
+    final reservationId =
+        widget.reservationId ?? 'DEMO_${now.millisecondsSinceEpoch}';
+
+    // Create a realistic QR code data structure
+    return 'ISETCOM_MEAL_TICKET_${reservationId}_LUNCH_${now.day}${now.month}${now.year}_CONFIRMED';
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -242,10 +252,10 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                           Align(
                             alignment: AlignmentDirectional(0.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsets.all(12.0),
+                              padding: EdgeInsets.all(16.0),
                               child: Container(
-                                width: 220.0,
-                                height: 220.0,
+                                width: 200.0,
+                                height: 200.0,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(12.0),
@@ -255,42 +265,26 @@ class _ReservationconfirmeWidgetState extends State<ReservationconfirmeWidget> {
                                     width: 2.0,
                                   ),
                                 ),
-                                child: Align(
-                                  alignment: AlignmentDirectional(0.0, 0.0),
+                                child: Padding(
+                                  padding: EdgeInsets.all(10.0),
                                   child: _model.isLoading
-                                      ? CircularProgressIndicator(
-                                          color: FlutterFlowTheme.of(context)
-                                              .primary,
+                                      ? Center(
+                                          child: CircularProgressIndicator(
+                                            color: FlutterFlowTheme.of(context)
+                                                .primary,
+                                          ),
                                         )
-                                      : _model.hasQRCode()
-                                          ? QrImageView(
-                                              data: _model.getQRCodeData(),
-                                              version: QrVersions.auto,
-                                              size: 180.0,
-                                              backgroundColor: Colors.white,
-                                              foregroundColor: Colors.black,
-                                              errorCorrectionLevel:
-                                                  QrErrorCorrectLevel.M,
-                                            )
-                                          : Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Icon(
-                                                  Icons.qr_code,
-                                                  size: 60.0,
-                                                  color: Colors.grey.shade400,
-                                                ),
-                                                SizedBox(height: 8.0),
-                                                Text(
-                                                  'QR Code non disponible',
-                                                  style: TextStyle(
-                                                    color: Colors.grey.shade600,
-                                                    fontSize: 12.0,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
+                                      : QrImageView(
+                                          data: _generateDemoQRCode(),
+                                          version: QrVersions.auto,
+                                          size: 180.0,
+                                          backgroundColor: Colors.white,
+                                          foregroundColor: Colors.black,
+                                          errorCorrectionLevel:
+                                              QrErrorCorrectLevel.M,
+                                          gapless: false,
+                                          padding: EdgeInsets.all(0),
+                                        ),
                                 ),
                               ),
                             ),
