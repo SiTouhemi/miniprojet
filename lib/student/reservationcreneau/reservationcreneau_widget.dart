@@ -27,8 +27,8 @@ class ReservationcreneauWidget extends StatefulWidget {
 
 class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
   late ReservationcreneauModel _model;
-
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -45,8 +45,203 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _model.dispose();
     super.dispose();
+  }
+
+  /// Build individual time slot card to prevent scrolling issues
+  Widget _buildTimeSlotCard(TimeSlotRecord timeSlot) {
+    final startTime = timeSlot.startTime!;
+    final endTime = timeSlot.endTime!;
+    final availableSpots = timeSlot.maxCapacity - timeSlot.currentReservations;
+    final isSelected = _model.selectedTimeSlot?.reference == timeSlot.reference;
+
+    // Check if time slot is locked (past time or Sunday)
+    final isLocked = _isTimeSlotLocked(timeSlot);
+    final isSunday = timeSlot.date?.weekday == DateTime.sunday;
+
+    // Determine if slot is selectable
+    final isSelectable = !isLocked && !isSunday && availableSpots > 0;
+
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 8.0),
+      child: IgnorePointer(
+        ignoring: !isSelectable,
+        child: InkWell(
+          onTap: isSelectable
+              ? () {
+                  // Fix scrolling issue: Use a more targeted setState
+                  _model.selectedTimeSlot = timeSlot;
+                  _model.clearMessages();
+                  // Only call setState if the widget is still mounted
+                  if (mounted) {
+                    setState(() {
+                      // Only update the selection state, don't rebuild everything
+                    });
+                  }
+                }
+              : null,
+          borderRadius: BorderRadius.circular(12.0),
+          child: Container(
+            width: double.infinity,
+            constraints: BoxConstraints(
+              minHeight: 80.0,
+            ),
+            decoration: BoxDecoration(
+              color: isLocked || isSunday
+                  ? Color(0xFFF5F5F5) // Grey for locked slots
+                  : availableSpots > 0
+                      ? Colors.white
+                      : Color(0xFFF5F5F5),
+              boxShadow: isSelectable
+                  ? [
+                      BoxShadow(
+                        blurRadius: 4.0,
+                        color: isSelected ? Color(0x1A00A4E4) : Color(0x1A000000),
+                        offset: Offset(0.0, 1.0),
+                      )
+                    ]
+                  : [],
+              borderRadius: BorderRadius.circular(12.0),
+              border: Border.all(
+                color: isLocked || isSunday
+                    ? Color(0xFFBDBDBD) // Grey border for locked
+                    : availableSpots == 0
+                        ? Color(0xFFE74C3C)
+                        : isSelected
+                            ? Color(0xFF00A4E4)
+                            : Color(0xFFE0E0E0),
+                width: (isLocked || isSunday || availableSpots == 0 || isSelected)
+                    ? 2.0
+                    : 1.0,
+              ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(12.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Container(
+                        width: 36.0,
+                        height: 36.0,
+                        decoration: BoxDecoration(
+                          color: isLocked || isSunday
+                              ? Color(0xFFBDBDBD) // Grey icon for locked
+                              : isSelected
+                                  ? Color(0xFF00A4E4)
+                                  : Color(0xFF005BAA),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Align(
+                          alignment: AlignmentDirectional(0.0, 0.0),
+                          child: Icon(
+                            isLocked || isSunday
+                                ? Icons.lock // Lock icon for locked slots
+                                : Icons.schedule,
+                            color: Colors.white,
+                            size: 18.0,
+                          ),
+                        ),
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${DateFormat('HH:mm').format(startTime)} - ${DateFormat('HH:mm').format(endTime)}',
+                            style: FlutterFlowTheme.of(context).bodyLarge.override(
+                                  font: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  color: isLocked || isSunday
+                                      ? Color(0xFF9E9E9E) // Grey text for locked
+                                      : Color(0xFF005BAA),
+                                  fontSize: 16.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                          Text(
+                            isLocked
+                                ? 'Expired'
+                                : isSunday
+                                    ? 'Closed (Sunday)'
+                                    : availableSpots > 0
+                                        ? '${availableSpots} places available'
+                                        : 'Full',
+                            style: FlutterFlowTheme.of(context).bodySmall.override(
+                                  font: GoogleFonts.inter(),
+                                  color: isLocked || isSunday
+                                      ? Color(0xFF9E9E9E) // Grey text for locked
+                                      : availableSpots > 5
+                                          ? Color(0xFF00A855)
+                                          : availableSpots > 0
+                                              ? Color(0xFFFF6B35)
+                                              : Color(0xFFE74C3C),
+                                  fontSize: 12.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: (isLocked ||
+                                          isSunday ||
+                                          availableSpots == 0)
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ].divide(SizedBox(width: 12.0)),
+                  ),
+                  Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '${timeSlot.price.toStringAsFixed(2)} TND',
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              font: GoogleFonts.inter(
+                                fontWeight: FontWeight.w600,
+                              ),
+                              color: isLocked || isSunday
+                                  ? Color(0xFF9E9E9E) // Grey text for locked
+                                  : Color(0xFF005BAA),
+                              fontSize: 14.0,
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                      if (isSelected && isSelectable)
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 2.0),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF00A4E4),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Text(
+                            'Selected',
+                            style: FlutterFlowTheme.of(context).bodySmall.override(
+                                  font: GoogleFonts.inter(),
+                                  color: Colors.white,
+                                  fontSize: 10.0,
+                                  letterSpacing: 0.0,
+                                ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   /// Check if a time slot is locked (past time or Sunday)
@@ -249,6 +444,8 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
             body: SafeArea(
               top: true,
               child: SingleChildScrollView(
+                controller: _scrollController,
+                physics: ClampingScrollPhysics(), // Prevents over-scroll bounce
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
@@ -494,274 +691,193 @@ class _ReservationcreneauWidgetState extends State<ReservationcreneauWidget> {
                               );
                             }
 
+                            // Separate lunch and dinner slots
+                            final lunchSlots = allTimeSlots
+                                .where((slot) => slot.mealType == 'lunch')
+                                .toList();
+                            final dinnerSlots = allTimeSlots
+                                .where((slot) => slot.mealType == 'dinner')
+                                .toList();
+
                             return Column(
                               mainAxisSize: MainAxisSize.max,
-                              children: allTimeSlots.map((timeSlot) {
-                                final startTime = timeSlot.startTime!;
-                                final endTime = timeSlot.endTime!;
-                                final availableSpots = timeSlot.maxCapacity -
-                                    timeSlot.currentReservations;
-                                final isSelected =
-                                    _model.selectedTimeSlot?.reference ==
-                                        timeSlot.reference;
-
-                                // Check if time slot is locked (past time or Sunday)
-                                final isLocked = _isTimeSlotLocked(timeSlot);
-                                final isSunday =
-                                    timeSlot.date?.weekday == DateTime.sunday;
-
-                                // Determine if slot is selectable
-                                final isSelectable = !isLocked &&
-                                    !isSunday &&
-                                    availableSpots > 0;
-
-                                return Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 0.0, 16.0, 8.0),
-                                  child: IgnorePointer(
-                                    ignoring: !isSelectable,
-                                    child: InkWell(
-                                      onTap: isSelectable
-                                          ? () {
-                                              if (mounted) {
-                                                setState(() {
-                                                  _model.selectedTimeSlot =
-                                                      timeSlot;
-                                                  _model.clearMessages();
-                                                });
-                                              }
-                                            }
-                                          : null,
-                                      borderRadius: BorderRadius.circular(12.0),
-                                      child: Container(
-                                        width: double.infinity,
-                                        constraints: BoxConstraints(
-                                          minHeight: 80.0,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Lunch Section
+                                if (lunchSlots.isNotEmpty) ...[
+                                  Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        16.0, 0.0, 16.0, 0.0),
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 16.0, vertical: 12.0),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Color(0xFFFFF3E0),
+                                            Color(0xFFFFE0B2)
+                                          ],
+                                          begin: Alignment.centerLeft,
+                                          end: Alignment.centerRight,
                                         ),
-                                        decoration: BoxDecoration(
-                                          color: isLocked || isSunday
-                                              ? Color(
-                                                  0xFFF5F5F5) // Grey for locked slots
-                                              : availableSpots > 0
-                                                  ? Colors.white
-                                                  : Color(0xFFF5F5F5),
-                                          boxShadow: isSelectable
-                                              ? [
-                                                  BoxShadow(
-                                                    blurRadius: 4.0,
-                                                    color: isSelected
-                                                        ? Color(0x1A00A4E4)
-                                                        : Color(0x1A000000),
-                                                    offset: Offset(0.0, 1.0),
-                                                  )
-                                                ]
-                                              : [],
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
-                                          border: Border.all(
-                                            color: isLocked || isSunday
-                                                ? Color(
-                                                    0xFFBDBDBD) // Grey border for locked
-                                                : availableSpots == 0
-                                                    ? Color(0xFFE74C3C)
-                                                    : isSelected
-                                                        ? Color(0xFF00A4E4)
-                                                        : Color(0xFFE0E0E0),
-                                            width: (isLocked ||
-                                                    isSunday ||
-                                                    availableSpots == 0 ||
-                                                    isSelected)
-                                                ? 2.0
-                                                : 1.0,
+                                        borderRadius: BorderRadius.circular(12.0),
+                                        border: Border.all(
+                                          color: Color(0xFFFFB74D),
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 32.0,
+                                            height: 32.0,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFFF8F00),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              Icons.wb_sunny,
+                                              color: Colors.white,
+                                              size: 18.0,
+                                            ),
                                           ),
-                                        ),
-                                        child: Padding(
-                                          padding: EdgeInsets.all(12.0),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                children: [
-                                                  Container(
-                                                    width: 36.0,
-                                                    height: 36.0,
-                                                    decoration: BoxDecoration(
-                                                      color: isLocked ||
-                                                              isSunday
-                                                          ? Color(
-                                                              0xFFBDBDBD) // Grey icon for locked
-                                                          : isSelected
-                                                              ? Color(
-                                                                  0xFF00A4E4)
-                                                              : Color(
-                                                                  0xFF005BAA),
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                    child: Align(
-                                                      alignment:
-                                                          AlignmentDirectional(
-                                                              0.0, 0.0),
-                                                      child: Icon(
-                                                        isLocked || isSunday
-                                                            ? Icons
-                                                                .lock // Lock icon for locked slots
-                                                            : Icons.schedule,
-                                                        color: Colors.white,
-                                                        size: 18.0,
-                                                      ),
-                                                    ),
+                                          SizedBox(width: 12.0),
+                                          Text(
+                                            'Lunch Time Slots',
+                                            style: FlutterFlowTheme.of(context)
+                                                .titleMedium
+                                                .override(
+                                                  font: GoogleFonts.interTight(
+                                                    fontWeight: FontWeight.w600,
                                                   ),
-                                                  Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.max,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        '${DateFormat('HH:mm').format(startTime)} - ${DateFormat('HH:mm').format(endTime)}',
-                                                        style: FlutterFlowTheme
-                                                                .of(context)
-                                                            .bodyLarge
-                                                            .override(
-                                                              font: GoogleFonts
-                                                                  .inter(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                              ),
-                                                              color: isLocked ||
-                                                                      isSunday
-                                                                  ? Color(
-                                                                      0xFF9E9E9E) // Grey text for locked
-                                                                  : Color(
-                                                                      0xFF005BAA),
-                                                              fontSize: 16.0,
-                                                              letterSpacing:
-                                                                  0.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                            ),
-                                                      ),
-                                                      Text(
-                                                        isLocked
-                                                            ? 'Expired'
-                                                            : isSunday
-                                                                ? 'Closed (Sunday)'
-                                                                : availableSpots >
-                                                                        0
-                                                                    ? '${availableSpots} places available'
-                                                                    : 'Full',
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodySmall
-                                                                .override(
-                                                                  font: GoogleFonts
-                                                                      .inter(),
-                                                                  color: isLocked ||
-                                                                          isSunday
-                                                                      ? Color(
-                                                                          0xFF9E9E9E) // Grey text for locked
-                                                                      : availableSpots >
-                                                                              5
-                                                                          ? Color(
-                                                                              0xFF00A855)
-                                                                          : availableSpots > 0
-                                                                              ? Color(0xFFFF6B35)
-                                                                              : Color(0xFFE74C3C),
-                                                                  fontSize:
-                                                                      12.0,
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                  fontWeight: (isLocked ||
-                                                                          isSunday ||
-                                                                          availableSpots ==
-                                                                              0)
-                                                                      ? FontWeight
-                                                                          .bold
-                                                                      : FontWeight
-                                                                          .normal,
-                                                                ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ].divide(SizedBox(width: 12.0)),
-                                              ),
-                                              Column(
-                                                mainAxisSize: MainAxisSize.max,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.end,
-                                                children: [
-                                                  Text(
-                                                    '${timeSlot.price.toStringAsFixed(2)} TND',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          font:
-                                                              GoogleFonts.inter(
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                          ),
-                                                          color: isLocked ||
-                                                                  isSunday
-                                                              ? Color(
-                                                                  0xFF9E9E9E) // Grey text for locked
-                                                              : Color(
-                                                                  0xFF005BAA),
-                                                          fontSize: 14.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                                  ),
-                                                  if (isSelected &&
-                                                      isSelectable)
-                                                    Container(
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                              horizontal: 8.0,
-                                                              vertical: 2.0),
-                                                      decoration: BoxDecoration(
-                                                        color:
-                                                            Color(0xFF00A4E4),
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(8.0),
-                                                      ),
-                                                      child: Text(
-                                                        'Selected',
-                                                        style: FlutterFlowTheme
-                                                                .of(context)
-                                                            .bodySmall
-                                                            .override(
-                                                              font: GoogleFonts
-                                                                  .inter(),
-                                                              color:
-                                                                  Colors.white,
-                                                              fontSize: 10.0,
-                                                              letterSpacing:
-                                                                  0.0,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                ],
-                                              ),
-                                            ],
+                                                  color: Color(0xFFE65100),
+                                                  letterSpacing: 0.0,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
                                           ),
-                                        ),
+                                        ],
                                       ),
                                     ),
                                   ),
-                                );
-                              }).toList(),
+                                  SizedBox(height: 8.0),
+                                  ...lunchSlots.map((timeSlot) =>
+                                      _buildTimeSlotCard(timeSlot)),
+                                ],
+
+                                // Separator between lunch and dinner
+                                if (lunchSlots.isNotEmpty && dinnerSlots.isNotEmpty) ...[
+                                  SizedBox(height: 24.0),
+                                  Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        16.0, 0.0, 16.0, 0.0),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Container(
+                                            height: 1.0,
+                                            color: Color(0xFFE0E0E0),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 16.0),
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 12.0, vertical: 6.0),
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFF5F5F5),
+                                              borderRadius:
+                                                  BorderRadius.circular(16.0),
+                                              border: Border.all(
+                                                color: Color(0xFFE0E0E0),
+                                                width: 1.0,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              '• • •',
+                                              style: TextStyle(
+                                                color: Color(0xFF9E9E9E),
+                                                fontSize: 12.0,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Container(
+                                            height: 1.0,
+                                            color: Color(0xFFE0E0E0),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: 24.0),
+                                ],
+
+                                // Dinner Section
+                                if (dinnerSlots.isNotEmpty) ...[
+                                  Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        16.0, 0.0, 16.0, 0.0),
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 16.0, vertical: 12.0),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Color(0xFFE8EAF6),
+                                            Color(0xFFC5CAE9)
+                                          ],
+                                          begin: Alignment.centerLeft,
+                                          end: Alignment.centerRight,
+                                        ),
+                                        borderRadius: BorderRadius.circular(12.0),
+                                        border: Border.all(
+                                          color: Color(0xFF9575CD),
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 32.0,
+                                            height: 32.0,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFF673AB7),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              Icons.nightlight_round,
+                                              color: Colors.white,
+                                              size: 18.0,
+                                            ),
+                                          ),
+                                          SizedBox(width: 12.0),
+                                          Text(
+                                            'Dinner Time Slots',
+                                            style: FlutterFlowTheme.of(context)
+                                                .titleMedium
+                                                .override(
+                                                  font: GoogleFonts.interTight(
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                  color: Color(0xFF4527A0),
+                                                  letterSpacing: 0.0,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8.0),
+                                  ...dinnerSlots.map((timeSlot) =>
+                                      _buildTimeSlotCard(timeSlot)),
+                                ],
+                              ],
                             );
                           },
                         ),
