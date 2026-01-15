@@ -718,36 +718,36 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                 ),
                 SizedBox(height: 8.0),
               ],
-              // Price
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      accentColor.withOpacity(0.1),
-                      accentColor.withOpacity(0.05)
-                    ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.attach_money, color: accentColor, size: 18.0),
-                    Text(
-                      '${menu.price.toStringAsFixed(2)} DT',
-                      style: FlutterFlowTheme.of(context).titleMedium.override(
-                            fontFamily: 'Inter Tight',
-                            color: accentColor,
-                            letterSpacing: 0.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
+              // Price - Hidden for staff view
+              // Container(
+              //   padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              //   decoration: BoxDecoration(
+              //     gradient: LinearGradient(
+              //       colors: [
+              //         accentColor.withOpacity(0.1),
+              //         accentColor.withOpacity(0.05)
+              //       ],
+              //       begin: Alignment.centerLeft,
+              //       end: Alignment.centerRight,
+              //     ),
+              //     borderRadius: BorderRadius.circular(8.0),
+              //   ),
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.center,
+              //     children: [
+              //       Icon(Icons.attach_money, color: accentColor, size: 18.0),
+              //       Text(
+              //         '${menu.price.toStringAsFixed(2)} DT',
+              //         style: FlutterFlowTheme.of(context).titleMedium.override(
+              //               fontFamily: 'Inter Tight',
+              //               color: accentColor,
+              //               letterSpacing: 0.0,
+              //               fontWeight: FontWeight.bold,
+              //             ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
             ],
           ),
         ],
@@ -942,15 +942,16 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '${menu.price.toStringAsFixed(2)} DT',
-                    style: FlutterFlowTheme.of(context).titleSmall.override(
-                          fontFamily: 'Inter Tight',
-                          color: Color(0xFF00A4E4),
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
+                  // Price - Hidden for staff view
+                  // Text(
+                  //   '${menu.price.toStringAsFixed(2)} DT',
+                  //   style: FlutterFlowTheme.of(context).titleSmall.override(
+                  //         fontFamily: 'Inter Tight',
+                  //         color: Color(0xFF00A4E4),
+                  //         letterSpacing: 0.0,
+                  //         fontWeight: FontWeight.bold,
+                  //       ),
+                  // ),
                   Container(
                     padding:
                         EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
@@ -1211,32 +1212,32 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                       maxLines: 2,
                     ),
                     SizedBox(height: 12.0),
-                    // Display calculated price
-                    Container(
-                      padding: EdgeInsets.all(12.0),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFF0F8FF),
-                        borderRadius: BorderRadius.circular(8.0),
-                        border: Border.all(color: Color(0xFF1C1284)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Menu Price:',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            '${totalPrice.toStringAsFixed(2)} DT',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18.0,
-                              color: Color(0xFF1C1284),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    // Display calculated price - Hidden for staff view
+                    // Container(
+                    //   padding: EdgeInsets.all(12.0),
+                    //   decoration: BoxDecoration(
+                    //     color: Color(0xFFF0F8FF),
+                    //     borderRadius: BorderRadius.circular(8.0),
+                    //     border: Border.all(color: Color(0xFF1C1284)),
+                    //   ),
+                    //   child: Row(
+                    //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //     children: [
+                    //       Text(
+                    //         'Menu Price:',
+                    //         style: TextStyle(fontWeight: FontWeight.bold),
+                    //       ),
+                    //       Text(
+                    //         '${totalPrice.toStringAsFixed(2)} DT',
+                    //         style: TextStyle(
+                    //           fontWeight: FontWeight.bold,
+                    //           fontSize: 18.0,
+                    //           color: Color(0xFF1C1284),
+                    //         ),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
                     SizedBox(height: 24.0),
                     SwitchListTile(
                       title: Text('Available'),
@@ -1861,18 +1862,19 @@ class _DailyMenuManagementWidgetState extends State<DailyMenuManagementWidget> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Price',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text('${menu.price.toStringAsFixed(2)} TND',
-                            style: TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF00A4E4))),
-                      ],
-                    ),
+                    // Price - Hidden for staff view
+                    // Column(
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //   children: [
+                    //     Text('Price',
+                    //         style: TextStyle(fontWeight: FontWeight.bold)),
+                    //     Text('${menu.price.toStringAsFixed(2)} TND',
+                    //         style: TextStyle(
+                    //             fontSize: 18.0,
+                    //             fontWeight: FontWeight.bold,
+                    //             color: Color(0xFF00A4E4))),
+                    //   ],
+                    // ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [

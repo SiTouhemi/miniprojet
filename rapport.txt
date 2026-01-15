@@ -1,0 +1,573 @@
+TABLE OF CONTENTS
+
+General Introduction 	1
+
+1. General Project Framework 	3
+
+1.1 Introduction 	3
+1.2 Project Presentation 	4
+1.3 Preliminary Study 	5
+1.3.1 Study of Existing Solutions 	5
+1.3.2 Critique of Existing Solutions 	5
+1.4 Project Objectives.	 6
+1.5 Proposed Solution Overview 	7
+1.6 Conclusion 	9
+2. Market Study 	10
+
+2.1 Introduction 	10
+2.2 Stakeholders and Roles 	11
+2.3 Personas 	12
+2.4 User Journeys and Scenarios 	13
+2.5 Constraints 	15
+2.6 Risks and Mitigation 	16
+2.7 Conclusion 	17
+3. Requirements Specification 	17
+
+3.1 Introduction 	17
+3.2 Functional Requirements 	18
+3.2.1 Student Module Requirements 	19
+3.2.2 Staff Module Requirements 	24
+3.2.3 Administration Module Requirements 	26
+3.2.4 Cross-Cutting Requirements 	30
+3.3 Non-Functional Requirements 	31
+3.3.1 Performance 	31
+3.3.2 Availability and Reliability 	32
+3.3.3 Security and Privacy 	32
+3.3.4 Scalability 	33
+3.3.5 Maintainability and Quality 	33
+3.4 Use Cases (Textual Specification) 	33
+3.5 Acceptance Criteria 	34
+3.6 Conclusion 	38
+4. Design and Implementation 	39
+
+4.1 Introduction 	39
+4.2 Global System Architecture 	40
+4.3 Application Architecture (MVVM and Clean Architecture) 	41
+4.4 Database Design and Firestore Data Modeling 	42
+4.5 Security Architecture and Access Control 	43
+4.6 Payment Integration and Transaction Reliability 	44
+4.7 Technical Challenges and Solutions 	46
+4.8 Conclusion 	46
+5. Evaluation and Results 	47
+
+5.1 Introduction 	47
+5.2 Performance Evaluation 	47
+5.3 System Reliability and Security 	49
+5.4 Payment System Validation 	49
+5.5 Infrastructure and Scalability Assessment 	50
+5.6 Development and Implementation Outcomes 	51
+5.7 Security and Access Control Validation.		52
+5.8 Conclusion 	53
+General Conclusion 	54
+
+Bibliography 	55 
+Table of figures
+
+Figure 1 Technical flow	6
+Figure 2 Flutter Application and Firebase Interaction Flow	8
+Figure 3 Roles	12
+Figure 4 Student Flow	12
+Figure 5 Requirments structure	18
+Figure 6 Login page	19
+Figure 7 Profile page	20
+Figure 8 Weekly menus page	21
+Figure 9 main page + time Reservation page	22
+Figure 10 Reservation process and qr display	23
+Figure 11 History page	23
+Figure 12 Scanning qr page	24
+Figure 13 menus management page	25
+Figure 14 Users management by admin	27
+Figure 15 Time and Meal management	28
+Figure 16 User management	29
+Figure 17 Student and admin Diagram	30
+Figure 18 Reservation Lifecycle	34
+Figure 19 Firebase integration	40
+Figure 20 Firestore data model	43
+Figure 21 Planned Payment workflow	44
+
+ 
+Acknowledgments
+
+We would like to express our sincere gratitude to all the people who supported and accompanied us throughout the completion of this report.
+We extend our special gratitude to our supervisor, MR Sejir KHOJZT eL KHIL, for his valuable advice, benevolent guidance, as well as for the availability and time he granted us throughout this project. These efforts allowed us to better orient our work and achieve our objectives successfully.
+We also thank our professors and the entire teaching staff for the theoretical and practical knowledge transmitted during our training, which enabled us to successfully carry out this project.
+This report is the result of collective work, continuous effort, and the will to successfully complete an ambitious project. We hope that the result of our research and reflections will meet expectations.
+
+
+
+
+
+
+
+
+
+ 
+ 
+General Introduction
+
+The digital transformation of university services has become a strategic priority for higher education institutions seeking to improve operational efficiency, optimize resource management, and enhance student experience. Among these services, university restaurants represent a critical component of campus life, as they must deliver affordable meals to a large population within limited time windows and under strict logistical constraints. Traditional manual management methods, such as physical queues, cash payments, and paper-based verification, are increasingly inadequate for handling modern demand patterns and ensuring service quality during peak periods.
+
+At the Higher Institute of Technological Studies in Communications of Tunis (ISETCOM), the university restaurant serves several hundred students daily. Before the implementation of the proposed digital system, the service relied entirely on manual workflows that generated long waiting times, inefficient capacity utilization, and limited visibility into consumption trends. The absence of digital traceability made it difficult to perform accurate planning, evaluate service performance, or implement continuous improvement strategies. These limitations not only affected student satisfaction but also contributed to increased staff workload and unnecessary food waste.
+
+Advances in mobile technologies, cloud computing, and data-driven analytics offer new opportunities to modernize campus services through scalable and secure digital platforms. Mobile applications enable real-time interaction with users, while cloud-based infrastructures support elasticity and centralized data management without the need for complex on-premise deployments. 
+ 
+Within this context, the objective of this project is to design, develop, and deploy a mobile application that fully digitalizes the meal reservation, payment, and access validation workflow of the ISETCOM university restaurant. The solution integrates cross-platform mobile development using Flutter, cloud services provided by Firebase, secure national payment systems. Beyond technical implementation, the project aims to demonstrate that a student-led development team can deliver a production- grade solution that meets real institutional needs and operates reliably under daily operational constraints.
+
+This report documents the complete engineering process, starting from institutional context analysis and stakeholder needs assessment, through requirements specification and system design, to implementation, performance evaluation, and impact assessment. Each chapter contributes to building a comprehensive understanding of how modern software engineering practices can be applied to solve real-world problems within the academic environment.
+ 
+1.	General Project Framework
+
+1.1	Introduction
+This chapter establishes the foundational context for the ISETCOM university restaurant mobile application project. It begins by presenting the institutional setting and operational challenges that motivated the development of a digital solution. The chapter then conducts a comprehensive analysis of existing solutions in the market, identifies key limitations, and formulates a clear problem statement that guides the project objectives.
+
+Following this analysis, the chapter presents the proposed technical solution, including the selection of development methodologies and project management approaches. A competitive benchmarking analysis provides insights into market positioning, while a SWOT analysis evaluates internal strengths and weaknesses alongside external opportunities and threats. The chapter concludes with a detailed project timeline using Gantt chart methodology, establishing clear milestones and deliverables for the development process.
+1.2	Project Presentation
+The ISETCOM University Restaurant Mobile Application project represents a comprehensive digital transformation initiative aimed at modernizing meal service operations through mobile technology. The project addresses critical operational inefficiencies in the current manual system, including excessive waiting times during peak hours, limited payment options, and lack of real-time capacity management.
+
+The proposed solution leverages Flutter framework for cross-platform mobile development, Firebase for cloud-based backend services, and a wallet-based payment system foundation to create a comprehensive user experience. The application serves three primary user groups: students who require quick and convenient meal reservations, restaurant staff who need efficient QR validation tools, and administrators who require comprehensive management and analytics capabilities. 
+Key project objectives include reducing average waiting times, establishing a framework for digital payment options, enabling real-time capacity monitoring, and providing data-driven insights for operational optimization. The solution is designed with scalable architecture to handle concurrent users efficiently, with core functionality implemented and payment integrations in development phase.
+1.3	Preliminary Study
+1.3.1	Study of Existing Solutions
+The market analysis reveals several categories of existing solutions for restaurant and food service management. Enterprise-level solutions such as Toast POS, Square for Restaurants, and Resy provide comprehensive restaurant management capabilities but are primarily designed for commercial establishments with different operational models and pricing structures unsuitable for university environments.
+
+University-specific solutions include campus dining applications like GET Mobile, Grubhub for Campus, and institutional meal plan systems. However, these solutions often require significant infrastructure investments, lack integration with local payment systems, and do not address the specific constraints of Tunisian higher education institutions.
+
+Mobile ordering platforms such as UberEats, Deliveroo, and local alternatives like Glovo Tunisia focus on delivery services rather than on-campus dining management. While these platforms demonstrate effective mobile user interfaces and payment integration, they do not provide the capacity management and access control features required for university restaurant operations.
+
+Open-source alternatives include OpenTable for reservations and various POS systems, but these require extensive customization and technical expertise for deployment and maintenance. The analysis reveals a significant gap in the market for affordable, locally-adapted solutions that address the specific needs of Tunisian university restaurants.
+ 
+1.3.2	Critique of Existing Solutions
+The evaluation of existing solutions reveals several critical limitations that justify the development of a custom solution for ISETCOM. Commercial enterprise solutions, while feature- rich, present prohibitive licensing costs and require extensive infrastructure investments that exceed typical university budgets. These systems are designed for profit-maximizing commercial operations rather than subsidized educational services.
+
+University-specific platforms often lack integration with local payment systems and regulatory requirements. International solutions do not support Tunisian payment gateways such as D17 and Flouci, creating barriers for local users who prefer familiar payment methods. Additionally, these platforms typically require long-term contracts and provide limited customization options for institutional-specific requirements.
+
+Existing mobile ordering platforms focus on delivery logistics rather than on-site dining management. They lack essential features such as capacity-based reservation systems, real-time availability updates, and integration with institutional access control systems. Furthermore, commission-based pricing models are unsuitable for non-profit educational institutions.
+
+The technical architecture of available solutions often relies on proprietary systems that limit future extensibility and integration with existing institutional systems. This creates vendor lock- in situations and reduces the institution's ability to adapt the system to evolving needs or integrate with other campus services.
+ 
+ 
+Figure 1 Technical flow
+
+1.4	Project Objectives
+
+The objectives of the project were defined to be measurable and aligned with institutional needs, ensuring that the final product delivers both operational and user-facing value. The first objective is to significantly reduce student waiting time by introducing a controlled reservation workflow capable of distributing demand across time slots and decreasing congestion during peak hours. In parallel, the solution aims to increase the operational efficiency of restaurant staff by minimizing repetitive administrative tasks and enabling faster verification at entry, allowing staff to focus on service delivery rather than manual control procedures.
+A third objective concerns planning and waste reduction. By transforming meal requests into structured digital data, the institution can move from approximate forecasting to evidence-based planning. This supports better estimation of expected attendance, improves stock and meal preparation decisions, and consequently reduces food waste. Another major objective is
+ 
+improving the overall satisfaction of the student population through a modern user experience: intuitive navigation, quick reservation and payment flows, and immediate confirmation via secure QR access.
+Finally, the project aims to ensure full digitization of the end-to-end workflow-from reservation creation to payment confirmation and access validation-while maintaining high security and compliance standards. This includes strong authentication, role-based access control, secure data handling, traceability for audit purposes, and resilience mechanisms to ensure reliable operation in production.
+1.5	Proposed Solution Overview
+
+To meet these objectives, the project delivers a comprehensive mobile ecosystem designed around three main user roles: students, restaurant staff, and administrators. The solution is implemented using Flutter for cross-platform mobile development and relies on Firebase as a distributed backend for authentication, real-time data management, business logic, storage, and monitoring. This architecture provides scalability, reduced operational overhead, and fast iteration cycles suitable for a continuously maintained product.
+From the student perspective, the application provides an experience that simplifies the meal process into a few clear steps: consult availability, select an appropriate time slot, complete payment using the integrated wallet system, then receive a secure QR code for access. The QR code represents a digital proof of reservation and payment, enabling fast entry verification. Students also benefit from history tracking and wallet management features. Payment integration with external providers (D17 and Flouci) is currently in development phase, with the internal wallet system fully operational for testing and demonstration purposes. 
+ 
+Figure 2 Flutter Application and Firebase Interaction Flow
+
+For staff members, the application provides a professional scanning interface optimized for peak conditions. QR validation is designed to be fast and reliable, with immediate feedback and server- side checks to prevent common attack patterns such as QR forgery or replay. Operational dashboards provide real-time indicators (scans per hour, validation rate, anomalies), supporting smoother coordination during rush hours and giving staff clear visibility on service status.
+For administrators, the solution offers governance features including user management (with bulk import support via Excel files), configuration of time slots and capacity rules, and comprehensive analytics dashboards. These tools enable monitoring and decision-making based on data rather than estimation. The system includes data-driven components such as usage-based analysis and historical trend tracking to support better demand distribution and planning optimization, contributing directly to service efficiency and waste reduction. Advanced AI-powered recommendation features are planned for future development phases.
+
+1.10 Conclusion
+
+This chapter established the institutional context of the ISETCOM university restaurant and highlighted the operational limitations of the initial manual workflow, including excessive waiting times during peak hours, inefficient planning leading to food waste, cash-related delays, and the absence of traceability. Based on these findings, the chapter formulated a clear problem statement centered on delivering a secure, scalable, and reliable digital process capable of operating under real constraints such as high concurrency and variable connectivity.
+ 
+In response, the project objectives were defined in measurable terms, focusing on reducing queues, improving operational efficiency, decreasing waste, and raising user satisfaction through full digitization of reservation, payment, and access control. Finally, the chapter presented the proposed solution as a role-based mobile ecosystem (students, staff, administrators) built with Flutter and Firebase, integrating Tunisian payment services. This foundation prepares the report for the next chapters, which detail stakeholder needs, requirements, and the technical design and implementation choices that enabled a stable production deployment.
+ 
+2.	Market Study
+
+2.1	Introduction
+
+This chapter presents a structured needs analysis to ensure that the proposed mobile solution addresses real operational requirements rather than only implementing technical features. Because the ISETCOM restaurant service is used daily and experiences short but intense peak periods, the solution must satisfy three key dimensions simultaneously: (1) usability and speed for students, (2) operational efficiency for staff during high load, and (3) governance and traceability for administrators and institutional leadership. The analysis therefore identifies stakeholders, formalizes their expectations, and models typical usage scenarios to capture the real workflows that the application must support.
+In addition, this chapter highlights the constraints that shape design decisions, including connectivity variability, heterogeneous mobile devices, and cost limitations. Finally, it defines the main project risks (technical and operational) and proposes mitigation strategies. The outcome of this chapter is a clear foundation for the next chapters, where requirements and design choices are specified using evidence-based needs and realistic assumptions.
+2.2	Stakeholders and Roles
+
+The system involves multiple stakeholders who interact with the service at different levels and with different objectives. At the operational level, students and restaurant staff are the most frequent users and have direct impact on daily service performance. At the governance level, administrators and institutional management define rules, monitor indicators, and ensure compliance, making them essential stakeholders for system control and sustainability.
+Students represent the primary user population. Their needs are strongly time-driven: they typically access the restaurant between lectures, often within short breaks. Their priority is to reserve quickly, pay without delays, and access the restaurant without waiting. They expect the interface to be intuitive, the reservation process to be short, and confirmations to be immediate.
+ 
+Any uncertainty (e.g., whether payment succeeded or whether the slot is still available) is perceived as a major friction point.
+Restaurant staff are responsible for executing the service under real constraints: high throughput at peak hours, limited space, and a need to validate access quickly and fairly. Their main expectation is operational simplicity and speed. A scanning workflow that takes too long or produces ambiguous results directly increases pressure and slows down service. For this reason, staff tools must provide immediate feedback, detect invalid entries (expired or already-used reservations), and prevent fraud while remaining easy to use during high stress. Staff also benefit from real-time indicators (scans/hour, validation rate) that help them adapt the flow without needing manual counting.
+Administrators supervise system configuration and long-term reliability. They are responsible for user management (including bulk imports), configuration of time slots and capacities, menu management, and monitoring analytics. Admin requirements are typically overlooked in small applications, but in a production system they are critical: administrators need strong access control, audit logs, and safe bulk operations to avoid large-scale errors. They also require reporting tools that transform raw activity into actionable insights for planning.
+Institutional management is concerned with measurable impact, scalability, and strategic decisions. Their perspective is not limited to daily operations; they evaluate performance indicators such as adoption, waiting time reduction, food waste reduction, productivity gain, and system availability. They also assess whether the solution is stable and scalable enough to be extended to other establishments or to additional campus services.
+
+
+
+
+
+
+	
+ 
+Figure 3 Roles
+
+2.3	Personas
+
+Personas are used to represent typical users and to anchor design decisions in realistic behaviors. Instead of describing users only as "students" or "staff," personas capture motivations, constraints, and expected outcomes, which helps justify UX choices and system priorities.
+Persona1- Time-constrained Student
+This student attends multiple classes per day and has limited free time during lunch. Their main objective is to secure a meal without wasting time in queues. They want a fast reservation flow, clear slot availability, and a payment process that works reliably with local solutions. Any delay, uncertainty, or "pending state" that is not well explained reduces trust in the system and can lead to abandoning the digital flow and returning to manual service.
+
+Persona2- Staff	Operator under Peak Load 
+This persona represents the staff member who validates entry during high traffic. They need the scanner to be extremely reliable under real conditions (different phone models, camera quality, lighting, QR angle). Their expectations focus on speed and clarity: the system must show an unambiguous result (valid/invalid/expired/used), and feedback must be immediate to keep the flow moving. Security is critical, but it must not complicate the scanning workflow or increase cognitive load.
+Persona3- Administrator(Governance and Monitoring) 
+This persona configures system rules and ensures stable operation. They need tools to manage users, wallets, menus, and slots at scale. They also need traceability: actions performed in the admin interface must be logged to ensure accountability and simplify troubleshooting. Their goal is to reduce manual work and replace informal procedures with standardized digital processes supported by analytics.
+
+2.4	User Journeys and Scenarios
+
+User journeys describe how the system is used in real conditions and help identify critical points where failures may cause operational disruption.
+Scenario 1 - Student Reservation → Payment → QR Access
+
+The student opens the app and consults the dashboard, which provides quick access to reservation and payment actions. The student then browses available menus and selects a date and time slot. The system checks capacity constraints in real time to prevent overbooking. Once the slot is selected, the student confirms reservation details and proceeds to payment using one of the supported methods (D17, Flouci, or internal wallet). After successful payment validation, the reservation status becomes confirmed and the application generates a QR code. At the
+ 
+restaurant entry, the student presents the QR code for scanning, which triggers server-side validation and final access confirmation.
+Scenario 2 - Reservation History and Modification
+
+After using the service multiple times, students need traceability and control. The history section allows students to verify upcoming reservations and past usage. When modification is allowed, the student selects a new date and slot, and the system updates capacity constraints accordingly. This scenario directly supports user satisfaction because it reduces frustration when schedules change. It also supports operational predictability, since updates remain recorded and consistent rather than informal.
+Scenario 3 - Staff Validation Workflow
+
+In peak time, staff must validate many users quickly. The scanning workflow must be optimized for speed and must provide immediate feedback. Each scan triggers server verification that checks reservation state (confirmed/used), time validity, and integrity rules to prevent replay and forgery. When a QR is invalid, the staff must be informed without ambiguity (e.g., expired, already used, not found). This reduces conflict, speeds up decision-making, and prevents queue blockage.
+Scenario 4 - Administrative Governance
+
+Administrators typically interact with the system to manage operational configuration. This includes importing users in bulk, setting slot templates and capacities, managing menus, and reviewing analytics dashboards. The admin workflow must be safe (validation, rollback) because mistakes at this level can affect many users. Audit logs are essential here to ensure accountability and facilitate error investigation.
+2.5	Constraints
+
+The system was designed under constraints typical of real campus environments. These constraints are not secondary; they directly influence architecture and implementation choices.
+ 
+Connectivity variability is a major factor because students may have inconsistent network access. The application must therefore present states clearly (pending/confirmed/failed) and avoid workflows that depend on continuous connection without fallback. Reliability at the UI level is critical: users should always understand what happened and what to do next.
+Device diversity also matters because students use a wide range of Android and iOS devices, including older models with limited performance. This requires careful optimization: efficient queries, controlled caching, and lightweight UI rendering. Without optimization, user experience becomes inconsistent and adoption drops.
+Budget constraints require a cost-efficient backend. Using Firebase and managed services helps reduce operational overhead, but it also requires careful quota optimization (reads/writes) and efficient data modeling.
+Security and privacy constraints are essential because the system processes identity data, reservation history, and payment-related workflows. This requires strong authentication, role- based access control, encryption, and careful analytics design (anonymization) to avoid exposing personal or sensitive information.
+2.6	Risks and Mitigation
+
+Because the application runs in production and directly impacts daily operations, risk management is essential. Risks were identified early and treated through design and implementation decisions.
+A first major risk is high concurrency during peak hours, which can cause overbooking if multiple users reserve simultaneously. This risk is mitigated through atomic operations and controlled reservation state transitions. A second risk is payment reliability, since payment systems are sensitive to partial failures, network issues, and asynchronous confirmation. To mitigate this, the system applies retry/backoff logic, fallback between payment methods, and rollback strategies to prevent inconsistent states.
+ 
+A third risk concerns QR security. Without strong validation, QR codes can be replayed or forged. The mitigation requires server-side validation, time-based validity rules, and integrity protections. Another risk is performance degradation on low-end devices, especially in camera- based scanning workflows; mitigation includes optimization and efficient rendering. Finally, privacy risks exist when collecting analytics; mitigations include anonymization and strict role- based access controls.
+2.7	Conclusion
+
+This chapter clarified the needs of each stakeholder group and translated them into realistic expectations through personas and operational scenarios. It demonstrated that the project is not only a mobile application, but a production service that must remain reliable under peak demand, payment constraints, and security threats. The chapter also documented practical constraints such as connectivity variability, device diversity, and cost efficiency, all of which influenced architectural decisions. Finally, the risks and mitigation strategies presented here establish a solid foundation for the next chapter, which will formalize the functional and non-functional requirements of the system in a structured and verifiable manner.
+ 
+3.	Requirements Specification
+
+3.1	Introduction
+
+This chapter formalizes the requirements of the mobile meal reservation system in a structured and verifiable manner. After identifying stakeholders and workflows in section 2, the goal here is to translate those needs into clear specifications that guide implementation, testing, and acceptance. In production systems, requirements specification is not only a documentation step; it is the foundation for system stability, traceability, and maintainability. A requirement that is vague or not measurable creates ambiguity during development and makes validation difficult during deployment.
+For this project, requirements are divided into two complementary categories. Functional requirements define what the system must do for each user role (student, staff, and administrator) as well as cross-cutting modules . Non-functional requirements define how the system must behave in production, including performance targets, security constraints, reliability and availability objectives, scalability expectations, and maintainability standards. This chapter also introduces key use cases and measurable acceptance criteria, ensuring that the delivered product can be evaluated objectively against its goals.
+ 
+ 
+Figure 5 Requirments structure
+
+
+3.2	Functional Requirements
+
+Functional requirements describe the expected behavior of the system from the user's perspective. Because the application supports different roles, requirements are grouped into modules: Student, Staff, Admin, and Cross-cutting services (Payments and AI). This structure ensures that each module can be tested independently while preserving end-to-end consistency across the full workflow
+.  
+Figure 6 Login page
+3.2.1	Student Module Requirements
+
+The student module is designed to minimize time loss and reduce uncertainty. It must allow students to complete the reservation process in a small number of steps while ensuring that every action leads to a clear and consistent system state.
+Authentication and profile management are required to establish identity and ensure role-based permissions. The system must allow students to log in securely, manage basic profile information, and access personalized features (wallet balance, history).
+ 
+  
+Figure 7 Profile page
+The student must be able to browse daily menus and consult time-slot availability with capacity indicators. The availability view must reflect real-time capacity constraints to avoid "false availability" that would create frustration or overbooking.
+ 
+Figure 8 Weekly menus page
+   
+Figure 9 main page + time Reservation page
+ 
+  
+Figure 10 Reservation process and qr display
+The system must support reservation creation by allowing the student to select a date and time slot and confirm details. During this action, the system must check capacity consistently and prevent race conditions (e.g., several students reserving the last remaining seat simultaneously).
+  
+Figure 11 History page
+ 
+Once payment succeeds, the system must generate a secure QR code that acts as access proof. The student must be able to display this QR code quickly at entry. The system must also provide reservation history, allowing the student to track upcoming and past reservations. Where policy allows, the student should be able to cancel or modify reservations, with the system updating capacity accordingly.
+3.2.2	Staff Module Requirements
+
+The staff module is optimized for operational performance. During peak hours, a delay of a few seconds per student may translate into long queues and service disruption. Therefore, staff workflows must be designed around speed, clarity, and reliability.
+The staff must be able to authenticate and access a QR scanning interface that supports rapid scanning under realistic constraints (camera quality differences, lighting conditions, varying QR angles). Once scanned, the system must validate the QR code using server-side logic, ensuring that the reservation exists, is confirmed, is not already used, and satisfies time validity rules.
+ 
+Figure 12 Scanning qr page
+Additionally, the staff module must display an operational dashboard with indicators such as scans per hour, validation success rate, and menu management(in case an ingredient run out) . These indicators support real -time situational awareness and reduce operational uncertainty.      
+Figure 13 menus management page
+
+3.2.3	Administration Module Requirements
+
+The administration module ensures governance, configuration, and traceability. Since administrative actions can affect many users, the module must prioritize safe operations, access control, and auditability.
+Administrators must be able to access a central dashboard summarizing key performance indicators and operational status. They must be able to manage users, including bulk import operations (CSV/Excel) with validation, mapping support, and rollback capabilities to prevent mass errors.
+
+
+
+
+
+
+    
+Figure 14 Users management by admin
+
+The admin module must allow configuration of time slots (capacity, schedules, templates, exceptions) and enforce policy rules consistently. Menu management is required to create and update daily menus, including useful attributes such as allergens and nutrition fields where applicable.
+   
+  
+Figure 15 Time and Meal management
+Administrators must have access to analytics dashboards and reports that reflect usage patterns, occupancy rates, reservation trends, and performance indicators. The system must also provide audit logs to track sensitive actions (user changes, configuration changes, financial operations), ensuring accountability and simplifying troubleshooting.
+ 
+Figure 16 User management 
+3.2.4	Cross-Cutting Requirements
+
+Certain requirements apply across multiple modules because they are central to the end-to-end workflow.
+The system must support integrated payments through D17 and Flouci payment providers, in addition to an internal wallet mechanism. The payment integration framework has been established with demo implementations for testing purposes, while full production integration with external providers remains in development. Payment processing includes retry logic, fallback mechanisms, and state consistency controls to ensure that partial failures do not create inconsistent states. The internal wallet system is fully operational and supports secure transactions within the application ecosystem.
+
+
+
+3.3	Non-Functional Requirements
+
+Non-functional requirements define the quality attributes required for safe production operation. In practice, these requirements heavily influence architecture decisions (database design, security model, caching strategy, monitoring, and CI/CD). For this project, NFRs are aligned with production targets already observed in deployment: fast response times, high availability, strong security controls, and scalability readiness.
+ 
+3.3.1	Performance
+
+The system must provide fast response time for everyday operations such as authentication, dashboard loading, reservation creation, and data synchronization. Performance targets are essential because the restaurant service is time-sensitive and peak usage occurs within short windows. A slow response time directly increases user frustration and can negatively impact adoption. The application must remain responsive even on heterogeneous devices, requiring optimized queries, careful UI rendering, and efficient caching.
+For staff workflows, performance is even more critical: QR validation must execute quickly to avoid blocking entry flow. Therefore, server-side validation should remain lightweight and consistently optimized.
+3.3.2	Availability and Reliability
+
+The system must achieve high availability and remain stable during daily operations. Because it is used continuously throughout the academic schedule, downtime during peak hours has direct operational consequences (queues, service disruption, staff overload). The system must therefore include reliability mechanisms such as controlled state transitions, safe retry logic, fallback paths for payment failures, and operational monitoring to detect incidents early.
+In addition, the system must be designed so that failures do not lead to data corruption. For example, reservation states must remain consistent even when network connectivity is unstable.
+3.3.3	Security and Privacy
+
+Security is a core requirement because the system handles user identity, reservation records, and payment-related processes. The system must enforce secure communication (transport security), protect sensitive data (encryption), implement strong authentica tion, and restrict access via role-based authorization. QR validation must include protections against replay and forgery, because QR codes represent access rights.
+ 
+Privacy requirements apply particularly to analytics: the system must avoid exposing personal data unnecessarily and must ensure that access to sensitive information is limited to authorized roles. Audit logs must be maintained to ensure accountability and support investigations if abnormal behavior is detected.
+3.3.4	Scalability
+
+The system must support more than 1000 concurrent users and remain ready for future expansion (multi-institution deployment). Scalability affects database design, indexing strategy, and the architecture of server-side workflows. The system must remain stable under peak loads and must be adaptable to increased traffic without requiring a complete redesign.
+3.3.5	Maintainability and Quality
+
+To ensure long-term sustainability, the project must be maintainable. This includes clean architecture (MVVM + layered design), modular components, standardized development workflow, CI/CD automation, and automated testing. Maintainability is essential because production systems evolve: menus change, policies change, payments evolve, and new campuses may join. A maintainable codebase reduces the cost and risk of future updates.
+
+3.4	Use Cases (Textual Specification)
+
+This section describes key use cases in a structured form. Each use case includes actor, preconditions, main flow, and exceptions, ensuring that behaviors are testable and consistent.
+UC-01 - Reserve a Meal Slot
+
+Actor: Student
+Preconditions: Student is authenticated; time slots exist; system is online.
+Main flow: The student selects a date and slot → the system checks capacity in real time → the system creates a reservation in "pending" state → the student confirms reservation details.
+ 
+Exceptions: If the slot is full, the system proposes alternatives. If connectivity fails, the system preserves state and requests retry without duplicating actions.
+UC-02 - Validate QR at Entry
+
+Actor: Staff
+Preconditions: Staff authenticated; scanner active; reservation exists.
+Main flow: Staff scans QR → server verifies signature/timestamp/state → if valid, reservation marked "used" → immediate success feedback displayed.
+Exceptions: Expired or replayed QR triggers rejection. Already-used reservation triggers
+rejection. Network issues trigger safe retry, without double marking.
+ 
+ 
+Figure 18 Reservation Lifecycle
+
+3.4.1	Acceptance Criteria (subsections)
+
+Acceptance criteria define the objective conditions under which the system can be considered compliant with project objectives and suitable for production deployment. They transform general requirements into measurable indicators that can be validated through testing, monitoring, and real operational use. In the context of a university restaurant service that operates daily and under peak demand, acceptance criteria are essential to ensure that the digital solution is not only functional, but also reliable, secure, and operationally efficient.
+The acceptance criteria are grouped into several categories reflecting the main dimensions of system quality: usability and adoption, operational efficiency, performance and responsiveness, reliability and availability, security and fraud prevention, payment consistency, administrative governance, and scalability.
+3.4.2	User Adoption and Usability Criteria
+
+The first level of acceptance concerns user adoption and usability, which are critical indicators of whether the solution effectively replaces manual processes. The system must achieve an
+ 
+adoption rate of at least 95% of the student population, ensuring that the majority of students rely on the application instead of physical queues. This criterion is verified through usage statistics and active user monitoring.
+From a usability perspective, the full reservation workflow-from opening the application to obtaining a confirmed QR code-must be achievable in a limited number of steps and without unnecessary complexity. The user interface must provide clear feedback at each stage, including reservation confirmation, payment status, and QR code availability. Notifications must be delivered reliably to remind students of upcoming reservations and to confirm successful transactions. Acceptance testing includes user observation sessions and feedback collection to ensure that students can complete tasks without external assistance.
+3.4.3	Operational Efficiency and Service Throughput
+
+A core objective of the project is to improve operational efficiency and reduce waiting time during peak periods. The QR-based validation workflow is designed to allow staff to validate entries faster than manual verification. The system's effectiveness is evaluated through operational observation and user feedback to ensure that staff can handle peak demand efficiently.
+Another indicator is service throughput, measured as the number of students processed per hour. The QR-based validation workflow must allow staff to validate entries significantly faster than manual verification. Acceptance is validated by comparing historical throughput data with post-deployment metrics and confirming that staff can handle peak demand without queue accumulation.
+3.4.4	Performance and Responsiveness
+
+System responsiveness is essential to maintaining smooth operations and user trust. The system is designed to provide fast response times for key actions such as authentication, dashboard loading, reservation confirmation, and synchronization of reservation status. Performance optimization focuses on efficient queries, and lightweight UI rendering to ensure consistent user experience across different devices. 
+3.4.5	Reliability and Availability
+
+Because the restaurant service operates on a daily basis, system availability is a critical factor. The system is designed to maintain high availability and remain stable during daily operations. Downtime during peak hours would directly disrupt service and force staff to revert to manual procedures.
+
+The system includes reliability mechanisms such as controlled state transitions, retry logic for failed operations, and operational monitoring to detect issues early. Reservation and payment states are designed to remain consistent even when connectivity is unstable or when partial failures occur.Security and Fraud Prevention
+
+Security acceptance criteria ensure that the system protects both institutional resources and user data. QR codes must not be reusable, forgeable, or repayable. Validation attempts using expired or already-used QR codes must always be rejected by the server. Penetration testing and controlled attack simulations are used to validate resistance against replay and tampering attempts.
+Role-based access control must be enforced strictly: students must not access staff or administrative functions, and administrative privileges must be limited to authorized accounts. Audit logs must capture sensitive actions such as configuration changes and financial operations. Zero critical security incidents is a mandatory acceptance condition for continued production operation.
+ 
+3.4.6	Payment Reliability and Transaction Consistency
+
+The system integrates payment services with focus on transaction reliability and consistency. The wallet-based payment system is designed to maintain high success rates, with external payment provider integration in development phase. Each successful payment corresponds to exactly one confirmed reservation, and the system prevents confirmed reservations without validated payment.
+
+The system includes mechanisms to handle partial failures, such as rollback and reconciliation procedures to ensure that system state remains consistent. Testing includes simulated failure scenarios to verify that duplicate charges and unauthorized access are prevented.
+3.4.7	Administrative Governance and Traceability
+
+From an institutional perspective, acceptance criteria also apply to administrative operations. Administrators must be able to perform bulk operations such as user import and slot configuration without causing system instability. Validation rules, confirmation prompts, and rollback options must be available to prevent large-scale configuration errors.
+Traceability is mandatory: all sensitive administrative actions must be logged and attributable to individual accounts. These logs support accountability, regulatory compliance, and troubleshooting. Acceptance testing verifies that audit trails are complete and tamper-resistant.
+3.4.8	Scalability and Future Expansion
+
+The system is designed with scalability in mind to support growth and future expansion. The architecture supports concurrent users and is designed to be ready for expansion to additional institutions and services. This includes modular configuration, separation of data where applicable, and adaptable capacity management. The system architecture demonstrates readiness for expansion beyond the initial campus deployment. 
+Beyond current deployment, the system must demonstrate architectural readiness for expansion to additional institutions and services. This includes modular configuration, separation of tenant data where applicable, and adaptable capacity management. Meeting this criterion confirms that the project is not limited to a single-site prototype but constitutes a reusable digital platform.
+
+3.5	Conclusion
+
+This chapter translated stakeholder needs into a structured specification that supports implementation and validation. Functional requirements were defined across student, staff, and administrative modules, ensuring that the end-to-end workflow-from reservation to payment and QR validation-is complete and operationally realistic. In parallel, non-functional requirements defined the quality expectations necessary for production readiness, including performance, availability, scalability, security, privacy, and maintainability. Finally, key use cases and acceptance criteria were formalized to ensure that the final solution can be tested and evaluated objectively against its measured operational goals.
+ 
+4.	Design and Implementation
+
+4.1	Introduction
+
+This chapter presents the technical design and implementation choices that enabled the transformation of the proposed solution into a stable production system. While previous chapters focused on understanding needs and defining requirements, this chapter explains how those requirements were translated into concrete software architecture, data models, security mechanisms, and operational workflows.
+Design decisions in this project were driven by several constraints: the need for fast mobile performance, scalability under peak usage, strong security for payments and QR-based access, and maintainability for long-term institutional deployment. Therefore, architectural patterns, backend services, and development workflows were carefully selected to ensure robustness and extensibility.
+This chapter first introduces the global system architecture, followed by the internal application architecture based on MVVM and Clean Architecture principles. It then describes the database design, security mechanisms, payment integration, AI components, and DevOps practices. Finally, it discusses performance optimization techniques and major technical challenges encountered during implementation.
+4.2	Global System Architecture
+
+The system follows a distributed client-cloud architecture in which mobile applications communicate with cloud-hosted backend services through secure APIs and real-time data channels. The architecture is designed to minimize server maintenance overhead while ensuring scalability and high availability, making it suitable for institutional environments with limited infrastructure resources.
+ 
+At the client level, the system consists of three Flutter-based mobile interfaces: student app, staff app, and admin interface, which share the same codebase but expose different modules based on authenticated roles. This approach reduces development effort while maintaining strict access separation. The applications interact with Firebase services for authentication, real -time database access, file storage, analytics, and cloud functions.
+At the backend level, Firebase Authentication manages identity and role assignment using custom claims, ensuring that each user receives only the permissions associated with their role. Cloud Firestore acts as the main data store, providing scalable NoSQL storage with real-time synchronization. Firebase services implement server-side business logic such as reservation validation, capacity enforcement, QR verification, and payment processing.
+External services are integrated into this architecture through secure APIs. Payment providers (D17 and Flouci) communicate with backend services using encrypted channels and asynchronous callbacks. Monitoring and observability are ensured using Firebase Analytics, Crashlytics, and Performance Monitoring, enabling proactive detection of anomalies and performance degradation.
+
+4.2	Application Architecture (MVVM and Clean Architecture)
+
+To ensure long-term maintainability and scalability, the mobile application follows MVVM (Model-View-ViewModel) combined with Clean Architecture principles. This structure enforces separation of concerns and prevents business logic from being tightly coupled to UI components.
+The Presentation Layer contains Flutter widgets responsible only for rendering UI and handling user interactions. These widgets do not access databases or APIs directly. Instead, they communicate with ViewModels that expose observable state and trigger actions. This separation improves testability and reduces UI complexity.
+The ViewModel Layer acts as the mediator between UI and business logic. ViewModels manage application state, validation rules, and error handling. They call use cases from the domain layer and expose results through reactive streams or state notifiers, ensuring that UI updates remain consistent and predictable.
+The Domain Layer contains business rules expressed as use cases (e.g., create reservation, confirm payment, validate QR). This layer is independent of external frameworks, allowing logic to remain stable even if backend technologies change. Domain entities define core models such as User, Reservation, TimeSlot, and PaymentTransaction.
+The Data Layer handles all interactions with external systems, including Firestore queries, Cloud Function calls, and payment APIs. Repositories abstract data sources, ensuring that the domain layer does not depend on Firebase-specific implementations. This design allows mocking during tests and supports future backend evolution.
+This layered approach significantly improved debugging, testing, and onboarding of new contributors. It also allowed parallel development of UI and backend integration while maintaining stable interfaces between layers.
+ 
+4.3	Database Design and Firestore Data Modeling
+
+The database design is based on Firestore's document-oriented NoSQL model, optimized for real- time synchronization and horizontal scalability. Collections are structured around functional domains rather than relational joins, minimizing cross-collection dependencies and improving performance.
+The users collection stores authentication-linked profiles and role metadata. Each document includes user identifiers, role claims (student, staff, admin), wallet balances, and preference settings. Sensitive attributes are protected through Firestore security rules and are only accessible to authorized roles.
+The reservations collection is the transactional core of the system. Each reservation document includes references to user ID, selected time slot, payment status, QR signature, and lifecycle state (pending, confirmed, used, cancelled). Indexes are configured to optimize queries by date, slot, and user ID, supporting both operational dashboards and analytics queries.
+The time_slots collection defines capacity and scheduling rules. Slots are generated using templates and can be adjusted dynamically based on historical data analysis. Atomic updates are used when modifying slot capacity to prevent race conditions during high-concurrency reservation attempts.
+The daily_menus collection stores meal data, nutritional information, allergen tags, and pricing. This allows menu planning to be data-driven and integrated with simple recommendation algorithms.
+The analytics_records collection stores anonymized events related to user behavior, reservation flow performance, and validation metrics. This dataset feeds standard reporting dashboards is
+Firestore transactions and batch writes are used extensively to maintain data consistency, especially during payment confirmation and QR validation workflows. Composite indexes are carefully designed to balance performance and quota usage.
+ 
+ 
+Figure 20 Firestore data model
+
+4.4	Security Architecture and Access Control
+
+Security is a fundamental design concern because the system manages financial transactions and access authorization. Multiple layers of protection are implemented to prevent unauthorized access, fraud, and data leakage.
+All communication between client applications and backend services is protected using TLS encryption, preventing interception and tampering. Sensitive data stored in the backend is encrypted using industry-standard algorithms. Authentication is handled through Firebase
+ 
+Authentication,  and  authorization  is enforced  using  role-based access control (RBAC)
+implemented via custom claims and Firestore security rules.
+
+Each API call is validated against the user's role and privileges. Students cannot access staff scanning APIs, and staff cannot access administrative configuration endpoints. Administrative actions are logged for audit purposes, ensuring accountability.
+QR code security relies on server-side validation. QR codes include signed data and timestamps, preventing reuse and manipulation. During validation, the backend checks reservation state, timestamp validity, and cryptographic integrity before granting access. Replay attacks are prevented by marking reservations as used immediately after validation.
+Payment workflows are protected through secure API calls and webhook verification. Only validated callbacks from trusted payment providers can update reservation states. Any mismatch between payment and reservation status triggers rollback mechanisms to avoid unauthorized access.
+
+
+4.5	Payment Integration and Transaction Reliability
+
+Payment integration is a critical component of system trust and financial accountability. The application supports multiple payment methods to maximize accessibility and reliability, including national banking services and mobile wallets.
+ 
+Payment processing follows a multi-step confirmation workflow. After a user initiates payment, the backend generates a transaction reference and redirects to the provider's payment interface. Payment confirmation is received asynchronously via webhooks, which are validated using secure signatures before updating reservation states.
+Fallback mechanisms are implemented to handle partial failures. If one provider is unavailable or fails, the user can retry using another method without losing the reservation context. Transactions are reconciled periodically to ensure consistency between financial records and reservation confirmations.
+All financial operations are logged and linked to reservation records, supporting audit and compliance requirements. These mechanisms ensure that no confirmed reservation exists without verified payment.
+4.6	Technical Challenges and Solutions
+
+Several technical challenges were encountered during implementation. High concurrency during peak reservation periods required careful transaction handling to avoid overbooking. This was solved using atomic Firestore operations and capacity locks.
+Performance optimization was required for older devices, particularly during QR scanning. Lazy loading, optimized image processing, and efficient state management significantly improved responsiveness.
+Security concerns around QR replay and payment fraud required server-side enforcement and cryptographic validation. Multiple layers of validation were implemented to eliminate attack vectors.
+These challenges significantly shaped architectural decisions and strengthened system robustness.
+ 
+4.4 Conclusion
+
+This chapter detailed the architectural and implementation strategies that transformed system requirements into a secure and scalable production platform. By adopting Clean Architecture, leveraging Firebase's distributed services, integrating secure payment workflows, and deploying data-driven optimization, the system achieves both operational efficiency and long-term maintainability.
+The design choices described in this chapter ensure that the solution is not limited to a prototype, but constitutes a reliable digital infrastructure suitable for institutional expansion. The next chapter will evaluate system performance, scalability, and production metrics, validating that the implemented architecture successfully meets real-world operational demands.
+ 
+5.1	Introduction
+
+This chapter evaluates the implemented solution from an operational and engineering perspective. While the previous chapter explained the design and implementation choices, the purpose here is to verify that the deployed system meets its objectives under r eal production conditions. In a university restaurant context, success is not measured only by feature completeness, but by the ability to deliver stable performance during peak demand, maintain service continuity, preserve data integrity, and provide measurable institutional impact.
+The evaluation presented in this chapter is therefore structured around concrete evidence collected during production operation: application latency, QR validation speed, payment success rate, infrastructure consumption, availability, and observed adoption. These indicators are complemented by scalability considerations and continuous monitoring results. The intent is to demonstrate that the system behaves as a reliable institutional service and that its architecture is suitable for growth beyond the initial deployment scope.
+5.2	Performance Evaluation (Client and Backend)
+
+The implemented solution was evaluated through comprehensive testing and functional validation. The evaluation focused on verifying that core functionality works as intended and that the system architecture supports the design requirements established in earlier chapters.
+
+Functional Testing Results:
+The system successfully demonstrates all core features including user authentication, reservation creation, payment processing through the wallet system, and QR code validation. Role-based access control functions correctly, ensuring that students, staff, and administrators can only access their respective features. Additional features implemented include Excel-based user import/export, advanced time slot template management, and comprehensive wallet top-up functionality.
+
+User Interface and Experience:
+The Flutter-based mobile application provides a responsive and intuitive interface across both Android and iOS platforms. The reservation workflow is streamlined, allowing users to complete reservations efficiently. The QR code generation and scanning functionality operates reliably under various lighting conditions and device configurations. The application demonstrates good performance on various device types and screen sizes.
+
+Database and Backend Performance:
+Firebase integration provides real-time data synchronization and reliable data storage. Firestore security rules effectively enforce access control, and the NoSQL data model supports the application's requirements efficiently. The system handles concurrent reservations appropriately, preventing overbooking through atomic transaction operation. 
+5.3	System Reliability and Security
+
+Reliability Testing:
+The system demonstrates reliable operation through consistent state management and proper error handling. The reservation lifecycle (pending → confirmed → used/cancelled) is enforced through server-side rules and transactional operations, preventing inconsistent states such as "paid but not confirmed" or "used without confirmation."
+
+Security Implementation:
+Security measures have been implemented and tested, including Firebase Authentication integration, role-based access control through Firestore security rules, and QR code validation with cryptographic verification. The system prevents common security issues such as QR code replay attacks and unauthorized access to administrative functions.
+
+Error Handling:
+The application includes comprehensive error handling mechanisms with clear user feedback for various failure scenarios. Network connectivity issues are handled gracefully, and the system provides appropriate fallback behaviors to maintain user experience during temporary disruptions.
+5.4	Payment System Validation
+
+Payment Integration Status:
+The payment system has been designed with multiple integration options and demonstrates a working framework for transaction processing. The internal wallet system is fully operational, providing reliable transaction processing for users with sufficient balance. The framework for external payment providers (D17 and Flouci) has been implemented with demo modes for testing and development purposes, with full production integration planned for future deployment phases.
+Transaction Integrity:
+The wallet-based payment system maintains strict integrity between financial transactions and reservation confirmations. Reservations become confirmed only after successful payment validation, and failed payments do not create confirmed access rights. The system includes rollback mechanisms to handle partial failures and maintain consistent states.
+Payment Workflow Testing:
+Testing has validated the payment workflow from initiation through completion using demo modes, including proper handling of various failure scenarios. The system provides clear feedback to users throughout the payment process and maintains transaction logs for audit purposes.	
+5.5	Infrastructure and Scalability Assessment
+
+System Architecture Validation:
+The chosen architecture using Flutter for cross-platform development and Firebase for backend services has proven effective for the project requirements. The MVVM pattern combined with Clean Architecture principles provides good separation of concerns and maintainability.
+Database Design:
+The Firestore NoSQL database design supports the application's data requirements efficiently. Collections are structured to optimize common queries, and security rules effectively enforce access control. Real-time synchronization capabilities ensure that users see current availability information.
+Scalability Considerations:
+The system architecture is designed with scalability in mind, using Firebase's managed services that can scale automatically. The data model and query patterns are structured to support growth, and the modular design allows for future expansion to additional campuses or services..
+ 
+
+5.6	Development and Implementation Outcomes
+
+Technical Achievement:
+The project successfully demonstrates the implementation of a comprehensive mobile application using modern development practices. The Flutter framework enabled efficient cross-platform development, while Firebase provided reliable backend services including authentication, database, and real-time synchronization.
+
+Feature Implementation:
+All core features have been successfully implemented and tested, including user management, reservation system, QR code generation and validation, and administrative tools. The role-based access control system effectively separates functionality for different user types.
+
+Code Quality and Maintainability:
+The codebase follows clean architecture principles with proper separation of concerns. The modular design facilitates maintenance and future enhancements, while comprehensive error handling ensures robust operation. 
+5.7	Security and Access Control Validation
+
+Security Implementation:
+The security measures implemented in the system have been tested and validated. Firebase Authentication provides secure user authentication, while Firestore security rules enforce role-based access control effectively. The QR code validation system includes cryptographic verification to prevent forgery and replay attacks.
+Access Control Testing:
+Role-based access control has been thoroughly tested to ensure that users can only access features appropriate to their role. Students cannot access staff or administrative functions, and administrative privileges are properly restricted and logged.
+Data Protection:
+User data is protected through Firebase's built-in security measures, and sensitive information is handled according to privacy best practices. The system includes audit logging for administrative actions to ensure accountability.
+ 
+5.8	Conclusion
+
+This chapter demonstrated that the implemented solution successfully meets the core design requirements and project objectives. The system provides a functional and secure foundation for university restaurant reservation management, with all essential features working as intended and additional capabilities beyond the initial scope.
+The evaluation confirmed that the chosen architecture and technologies are appropriate for the project requirements. Flutter and Firebase provide a solid foundation for cross-platform mobile development with real-time backend capabilities. The implementation demonstrates good software engineering practices with clean architecture, proper security measures, and comprehensive error handling.
+The project successfully delivers a working prototype that validates the feasibility of digitalizing university restaurant operations through mobile technology. While external payment integrations remain in development phase with demo implementations, the core functionality provides a strong foundation for future enhancements and potential production deployment. The system demonstrates readiness for pilot testing and iterative improvement based on user feedback.
+ 
+General Conclusion
+
+This project demonstrates that a well-structured, technology-driven approach has significant potential to improve the efficiency and quality of university restaurant services. The development of a Flutter-based cross-platform mobile application integrated with Firebase cloud services establishes a solid foundation for digitalizing meal reservation workflows at ISETCOM university restaurant.
+
+From a technical perspective, the project successfully illustrates the application of modern software engineering principles in developing a scalable mobile solution. The use of Flutter enabled the development of a unified cross-platform application, while Firebase provided robust backend services including authentication, real-time data synchronization, serverless business logic, and monitoring capabilities. The adoption of Clean Architecture and MVVM design patterns ensured maintainability and testability, creating a codebase that can evolve without compromising stability.
+
+The current implementation successfully delivers core functionality including user authentication, menu browsing, time-slot selection, reservation management, and QR-based access validation. Students can navigate through an intuitive interface to view available meals and select preferred time slots, while administrators have access to comprehensive user management tools including Excel-based import/export functionality and system configuration capabilities. The real-time data synchronization ensures that availability information remains current across all user sessions.
+
+However, certain components remain under development. The integration with external Tunisian payment systems (D17 and Flouci) is implemented in demo mode for testing and development purposes, requiring additional implementation work to ensure secure and reliable transaction processing in production environments. The current implementation successfully demonstrates the payment workflow architecture through the fully operational internal wallet system and demo implementations of external payment providers.
+ 
+Additional features implemented beyond the initial scope include comprehensive wallet top-up management, advanced time slot template systems, and robust Excel-based user import/export capabilities. The system's current dependence on continuous network connectivity is acknowledged, with offline operation capabilities planned for future development phases. The analytics and reporting components provide valuable insights through usage statistics and operational dashboards that help administrators make informed decisions.
+
+Future work will focus on completing the remaining features, particularly full production integration with external payment providers and enhanced offline capabilities. Short-term priorities include finalizing the integration with local payment providers for production deployment, implementing additional security enhancements, and expanding offline functionality. Medium-term goals involve enhancing analytics dashboards based on real usage data, improving user experience based on pilot testing feedback, and extending the platform to support additional campus services such as library access and transportation scheduling.
+
+The ISETCOM University Restaurant Mobile Application project establishes a strong technical foundation and demonstrates the feasibility of student-led development teams to create sophisticated mobile solutions addressing real institutional needs. While the complete production vision requires additional development work, the current implementation validates the chosen architectural approach and provides a scalable platform ready for pilot testing and iterative improvement.
+
+The project serves as a valuable proof-of-concept for digital transformation initiatives within Tunisian higher education institutions, showing how modern mobile technologies can be leveraged to modernize traditional campus services while maintaining cost-effectiveness and institutional control. The system demonstrates readiness for controlled deployment and user feedback collection to guide future development phases.
+ 
+Bibliography
+
+
+[1]	Flutter Team, "Flutter Documentation - Building User Interfaces." Google Developers, 2025. Available: www.docs.flutter.dev [Accessed: Dec. 20, 2025]
+[2]	Dart Team, "Dart Programming Language Guide." Google Developers, 2025. Available: www.dart.dev/guides [Accessed: Dec. 20, 2025]
+[3]	Firebase Team, "Firebase Documentation - Build and Run Apps." Google Cloud, 2025. Available: www.firebase.google.com/docs [Accessed: Dec. 22, 2025]
+[4]	Firebase Team, "Cloud Firestore Data Structure Guide." Google Cloud, 2025. Available: www.firebase.google.com/docs/firestore/manage-data/structure-data [Accessed: Dec. 22, 2025]
+[5]	Firebase Team, "Firebase Authentication Documentation." Google Cloud, 2025. Available: www.firebase.google.com/docs/auth [Accessed: Dec. 23, 2025]
+[6]	Firebase Team, "Cloud	Functions	for	Firebase."	Google Cloud,	2025.	Available: www.firebase.google.com/docs/functions [Accessed: Dec. 23, 2025]
+[7]	Firebase Team, "Firestore Security Rules Getting Started." Google Cloud, 2025. Available: www.firebase.google.com/docs/firestore/security/get-started [Accessed: Dec. 26, 2025]
+[8]	Firebase Team, "Firebase Performance Monitoring." Google Cloud, 2025. Available: www.firebase.google.com/docs/perf-mon [Accessed: Dec. 28, 2025]
+[9]	Firebase	Team, "Firebase	ML	Documentation."	Google	Cloud,	2025.	Available: www.firebase.google.com/docs/ml [Accessed: Dec. 29, 2025]

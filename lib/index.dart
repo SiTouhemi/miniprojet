@@ -3,6 +3,7 @@ export '/student/home/home_widget.dart' show HomeWidget;
 export '/student/reservationconfirme/reservationconfirme_widget.dart'
     show ReservationconfirmeWidget;
 export '/student/history/history_widget.dart' show HistoryWidget;
+export '/student/weekly_menu/weekly_menu_widget.dart' show WeeklyMenuWidget;
 export '/admins/admin_dashboard/admin_dashboard_widget.dart'
     show AdminDashboardWidget;
 export '/student/login/login_widget.dart' show LoginWidget;

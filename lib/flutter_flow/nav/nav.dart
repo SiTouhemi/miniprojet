@@ -16,10 +16,6 @@ import 'serialization_util.dart';
 import '/index.dart';
 import '/auth/role_middleware.dart';
 import '/auth/firebase_auth/auth_util.dart';
-import '/admins/time_slots/time_slots_widget.dart';
-import '/admins/reservation_list/reservation_list_widget.dart';
-import '/admins/user_import/user_import_widget.dart';
-import '/staff/monjeya_scan/monjeya_scan_widget.dart';
 import '/staff/qr_scanner/qr_scanner_widget.dart';
 
 export 'package:go_router/go_router.dart';
@@ -102,6 +98,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           requireAuth: true,
           allowedRoles: [UserRole.student, UserRole.staff, UserRole.admin],
           builder: (context, params) => ProfileWidget(),
+        ),
+        FFRoute(
+          name: WeeklyMenuWidget.routeName,
+          path: WeeklyMenuWidget.routePath,
+          requireAuth: true,
+          allowedRoles: [UserRole.student, UserRole.staff, UserRole.admin],
+          builder: (context, params) => WeeklyMenuWidget(),
         ),
         // Staff routes
         FFRoute(

@@ -427,6 +427,25 @@ class _HomeWidgetState extends State<HomeWidget> {
           onTap: _handleReservationAccess,
         ),
 
+        // Weekly Menu card
+        _buildActionCard(
+          icon: Icons.calendar_view_week,
+          iconColor: AppColors.success,
+          title: l10n.translate('weekly_menu'),
+          subtitle: l10n.translate('view_weekly_menu'),
+          onTap: () {
+            try {
+              context.pushNamed('WeeklyMenu');
+            } catch (e) {
+              _errorHandler.showError(
+                context,
+                e,
+                contextInfo: 'weekly_menu_access',
+              );
+            }
+          },
+        ),
+
         // QR Code card with enhanced error handling
         _buildActionCard(
           icon: Icons.qr_code,
@@ -694,6 +713,10 @@ class _HomeWidgetState extends State<HomeWidget> {
                     l10n: l10n,
                   ),
                 ],
+                
+                // Weekly Menu Button
+                AppSpacing.verticalLG,
+                _buildWeeklyMenuButton(l10n),
               ],
             );
           },
@@ -1229,6 +1252,60 @@ class _HomeWidgetState extends State<HomeWidget> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildWeeklyMenuButton(AppLocalizations l10n) {
+    return InkWell(
+      onTap: () {
+        try {
+          context.pushNamed('WeeklyMenu');
+        } catch (e) {
+          _errorHandler.showError(
+            context,
+            e,
+            contextInfo: 'weekly_menu_access',
+          );
+        }
+      },
+      borderRadius: AppBorders.borderMD,
+      child: Container(
+        width: double.infinity,
+        padding: AppSpacing.paddingMD,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          boxShadow: AppShadows.medium,
+          borderRadius: AppBorders.borderMD,
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.2),
+            width: 1.0,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.calendar_view_week,
+              color: AppColors.primary,
+              size: AppIconSizes.lg,
+            ),
+            AppSpacing.horizontalSM,
+            Text(
+              'View Weekly Menu',
+              style: AppTypography.h6.copyWith(
+                color: AppColors.primary,
+                fontWeight: AppTypography.semiBold,
+              ),
+            ),
+            AppSpacing.horizontalSM,
+            Icon(
+              Icons.arrow_forward_ios,
+              color: AppColors.primary,
+              size: AppIconSizes.sm,
+            ),
+          ],
+        ),
       ),
     );
   }

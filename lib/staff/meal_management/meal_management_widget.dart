@@ -366,26 +366,27 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                                 ),
                           ),
                         ),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8.0,
-                            vertical: 4.0,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Color(0xFF00A4E4),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          child: Text(
-                            '${meal.prix.toStringAsFixed(2)} DT',
-                            style:
-                                FlutterFlowTheme.of(context).bodySmall.override(
-                                      fontFamily: 'Inter',
-                                      color: Colors.white,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                          ),
-                        ),
+                        // Price - Hidden for staff view
+                        // Container(
+                        //   padding: EdgeInsets.symmetric(
+                        //     horizontal: 8.0,
+                        //     vertical: 4.0,
+                        //   ),
+                        //   decoration: BoxDecoration(
+                        //     color: Color(0xFF00A4E4),
+                        //     borderRadius: BorderRadius.circular(12.0),
+                        //   ),
+                        //   child: Text(
+                        //     '${meal.prix.toStringAsFixed(2)} DT',
+                        //     style:
+                        //         FlutterFlowTheme.of(context).bodySmall.override(
+                        //               fontFamily: 'Inter',
+                        //               color: Colors.white,
+                        //               letterSpacing: 0.0,
+                        //               fontWeight: FontWeight.w600,
+                        //             ),
+                        //   ),
+                        // ),
                       ],
                     ),
                     SizedBox(height: 4.0),
@@ -793,12 +794,13 @@ class _MealManagementWidgetState extends State<MealManagementWidget> {
                 ),
                 Text(meal.categorie),
                 SizedBox(height: 12.0),
-                Text(
-                  'Prix',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text('${meal.prix.toStringAsFixed(2)} DT'),
-                SizedBox(height: 12.0),
+                // Price - Hidden for staff view
+                // Text(
+                //   'Prix',
+                //   style: TextStyle(fontWeight: FontWeight.bold),
+                // ),
+                // Text('${meal.prix.toStringAsFixed(2)} DT'),
+                // SizedBox(height: 12.0),
                 Text(
                   'Description',
                   style: TextStyle(fontWeight: FontWeight.bold),
